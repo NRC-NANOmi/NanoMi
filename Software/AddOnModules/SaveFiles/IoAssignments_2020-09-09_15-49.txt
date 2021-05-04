@@ -1,0 +1,24 @@
+# Last save date: 2020/Sep/09, 15:45
+#
+#Type,      Channel Name,   Board serial,  Board Channel, Direction,
+#(AO/AI/D), string,         integer,       integer,     , string ('I' or 'O'),
+#
+#Comma after the last entry is required to not have a newline character involved unnecessarily
+#
+#Analog Outputs
+#
+AO,C1,32881,0,-,
+AO,C2,32881,1,-,
+AO,I1,32881,2,-,
+AO,O1,32881,4,-,
+#
+#Analog Inputs
+#
+AI,C1,33119,0,-,
+AI,C2,33119,1,-,
+AI,I1,33119,2,-,
+#
+#Digitals
+#
+Dx,Bit1,32881,0,I,
+Dx,Bit2,32881,2,O,

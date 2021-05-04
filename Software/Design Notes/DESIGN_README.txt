@@ -1,0 +1,1 @@
+This folder will contain design notes and simulation information relating to the microscope.
