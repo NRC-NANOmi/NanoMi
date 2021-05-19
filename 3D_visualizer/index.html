@@ -1,0 +1,106 @@
+
+<!DOCTYPE html>
+<head>
+
+<meta http-equiv="origin-trial" data-feature="WebVR (For Chrome M59+)" data-expires="2017-07-28" content="ArFv1ZeTwzkhjNE00uAE+XtiQB41fwqG/TqlFMLrepd9sforQSvQE/tgfIbUMYNuNre4QR1k4/z8xp2mV3dbhwwAAABeeyJvcmlnaW4iOiJodHRwczovL2FmcmFtZS5pbzo0NDMiLCJmZWF0dXJlIjoiV2ViVlIxLjEiLCJleHBpcnkiOjE1MDEyMTcwMDIsImlzU3ViZG9tYWluIjp0cnVlfQ==">
+<meta charset="utf-8">
+<title>NANOmi</title>
+<meta name="description" content="Model Viewer (VR / AR) • A-Frame">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+<style type="text/css">
+
+  model-viewer#reveal {
+    --poster-color: transparent;
+    height: 100%;
+    width: 100%;
+  }
+	html, body, div {
+    /* Height and width fallback for older browsers. */
+    height: 100%;
+    width: 100%;
+
+    /* Set the height to match that of the viewport. */
+    height: 100vh;
+
+    /* Set the width to match that of the viewport. */
+    width: 100vw;
+
+    /* Remove any browser-default margins. */
+    margin: 0;
+}
+
+
+.a-info-message{border-radius: 10px; position: absolute; width: 400px;height: 320px; background-color: white; border: 3px solid rgba(0,0,0,0.65);bottom: 22px; left: 22px; color: rgb(51, 51, 51); padding: 20px 15px 0 15px;font-size: 11pt; line-height: 20pt; z-index: 9999}
+.a-info-message a{border-bottom: 1px solid rgba(53,196,232,.15); color: #1497b8;position: relative; text-decoration: none; transition: .05s ease;}
+@media only screen and (min-width: 1200px) {.a-info-message {font-size: 12pt}}
+@media only screen and (max-width: 600px) {.a-info-message {left: 20px; right: 20px; bottom: 60px; width: auto}}
+@media only screen and (max-height: 600px) {.a-info-message {left: 20px; bottom: 20px; height: 250px}}
+.a-close-button-info{width: 25px; height: 25px; padding: 0;top: 10px; right: 10px; position: absolute; color: white;font-size: 12px; line-height: 12px; border: none; background-color: #ef2d5e;border-radius: 5px; font-weight: medium}.a-close-button-info:hover{background-color: #b32146; color: white}
+.a-info-message-container {position: absolute; left: 100px; bottom: 20px;}
+
+.a-info-message-button, .a-toggle-button{ border: 2px solid black; bottom: 5px; cursor: pointer; min-width: 30px; max-width: 90px; min-height: 34px; padding-right: 0; padding-top: 0; position: absolute; right: 0; transition: background-color .05s ease; -webkit-transition: background-color .05s ease; z-index: 9999; border-radius: 8px; touch-action: manipulation; padding: 5px; background-color: lightgray;}
+.a-info-message-button{left: 5px;}
+.a-toggle-button{right: 5px;}
+.a-toggle-button:active, .a-info-message-button:active, .a-toggle-button:hover,.a-info-message-button:hover {background-color: lightblue;}
+
+</style>
+</head>
+<body>
+	<div>
+
+	<model-viewer id="reveal" loading="eager" camera-controls auto-rotate poster="./assets/nanomi/IntroImage.png" src="./assets/nanomi/NANOmi.gltf" alt="A 3D model of a shishkebab"></model-viewer>
+<button class="a-info-message-button" title="Information about this experience"  onclick="showInfoWindow()">Info</button>
+	<button class="a-toggle-button" title="Toggle view to see internal components" onclick="toggleModel()">Toggle view</button>
+
+
+		<div class="a-info-message" id="a-info-message" ><h1>NanoMi</h1><p> An Open Source (Scanning) Transmission Electron Microscope</p>
+		<p>
+			<p>
+				More info at:
+			</p>
+		 <a href="https://github.com/NRC-NANOmi/NANOmi">Github repository</a><br>
+		 <a href="https://osf.io/bpj73/">Open Science Foundation page</a>
+		</p>
+		<button class="a-close-button-info" onclick="closeInfoWindow()">X</button></div>
+
+
+	</div>
+
+
+
+
+	<script type="text/javascript">
+	window.onload = function() {
+	modelViewer=document.querySelector('#reveal');
+	modelViewer.exposure=0.3;
+	modelViewer.setAttribute('touch-action','auto');
+	infoWindow=document.querySelector('#a-info-message');
+	}
+
+
+
+	function toggleModel(){
+		if (modelViewer.getAttribute('src')=="./assets/nanomi/NANOmi.gltf") {
+		modelViewer.setAttribute('src',"./assets/nanomi/NANOmi_internals.gltf")
+	}else {
+	modelViewer.setAttribute('src',"./assets/nanomi/NANOmi.gltf")
+	}
+	}
+	function closeInfoWindow(){
+		infoWindow.style.display='none';
+		console.log('Exit');
+	}
+	function showInfoWindow(){
+		infoWindow.style.display='block';
+		console.log('Show');
+	}
+	window.addEventListener("load", function() {
+	    console.log('Page is loaded');
+			var titler2=document.querySelector('.a-enter-vr');
+			console.log(titler2);
+	});
+	</script>
+</body>
+</html>
