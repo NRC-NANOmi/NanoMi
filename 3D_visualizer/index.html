@@ -11,6 +11,10 @@
 <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 <style type="text/css">
 
+#a-info-message{
+	display: none;
+}
+	
   model-viewer#reveal {
     --poster-color: transparent;
     height: 100%;
@@ -50,7 +54,7 @@
 <body>
 	<div>
 
-	<model-viewer id="reveal" loading="eager" camera-controls auto-rotate poster="./assets/nanomi/IntroImage.png" src="./assets/nanomi/NANOmi.gltf" alt="A 3D model of a shishkebab"></model-viewer>
+	<model-viewer id="reveal" loading="eager" camera-controls auto-rotate poster="./assets/IntroImage.png" src="./assets/NANOmi.gltf" alt="A 3D model of a shishkebab"></model-viewer>
 <button class="a-info-message-button" title="Information about this experience"  onclick="showInfoWindow()">Info</button>
 	<button class="a-toggle-button" title="Toggle view to see internal components" onclick="toggleModel()">Toggle view</button>
 
@@ -82,10 +86,10 @@
 
 
 	function toggleModel(){
-		if (modelViewer.getAttribute('src')=="./assets/nanomi/NANOmi.gltf") {
-		modelViewer.setAttribute('src',"./assets/nanomi/NANOmi_internals.gltf")
+		if (modelViewer.getAttribute('src')=="./assets/NANOmi.gltf") {
+		modelViewer.setAttribute('src',"./assets/NANOmi_internals.gltf")
 	}else {
-	modelViewer.setAttribute('src',"./assets/nanomi/NANOmi.gltf")
+	modelViewer.setAttribute('src',"./assets/NANOmi.gltf")
 	}
 	}
 	function closeInfoWindow(){
