@@ -119,7 +119,7 @@ def fMinCalc():
     return fminSym, fminAsym
 
 
-def linspace(start,step,num): #creates a row vector #TODO: MAKE THE INPUTS START, STOP, STEP INSTEAD
+def linspace(start,step,num): #creates a linearly-spaced row vector
     vector = np.empty((1,num))
     for i in range(num):
         vector[0][i] = start + step*i
