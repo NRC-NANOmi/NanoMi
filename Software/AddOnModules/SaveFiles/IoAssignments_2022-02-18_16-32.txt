@@ -1,4 +1,4 @@
-# Last save date: 2022/Apr/29, 14:51
+# Last save date: 2022/Feb/07, 17:32
 #
 #Type,      Channel Name,   Board serial,  Board Channel, Direction,
 #(AO/AI/D), string,         integer,       integer,     , string ('I' or 'O'),
@@ -7,12 +7,12 @@
 #
 #Analog Outputs
 #
-AO,Bx1,32881,0,-,
-AO,By1,32881,1,-,
+AO,Bx,32881,0,-,
+AO,By,32881,1,-,
 AO,Xin,32881,2,-,
 AO,Yin,32881,3,-,
-AO,empty,32881,4,-,
-AO,Bx2,32881,5,-,
+AO,empty1,32881,4,-,
+AO,empty2,32881,5,-,
 AO,PanX,32881,6,-,
 AO,C1_Lens,32881,7,-,
 AO,PanY,32881,8,-,
@@ -20,12 +20,11 @@ AO,C3_Lens,32881,9,-,
 AO,test1,32881,10,-,
 AO,test2,32881,11,-,
 AO,test3,32881,12,-,
-AO,empty2,32881,13,-,
+AO,empty,32881,13,-,
 AO,Bx+,32881,14,-,
 AO,Bx-,32881,15,-,
 AO,By+,33119,14,-,
 AO,By-,33119,16,-,
-AO,By2,33119,17,-,
 #
 #Analog Inputs
 #

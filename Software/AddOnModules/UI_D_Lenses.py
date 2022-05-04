@@ -1,5 +1,5 @@
 '''
-
+COPY VERSION
 NANOmi Electron Microscope Lenses Module
 
 This code handles setting values on the lenses, as well as displaying the feedback voltage values numerically and in a time plot for chosen values.
@@ -44,7 +44,7 @@ Notes:              Added basic widgets (edit boxes, etc.), defined functions to
 import sys                              #import sys module for system-level functions
 
 #import the necessary aspects of PyQt5 for this user interface window
-from PyQt5.QtWidgets import QWidget, QPushButton, QApplication, QLabel, QMessageBox, QTabWidget, QGridLayout, QLineEdit, QCheckBox
+from PyQt5.QtWidgets import QWidget, QPushButton, QApplication, QLabel, QMessageBox, QTabWidget, QGridLayout, QLineEdit, QCheckBox, QSlider
 from PyQt5 import QtCore, QtGui
 
 import importlib
@@ -54,6 +54,105 @@ from AddOnModules.SoftwareFiles import TimePlot
 
 buttonName = 'Lenses'                 #name of the button on the main window that links to this code
 windowHandle = None                   #a handle to the window on a global scope
+
+
+
+
+
+
+#def send_data(setup):
+    #Hardware.IO.setDigital("SYNC", False)
+    #SCK_state = True
+    #if setup == True:
+        #data = [0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1,1]
+    #else:
+        #data = [0,0,0,0,0,0,1,1, 1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1]
+
+##1,0,0,1,0,0,1,0,1,0,0,0,1,0,1,0
+    #bit_n = 0
+    #i = 0
+
+    #while bit_n != 24:
+        #if i%2 == 0:
+            #Hardware.IO.setDigital("DATA", data[bit_n])
+            #bit_n = bit_n + 1
+        #SCK_state = not SCK_state
+        #Hardware.IO.setDigital("SCLK", SCK_state)
+        #i = i + 1
+    #'''
+    #y   =[int(bit) for bit in list(bin(36)[2:])]
+    #while len(y) < 10:
+    #y.insert(0,0)'''
+
+        ##SCK_state = not SCK_state
+        ##Hardware.IO.setDigital("SYNC", SCK_state)
+        ##Hardware.IO.setDigital("DATA", True)
+    #Hardware.IO.setDigital("SYNC", True)
+    #Hardware.IO.setDigital("SCLK", True)
+
+
+
+    #return
+
+
+
+
+
+
+'''
+
+def send_data():
+    Hardware.IO.setDigital("SYNC", False) #CS
+    SCK = False
+    data = [0,0,0,0,0,0,0,0,   10_bit_data, 0,0,0,0,0,0]
+
+    bit_n = 0
+    i = 0
+
+    while bit_n != 24:
+        if i%2 == 0:
+            Hardware.IO.setDigital("DATA", data[bit_n])
+            bit_n = bit_n + 1
+        SCK = not SCK
+        Hardware.IO.setDigital("SCLK", SCK)
+        i = i + 1
+
+    Hardware.IO.setDigital("SCLK", False)
+    Hardware.IO.setDigital("SYNC", True) #CS
+
+'''
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#def myfunc():
+    ##send_data(setup=True)
+    ##send_data(setup=False)
+    #Hardware.IO.setDigital("SYNC", False)
+    #Hardware.IO.setDigital("SCLK", False)
+    #Hardware.IO.setDigital("DATA", False)
+
+    #return
+
+
+
+
+
+
+
+
 
 #this class handles the main window interactions, mainly initialization
 class popWindow(QWidget):
@@ -158,7 +257,14 @@ class popWindow(QWidget):
         I1Get.adjustSize()
         
         DO1 = QCheckBox('Digital output 1')
-        DO1.stateChanged.connect(lambda: Hardware.IO.setDigital("Out1",DO1.isChecked()))
+        #DO1.stateChanged.connect(lambda: Hardware.IO.setDigital("DATA",DO1.isChecked()))
+        #Hardware.IO.setDigital("SYNC", True)
+        #Hardware.IO.setDigital("SCLK", True)
+        #send_data(setup=True)
+       # DO1.stateChanged.connect(lambda: send_data(setup=False))
+        ##myfunc()
+
+
         mainGrid.addWidget(DO1, 7, 1)
         
         self.displayPlot = TimePlot.main()
@@ -177,7 +283,7 @@ class popWindow(QWidget):
         
 #****************************************************************************************************************
 #BREAK - DO NOT MODIFY CODE BELOW HERE OR MAIN WINDOW'S EXECUTION MAY CRASH
-#****************************************************************************************************************
+#****************************************************************************************************************0000000000000000000
  
     #feeds back the analog input values to the user interface
     def updateFeedback(self, labels, names):
