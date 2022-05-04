@@ -76,42 +76,118 @@ class popWindow(QWidget):
         self.zoomOutBtn.setFixedHeight(50)
         self.zoomOutBtn.clicked.connect(lambda: self.zoomOut())
         mainGrid.addWidget(self.zoomOutBtn, 0, 2, 1, 2)
-        
+
+        ZoomLabel = QLabel('Zoom Coarseness [1 - 255]')
+        ZoomLabel.setAlignment(QtCore.Qt.AlignCenter)
+        mainGrid.addWidget(ZoomLabel, 1, 0)
+        self.zoomAmount = QLineEdit(self)
+        self.zoomAmount.setText('256')
+        self.zoomAmount.setFixedWidth(100)
+        self.zoomAmount.setAlignment(QtCore.Qt.AlignCenter)
+        mainGrid.addWidget(self.zoomAmount, 1, 1)
+
         PanXLabel = QLabel('Pan X Setting [0-5V]')
         PanXLabel.setAlignment(QtCore.Qt.AlignCenter)
-        mainGrid.addWidget(PanXLabel, 1, 0)
+        mainGrid.addWidget(PanXLabel, 2, 0)
         self.panX = QLineEdit(self)
-        self.panX.setText('0')
+        self.panX.setText('2.5')
         self.panX.setFixedWidth(100)
         self.panX.setAlignment(QtCore.Qt.AlignCenter)
-        self.panX.textChanged.connect(lambda: Hardware.IO.setAnalog('PanX', self.panX.text()))
-        mainGrid.addWidget(self.panX, 1, 1)
+        #self.panX.textChanged.connect(lambda: Hardware.IO.setAnalog('PanX', self.panX.text()))
+        self.panX.textChanged.connect(lambda: Hardware.IO.setAnalog('Bx', self.panX.text()))
+        mainGrid.addWidget(self.panX, 2, 1)
         
         PanYLabel = QLabel('Pan Y Setting [0-5V]')
         PanYLabel.setAlignment(QtCore.Qt.AlignCenter)
-        mainGrid.addWidget(PanYLabel, 1, 2)
+        mainGrid.addWidget(PanYLabel, 2, 2)
         self.panY = QLineEdit(self)
-        self.panY.setText('0')
+        self.panY.setText('2.5')
         self.panY.setFixedWidth(100)
         self.panY.setAlignment(QtCore.Qt.AlignCenter)
-        self.panY.textChanged.connect(lambda: Hardware.IO.setAnalog('PanY', self.panY.text()))
-        mainGrid.addWidget(self.panY, 1, 3)
+        #self.panY.textChanged.connect(lambda: Hardware.IO.setAnalog('PanY', self.panY.text()))
+        self.panY.textChanged.connect(lambda: Hardware.IO.setAnalog('By', self.panY.text()))
+        mainGrid.addWidget(self.panY, 2, 3)
+
+        self.deflectorX1 = QLineEdit(self)
+        self.deflectorX1.setText('0')
+        self.deflectorX1.setFixedWidth(100)
+        self.deflectorX1.setAlignment(QtCore.Qt.AlignCenter)
+        self.deflectorX1.textChanged.connect(lambda: Hardware.IO.setAnalog('Deflector_X1_Static',self.deflectorX1.text()))
+        mainGrid.addWidget(self.deflectorX1, 3, 0)
+
+        self.deflectorX2 = QLineEdit(self)
+        self.deflectorX2.setText('0')
+        self.deflectorX2.setFixedWidth(100)
+        self.deflectorX2.setAlignment(QtCore.Qt.AlignCenter)
+        self.deflectorX2.textChanged.connect(lambda: Hardware.IO.setAnalog('Deflector_X2_Static',self.deflectorX2.text()))
+        mainGrid.addWidget(self.deflectorX2, 3, 1)
+
+        self.deflectorY1 = QLineEdit(self)
+        self.deflectorY1.setText('0')
+        self.deflectorY1.setFixedWidth(100)
+        self.deflectorY1.setAlignment(QtCore.Qt.AlignCenter)
+        self.deflectorY1.textChanged.connect(lambda: Hardware.IO.setAnalog('Deflector_Y1_Static',self.deflectorY1.text()))
+        mainGrid.addWidget(self.deflectorY1, 3, 2)
+
+        self.deflectorY2 = QLineEdit(self)
+        self.deflectorY2.setText('0')
+        self.deflectorY2.setFixedWidth(100)
+        self.deflectorY2.setAlignment(QtCore.Qt.AlignCenter)
+        self.deflectorY2.textChanged.connect(lambda: Hardware.IO.setAnalog('Deflector_Y2_Static',self.deflectorY2.text()))
+        mainGrid.addWidget(self.deflectorY2, 3, 3)
         
         #name the window
         self.setWindowTitle('Aperture Motion')
         
-    def zoomIn(self):
+    def zoomOut(self):
+        Hardware.IO.setDigital("UpDown",1)
+        i = 0
+        total = int(self.zoomAmount.text())
+        for n in range(0,total):
+            #time.sleep(0.001)
+            Hardware.IO.setDigital("Inc",1)
+            #time.sleep(0.001)
+            Hardware.IO.setDigital("Inc",0)
+            #time.sleep(0.001)
+        Hardware.IO.setDigital("UpDown",0)
+
+
+        '''
+        Hardware.IO.setDigital("ChipSelect",1)
+        time.sleep(0.1)
+        Hardware.IO.setDigital("ChipSelect",0)
+        'commenting ended here
+
         sl = 0.001
-        #time.sleep(sl)
+        time.sleep(sl)
         Hardware.IO.setDigital("UpDown",1)
         Hardware.IO.setDigital("ChipSelect",1)
         Hardware.IO.setDigital("ChipSelect",0)
         Hardware.IO.setDigital("UpDown",0)
         Hardware.IO.setDigital("UpDown",1)
         Hardware.IO.setDigital("ChipSelect",1)
+        '''
         
     
-    def zoomOut(self):
+    def zoomIn(self):
+        i = 0
+        total = int(self.zoomAmount.text())
+        #while i < total:
+        for n in range(0, total):
+            Hardware.IO.setDigital("UpDown",0)
+            #time.sleep(0.001)
+            Hardware.IO.setDigital("Inc",1)
+            #time.sleep(0.001)
+            Hardware.IO.setDigital("Inc",0)
+            #time.sleep(0.001)
+            #i = i + 1
+
+        '''
+        Hardware.IO.setDigital("UpDown",1)
+        time.sleep(0.1)
+        Hardware.IO.setDigital("UpDown",0)
+        'commenting ended here
+
         sl = 0.001
         #time.sleep(sl)
         Hardware.IO.setDigital("UpDown",0)
@@ -120,7 +196,7 @@ class popWindow(QWidget):
         Hardware.IO.setDigital("UpDown",1)
         Hardware.IO.setDigital("UpDown",0)
         Hardware.IO.setDigital("ChipSelect",1)
-        
+        '''
 #****************************************************************************************************************
 #BREAK - DO NOT MODIFY CODE BELOW HERE OR MAIN WINDOW'S EXECUTION MAY CRASH
 #****************************************************************************************************************

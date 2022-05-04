@@ -276,14 +276,153 @@ class popWindow(QWidget):
         self.nEnables.append(self.scanStopButton)
         mainGrid.addWidget(self.scanStopButton, 8, 2, 1, 2)
         
-        
-        additionalInfoLabel = QLabel('Additional Info: ')
-        additionalInfoLabel.setAlignment(QtCore.Qt.AlignCenter)
-        mainGrid.addWidget(additionalInfoLabel, 8, 3)
+        '''
+        scanView = QGraphicsView()
+        scanScene = QGraphicsScene()
+        scanScene.setBackgroundBrush(QtGui.QBrush(QtGui.QColor.fromRgb(0,0,0)))
+        scanView.setScene(scanScene)
+        scanPixmap = QtGui.QPixmap()
+        #scanScene.setAlignment(QtCore.Qt.AlignCenter)
+        #mainGrid.addWidget(scanView, 9,0,1,1)
 
-        #additionalInfoLabel = QGraphicsView('Additional Info: ')
-        #additionalInfoLabel.setAlignment(QtCore.Qt.AlignCenter)
-        #mainGrid.addWidget(additionalInfoLabel, 8, 3)
+        scanView.setAlignment(QtCore.Qt.AlignCenter)
+        mainGrid.addWidget(scanView, 9,0,1,2)
+        '''
+
+        self.estimatedTimeLabel = QLabel('ADDITIONAL INFORMATION: ')
+        self.estimatedTimeLabel.setAlignment(QtCore.Qt.AlignCenter)
+        mainGrid.addWidget(self.estimatedTimeLabel, 10, 0)
+
+        self.estimatedTimeLabel = QLabel('Estimated time: ')
+        self.estimatedTimeLabel.setAlignment(QtCore.Qt.AlignCenter)
+        mainGrid.addWidget(self.estimatedTimeLabel, 10, 2)
+        self.estimatedTimeOutputLabel = QLabel('')
+        self.estimatedTimeOutputLabel.setAlignment(QtCore.Qt.AlignCenter)
+        mainGrid.addWidget(self.estimatedTimeOutputLabel, 10, 3)
+
+        self.xVoltageRangeLabel = QLabel('xScan Voltage Range: ')
+        self.xVoltageRangeLabel.setAlignment(QtCore.Qt.AlignCenter)
+        mainGrid.addWidget(self.xVoltageRangeLabel, 11, 0)
+        self.xVoltageRangeOutputLabel = QLabel('')
+        self.xVoltageRangeOutputLabel.setAlignment(QtCore.Qt.AlignCenter)
+        mainGrid.addWidget(self.xVoltageRangeOutputLabel, 11, 1)
+
+        self.yVoltageRangeLabel = QLabel('yScan Voltage Range: ')
+        self.yVoltageRangeLabel.setAlignment(QtCore.Qt.AlignCenter)
+        mainGrid.addWidget(self.yVoltageRangeLabel, 11, 2)
+        self.yVoltageRangeOutputLabel = QLabel('')
+        self.yVoltageRangeOutputLabel.setAlignment(QtCore.Qt.AlignCenter)
+        mainGrid.addWidget(self.yVoltageRangeOutputLabel, 11, 3)
+
+        filamentLabel = QLabel('Filament [V]')
+        filamentLabel.setAlignment(QtCore.Qt.AlignCenter)
+        mainGrid.addWidget(filamentLabel, 13, 0)
+
+        self.filamentV = QLineEdit()
+        self.filamentV.setText('4 V')
+        self.filamentV.setFixedWidth(100)
+        self.filamentV.setAlignment(QtCore.Qt.AlignCenter)
+        self.pEnables.append(self.filamentV)
+        mainGrid.addWidget(self.filamentV, 13, 1)
+
+        anodeLabel = QLabel('Anode [V]')
+        anodeLabel.setAlignment(QtCore.Qt.AlignCenter)
+        mainGrid.addWidget(anodeLabel, 13, 2)
+
+        self.anodeV = QLineEdit()
+        self.anodeV.setText('3.6 V')
+        self.anodeV.setFixedWidth(100)
+        self.anodeV.setAlignment(QtCore.Qt.AlignCenter)
+        self.pEnables.append(self.anodeV)
+        mainGrid.addWidget(self.anodeV, 13, 3)
+
+        c1Label = QLabel('C1 [V]')
+        c1Label.setAlignment(QtCore.Qt.AlignCenter)
+        mainGrid.addWidget(c1Label, 14, 0)
+
+        self.c1V = QLineEdit()
+        self.c1V.setText('2.002 (*5k) V')
+        self.c1V.setFixedWidth(100)
+        self.c1V.setAlignment(QtCore.Qt.AlignCenter)
+        self.pEnables.append(self.c1V)
+        mainGrid.addWidget(self.c1V, 14, 1)
+
+        c2Label = QLabel('C2 [V]')
+        c2Label.setAlignment(QtCore.Qt.AlignCenter)
+        mainGrid.addWidget(c2Label, 14, 2)
+
+        self.c2V = QLineEdit()
+        self.c2V.setText('7 kV')
+        self.c2V.setFixedWidth(100)
+        self.c2V.setAlignment(QtCore.Qt.AlignCenter)
+        self.pEnables.append(self.c2V)
+        mainGrid.addWidget(self.c2V, 14, 3)
+
+        c3Label = QLabel('C3 [V]')
+        c3Label.setAlignment(QtCore.Qt.AlignCenter)
+        mainGrid.addWidget(c3Label, 15, 0)
+
+        self.c3V = QLineEdit()
+        self.c3V.setText('4.170 (*3k) V')
+        self.c3V.setFixedWidth(100)
+        self.c3V.setAlignment(QtCore.Qt.AlignCenter)
+        self.pEnables.append(self.c3V)
+        mainGrid.addWidget(self.c3V, 15, 1)
+
+        scintillatorLabel = QLabel('Scintillator [V]')
+        scintillatorLabel.setAlignment(QtCore.Qt.AlignCenter)
+        mainGrid.addWidget(scintillatorLabel, 15, 2)
+
+        self.scintillatorV = QLineEdit()
+        self.scintillatorV.setText('6 kV')
+        self.scintillatorV.setFixedWidth(100)
+        self.scintillatorV.setAlignment(QtCore.Qt.AlignCenter)
+        self.pEnables.append(self.scintillatorV)
+        mainGrid.addWidget(self.scintillatorV, 15, 3)
+
+        pmtPLabel = QLabel('PMT+ [V]')
+        pmtPLabel.setAlignment(QtCore.Qt.AlignCenter)
+        mainGrid.addWidget(pmtPLabel, 16, 0)
+
+        self.pmtPV = QLineEdit()
+        self.pmtPV.setText('300 V')
+        self.pmtPV.setFixedWidth(100)
+        self.pmtPV.setAlignment(QtCore.Qt.AlignCenter)
+        self.pEnables.append(self.pmtPV)
+        mainGrid.addWidget(self.pmtPV, 16, 1)
+
+        pmtNLabel = QLabel('PMT- [V]')
+        pmtNLabel.setAlignment(QtCore.Qt.AlignCenter)
+        mainGrid.addWidget(pmtNLabel, 16, 2)
+
+        self.pmtNV = QLineEdit()
+        self.pmtNV.setText('600 V')
+        self.pmtNV.setFixedWidth(100)
+        self.pmtNV.setAlignment(QtCore.Qt.AlignCenter)
+        self.pEnables.append(self.pmtNV)
+        mainGrid.addWidget(self.pmtNV, 16, 3)
+
+        preampGainLabel = QLabel('Preamp Gain+ [V]')
+        preampGainLabel.setAlignment(QtCore.Qt.AlignCenter)
+        mainGrid.addWidget(preampGainLabel, 17, 0)
+
+        self.preampGainV = QLineEdit()
+        self.preampGainV.setText('10^9')
+        self.preampGainV.setFixedWidth(100)
+        self.preampGainV.setAlignment(QtCore.Qt.AlignCenter)
+        self.pEnables.append(self.preampGainV)
+        mainGrid.addWidget(self.preampGainV, 17, 1)
+
+        defPowSupLabel = QLabel('Deflectors Pow. Supp. [V]')
+        defPowSupLabel.setAlignment(QtCore.Qt.AlignCenter)
+        mainGrid.addWidget(defPowSupLabel, 17, 2)
+
+        self.defPowSupV = QLineEdit()
+        self.defPowSupV.setText('197.1 V')
+        self.defPowSupV.setFixedWidth(100)
+        self.defPowSupV.setAlignment(QtCore.Qt.AlignCenter)
+        self.pEnables.append(self.defPowSupV)
+        mainGrid.addWidget(self.defPowSupV, 17, 3)
 
         #actually add the main overall grid to the popup window
         self.setLayout(mainGrid)
@@ -526,14 +665,14 @@ class popWindow(QWidget):
 
             im = Image.fromarray(uint8(data), 'L')
             dateTimeNow=datetime.now()
-            imageFilename="./images/"+dateTimeNow.strftime("%Y%m%d_%H%M%S")+".png"
+            imageFilename="./../images/"+dateTimeNow.strftime("%Y%m%d_%H%M%S")+".png"
             im.save(imageFilename)
             print("Image saved as:"+imageFilename)
             #im.show()
 
-            imInfo = open("./images/"+dateTimeNow.strftime("%Y%m%d_%H%M%S")+".txt", "w")
+            imInfo = open("./../images/"+dateTimeNow.strftime("%Y%m%d_%H%M%S")+".txt", "w")
 
-            imInfo.write("Num of pixels X (xMax)="+str(xMax)+"\nNum of pixels Y (yMax) = "+str(yMax)+"\nxStep = "+str(xStep)+"\nyStep = "+str(yStep)+"\ndwell time [ns] = "+str(dwell)+"\ndebounce time [ns]= "+str(debounce)+"\nxMiddle = "+str(xMiddle)+"\nyMiddle = "+str(yMiddle)+"\nFilament = "+str('')+"\nAnode = "+str('')+"\nC1 = "+str('')+"\nC2 = "+str('')+"\nC3 = "+str('')+"\nScintillator = "+str('')+"\nPMT+ = "+str('')+"\nPMT- = "+str('')+"\nPreamp Gain = "+str(''))
+            imInfo.write("Num of pixels X (xMax)="+str(xMax)+"\nNum of pixels Y (yMax) = "+str(yMax)+"\nxStep = "+str(xStep)+"\nyStep = "+str(yStep)+"\ndwell time [ns] = "+str(dwell)+"\ndebounce time [ns]= "+str(debounce)+"\nxMiddle = "+str(xMiddle)+"\nyMiddle = "+str(yMiddle)+"\nFilament = "+self.filamentV.text()+"\nAnode = "+self.anodeV.text()+"\nC1 = "+self.c1V.text()+"\nC2 = "+self.c2V.text()+"\nC3 = "+self.c3V.text()+"\nScintillator = "+self.scintillatorV.text()+"\nPMT+ = "+self.pmtPV.text()+"\nPMT- = "+self.pmtNV.text()+"\nPreamp Gain = "+self.preampGainV.text()+"\nDeflector PowSupp = "+self.defPowSupV.text())
             #imInfo.close()
             
         Hardware.IO.setAnalog('D1X', xMiddle)
@@ -546,6 +685,26 @@ class popWindow(QWidget):
         # Udates displayed information about current scan
         willValidateInputFieldsHere=0
         #print("hi")
+
+        if (self.xPixels.text()!="" and self.yPixels.text()!="" and self.xStep.text()!="" and self.yStep.text()!="" and self.pixelDwell.text()!="" and self.pixelDebounce.text()!="" and self.xCenter.text()!="" and self.yCenter.text()!=""):
+            #print("Safe")
+            # Gather current variables values
+            xMax = int(self.xPixels.text())
+            yMax = int(self.yPixels.text())
+            xStep = float(self.xStep.text())
+            yStep = float(self.yStep.text())
+            dwell = float(self.pixelDwell.text())/1000 # converted from ms to s
+            debounce = int(self.pixelDebounce.text())/1000
+            xMiddle = float(self.xCenter.text())
+            yMiddle = float(self.yCenter.text())
+
+            # Udates variables about current scan
+            self.estimatedTimeOutputLabel.setText(str(round((xMax*yMax)*(dwell+debounce)/60, 2))+" min")
+            xRange=xMax*xStep/2
+            yRange=yMax*yStep/2
+            self.xVoltageRangeOutputLabel.setText(str(round(xMiddle-xRange, 2))+" - "+str(round(xMiddle+xRange, 2))+" v")
+            self.yVoltageRangeOutputLabel.setText(str(round(yMiddle-yRange, 2))+" - "+str(round(yMiddle+yRange, 2))+" v")
+
         
 
 

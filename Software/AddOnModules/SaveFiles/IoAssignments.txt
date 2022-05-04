@@ -1,4 +1,4 @@
-# Last save date: 2021/Mar/25, 15:31
+# Last save date: 2021/Dec/14, 13:48
 #
 #Type,      Channel Name,   Board serial,  Board Channel, Direction,
 #(AO/AI/D), string,         integer,       integer,     , string ('I' or 'O'),
@@ -13,15 +13,15 @@ AO,D2X,32881,2,-,
 AO,D2Y,32881,3,-,
 AO,PanX,32881,4,-,
 AO,PanY,32881,5,-,
-AO,I1,32881,6,-,
-AO,Placeholder_AO7,32881,7,-,
-AO,Placeholder_AO8,32881,8,-,
-AO,Placeholder_AO9,32881,9,-,
+AO,Bx,32881,6,-,
+AO,Deflector_X1_Static,32881,7,-,
+AO,By,32881,8,-,
+AO,Deflector_X2_Static,32881,9,-,
 AO,Placeholder_AO10,32881,10,-,
 AO,Placeholder_AO11,32881,11,-,
 AO,Placeholder_AO12,32881,12,-,
-AO,Placeholder_AO13,32881,13,-,
-AO,Placeholder_AO14,32881,14,-,
+AO,Deflector_Y1_Static,32881,13,-,
+AO,Deflector_Y2_Static,32881,14,-,
 AO,Placeholder_AO15,32881,15,-,
 AO,Placeholder_AO16,33119,0,-,
 AO,Placeholder_AO17,33119,1,-,
@@ -47,8 +47,8 @@ AI,Placeholder_AI15,33119,15,-,
 #
 #Digitals
 #
-Dx,ChipSelect,32881,0,O,
-Dx,UpDown,32881,1,O,
+Dx,UpDown,32881,0,O,
+Dx,Inc,32881,1,O,
 Dx,Placeholder_Dx2,32881,2,O,
 Dx,Placeholder_Dx3,32881,3,O,
 Dx,Placeholder_Dx4,32881,4,O,

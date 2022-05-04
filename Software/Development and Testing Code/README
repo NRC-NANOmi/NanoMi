@@ -1,0 +1,36 @@
+PRESET:
+-How to save all pyqt window settings. Could be a useful if program crashes since everything will be saved.
+-source:https://gist.github.com/eyllanesc/be8a476bb7038c7579c58609d7d0f031
+
+-How to implement with accessing variables in both files.
+Ex Import file1 inside file2:
+-To import all variables from file1 without flooding file2's namespace, use:
+"import file1" inside file2
+-now use file1.x1, file1.x2, ... to access the variables of file1 in file 2
+- This method allows you change the data in file 1 by changing data in file 2 which would be useful for loading
+-x1 and x2 etc should be lists or dictionaries since those are mutable variables in python
+-source:https://stackoverflow.com/questions/17255737/importing-variables-from-another-file  answer by Ashwini Chaudhary
+
+What I planned on doing with saving.
+-with the above implementation to access vairables and in the preset file importing from all other addonmodules
+-the save button should loop through all the lists/dictionaries in each of file in addonmodules and write the data into save the file made
+
+What I planned on doing with loading.
+-with the above implementation to access vairables and in the preset file importing from all other addonmodules
+-when the load button is pressed read the file selected, use REGEX to find specific data.
+-assign each data piece and loading will be done automaticaly
+
+Current issues in PRESET
+-accessing variables works but changing them from the file that imported doesn't work unless same folder as NANOmi.py. 
+-addonmodules files starting with numbers cause importing issues when trying to access variables in another file
+
+
+GRAPH:
+pyqtGraph method V10 and V10.5 (demo in V10 folder)
+-Real time plotting
+-source:https://stackoverflow.com/questions/57891219/how-to-make-a-fast-matplotlib-live-plot-in-a-pyqt5-gui
+
+Issue with pyqtGraph method
+-Can't have multiple graphs on one plot
+
+
