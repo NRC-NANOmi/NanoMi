@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <dataSets>
+    <set name="Set 5">
+        <setting module="Lenses" name="C1" value="0.01"/>
+        <setting module="Lenses" name="C2" value="0.02"/>
+        <setting module="Lenses" name="I1" value="0.04"/>
+    </set>
     <set name="Set 2">
         <setting module="Lenses" name="C1" value="0.01"/>
         <setting module="Lenses" name="C2" value="0.02"/>

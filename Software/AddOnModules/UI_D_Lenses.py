@@ -216,47 +216,47 @@ class popWindow(QWidget):
         mainGrid.addWidget(I1GetLabel, 6, 0)
         
         #add edit boxes to the right of the setting labels
-        C1Set = QLineEdit(self)
-        C1Set.setText('0')
-        C1Set.setFixedWidth(100)
-        C1Set.setAlignment(QtCore.Qt.AlignCenter)
-        C1Set.textChanged.connect(lambda: Hardware.IO.setAnalog('C1', C1Set.text()))
-        mainGrid.addWidget(C1Set, 1, 1)
+        self.C1Set = QLineEdit(self)
+        self.C1Set.setText('0')
+        self.C1Set.setFixedWidth(100)
+        self.C1Set.setAlignment(QtCore.Qt.AlignCenter)
+        self.C1Set.textChanged.connect(lambda: Hardware.IO.setAnalog('C1', self.C1Set.text()))
+        mainGrid.addWidget(self.C1Set, 1, 1)
         
-        C2Set = QLineEdit()
-        C2Set.setText('0')
-        C2Set.setFixedWidth(100)
-        C2Set.setAlignment(QtCore.Qt.AlignCenter)
-        C1Set.textChanged.connect(lambda: Hardware.IO.setAnalog('C2', C2Set.text()))
-        mainGrid.addWidget(C2Set, 2, 1)
+        self.C2Set = QLineEdit()
+        self.C2Set.setText('0')
+        self.C2Set.setFixedWidth(100)
+        self.C2Set.setAlignment(QtCore.Qt.AlignCenter)
+        self.C2Set.textChanged.connect(lambda: Hardware.IO.setAnalog('C2', self.C2Set.text()))
+        mainGrid.addWidget(self.C2Set, 2, 1)
         
-        I1Set = QLineEdit()
-        I1Set.setText('0')
-        I1Set.setFixedWidth(100)
-        I1Set.setAlignment(QtCore.Qt.AlignCenter)
-        C1Set.textChanged.connect(lambda: Hardware.IO.setAnalog('I1', I1Set.text()))
-        mainGrid.addWidget(I1Set, 3, 1)
+        self.I1Set = QLineEdit()
+        self.I1Set.setText('0')
+        self.I1Set.setFixedWidth(100)
+        self.I1Set.setAlignment(QtCore.Qt.AlignCenter)
+        self.I1Set.textChanged.connect(lambda: Hardware.IO.setAnalog('I1', self.I1Set.text()))
+        mainGrid.addWidget(self.I1Set, 3, 1)
         
         #add Feedback Labels and update them to display analog inputs from corresponding channels
-        C1Get = QLineEdit('')
-        C1Get.setReadOnly(True)
-        C1Get.setFixedWidth(100)
-        mainGrid.addWidget(C1Get, 4, 1)
-        C1Get.adjustSize()
+        self.C1Get = QLineEdit('')
+        self.C1Get.setReadOnly(True)
+        self.C1Get.setFixedWidth(100)
+        mainGrid.addWidget(self.C1Get, 4, 1)
+        self.C1Get.adjustSize()
         
-        C2Get = QLineEdit('')
-        C2Get.setReadOnly(True)
-        C2Get.setFixedWidth(100)
-        mainGrid.addWidget(C2Get, 5, 1)
-        C2Get.adjustSize()
+        self.C2Get = QLineEdit('')
+        self.C2Get.setReadOnly(True)
+        self.C2Get.setFixedWidth(100)
+        mainGrid.addWidget(self.C2Get, 5, 1)
+        self.C2Get.adjustSize()
         
-        I1Get = QLineEdit('')
-        I1Get.setReadOnly(True)
-        I1Get.setFixedWidth(100)
-        mainGrid.addWidget(I1Get, 6, 1)
-        I1Get.adjustSize()
+        self.I1Get = QLineEdit('')
+        self.I1Get.setReadOnly(True)
+        self.I1Get.setFixedWidth(100)
+        mainGrid.addWidget(self.I1Get, 6, 1)
+        self.I1Get.adjustSize()
         
-        DO1 = QCheckBox('Digital output 1')
+        self.DO1 = QCheckBox('Digital output 1')
         #DO1.stateChanged.connect(lambda: Hardware.IO.setDigital("DATA",DO1.isChecked()))
         #Hardware.IO.setDigital("SYNC", True)
         #Hardware.IO.setDigital("SCLK", True)
@@ -265,7 +265,7 @@ class popWindow(QWidget):
         ##myfunc()
 
 
-        mainGrid.addWidget(DO1, 7, 1)
+        mainGrid.addWidget(self.DO1, 7, 1)
         
         self.displayPlot = TimePlot.main()
         self.displayPlot.setupPlot(3, 'Lens Voltages', 'Voltage [V]', ['C1', 'C2', 'I1'])
@@ -278,7 +278,7 @@ class popWindow(QWidget):
         self.setWindowTitle('Lens Settings')
         
         self.updateTimer = QtCore.QTimer()
-        self.updateTimer.timeout.connect(lambda: self.updateFeedback([C1Get, C2Get, I1Get], ['C1','C2','I1']))
+        self.updateTimer.timeout.connect(lambda: self.updateFeedback([self.C1Get, self.C2Get, self.I1Get], ['C1','C2','I1']))
         self.updateTimer.start(10)
         
 #****************************************************************************************************************
@@ -315,7 +315,7 @@ class popWindow(QWidget):
     def setValue(self, name, value):
         for varName in self.data:
             if name in varName:
-                eval(varName + '.setText("' + str(value) + '")')
+                eval("self." + varName + '.setText("' + str(value) + '")')
                 return 0
         return -1
         

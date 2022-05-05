@@ -93,7 +93,7 @@ class popWindow(QWidget):
         loadTab = QWidget()
         tabs.addTab(loadTab, 'Load Data Sets')
         tabs.addTab(saveTab, 'Save Data Sets')
-        tabs.currentChanged.connect(lambda: self.refreshDataSets())
+        #tabs.currentChanged.connect(lambda: self.refreshDataSets())
         
         #import all other UI modules
         global modules
@@ -373,7 +373,7 @@ class popWindow(QWidget):
         
         #pull the tree from the file
         tree = self.readDataFile()
-        
+        print(tree)
         #pull the entered new filename
         setName = self.edit.text()
         
