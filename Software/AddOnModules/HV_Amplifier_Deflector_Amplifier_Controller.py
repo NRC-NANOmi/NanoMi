@@ -372,7 +372,15 @@ class popWindow(QWidget):
         self.zero_padded_SDI_binary = ['0'] * 18
         print(self.zero_padded_SDI_binary)
 
-
+        #Parameters of this module are saved inside of self.data, so Datasets module can use it
+        self.data = {
+            'Bx1' : self.slider,
+            'Bx2' : self.slider6,
+            'By1' : self.slider2,
+            'By2' : self.slider3,
+            'Xin' : self.slider4,
+            'Yin' : self.slider5
+            }
 
 #The following val_changed functions are activated when the slider values change. And the IO pins output accordingly.
     def val_changed_Bx(self):
@@ -715,18 +723,16 @@ class popWindow(QWidget):
 
     #function to be able to load data to the user interface from the DataSets module
     def setValue(self, name, value):
-        for varName in self.data:
-            if name in varName:
-                eval(varName + '.setText("' + str(value) + '")')
-                return 0
-        return -1
+        for varName in value:   #iterate the input values
+            if varName in self.data:     # check if the varName is a variable of this module
+                self.data[varName].setValue(value[varName])     #set the value
 
     #function to get a value from the module, used by DataSets
     def getValues(self):
         #return a dictionary of all variable names in data, and values for those variables
         varDict = {}
-        for varName in self.data:
-            value = eval(varName + '.text()')
+        for var in self.data:
+            value = self.data[var]
             if 'Set' in varName:
                 varName = varName.split('Set')[0]
             varDict[varName] = value

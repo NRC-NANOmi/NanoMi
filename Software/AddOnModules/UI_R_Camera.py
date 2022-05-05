@@ -97,8 +97,8 @@ class popWindow(QWidget):
     #a function that users can modify to create their user interface
     def initUI(self):
         #set width of main window (X, Y , WIDTH, HEIGHT)
-        windowWidth = 800
-        windowHeight = 800
+        windowWidth = 30
+        windowHeight = 30
         self.setGeometry(350, 50, windowWidth, windowHeight)
         
         #define a font for the title of the UI
@@ -116,23 +116,23 @@ class popWindow(QWidget):
         self.setLayout(mainGrid)
         
         #define global variables for testing save/load
-        global ImageSizeXSet, ImageSizeYSet
-        ImageSizeXSet = QLineEdit()
-        ImageSizeXSet.setText('2048')
-        ImageSizeXSet.setFixedWidth(100)
-        ImageSizeXSet.setAlignment(QtCore.Qt.AlignCenter)
-        mainGrid.addWidget(ImageSizeXSet, 5, 0)
+        #global ImageSizeXSet, ImageSizeYSet
+        #ImageSizeXSet = QLineEdit()
+        #ImageSizeXSet.setText('2048')
+        #ImageSizeXSet.setFixedWidth(100)
+        #ImageSizeXSet.setAlignment(QtCore.Qt.AlignCenter)
+        #mainGrid.addWidget(ImageSizeXSet, 5, 0)
         
-        ImageSizeYSet = QLineEdit()
-        ImageSizeYSet.setText('2048')
-        ImageSizeYSet.setFixedWidth(100)
-        ImageSizeYSet.setAlignment(QtCore.Qt.AlignCenter)  
-        mainGrid.addWidget(ImageSizeYSet, 5, 1)
-        
+        #ImageSizeYSet = QLineEdit()
+        #ImageSizeYSet.setText('2048')
+        #ImageSizeYSet.setFixedWidth(100)
+        #ImageSizeYSet.setAlignment(QtCore.Qt.AlignCenter)
+        #mainGrid.addWidget(ImageSizeYSet, 5, 1)
+
         
         def enableVideoStream():
             print ("Loading camera stream ...")
-
+            subprocess.Popen(['./AddOnModules/StartCanonM50'])
 
             #Run terminal command to enable mprobe
             #os.system('echo NanoNRC1^^^= | sudo -S modprobe v4l2loopback exclusive_caps=1 max_buffer=2')
@@ -142,11 +142,11 @@ class popWindow(QWidget):
             #subprocess.Popen('gphoto2 --stdout --capture-movie | ffmpeg -i - -vcodec rawvideo -pix_fmt yuv420p -threads 0 -f v4l2 /dev/video0',stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
 
-            pygame.init()
-            pygame.camera.init()
-            pygame.display.init()
-            myCapture=Capture()
-            myCapture.main()
+            #pygame.init()
+            #pygame.camera.init()
+            #pygame.display.init()
+            #myCapture=Capture()
+            #myCapture.main()
 
             '''
             pygame.init()
@@ -171,16 +171,17 @@ class popWindow(QWidget):
             print ("camlist:",camlist)
             pygame.quit()
             '''
-            print ("Video stream finished")
+            #print ("Video stream finished")
         
         
         #define Stream Button
         btnStreamEnabler = QPushButton('Enabe Camera Stream')
         btnStreamEnabler.clicked.connect(enableVideoStream)
         mainGrid.addWidget(btnStreamEnabler, 0, 0)
-        
+
         #name the window
         self.setWindowTitle('Camera Functions')
+        self.close()
         
 #****************************************************************************************************************
 #BREAK - DO NOT MODIFY CODE BELOW HERE OR MAIN WINDOW'S EXECUTION MAY CRASH
