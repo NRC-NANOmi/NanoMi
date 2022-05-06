@@ -723,10 +723,12 @@ class popWindow(QWidget):
 
     #function to be able to load data to the user interface from the DataSets module
     def setValue(self, name, value):
-        for varName in value:   #iterate the input values
-            if varName in self.data:     # check if the varName is a variable of this module
-                self.data[varName].setValue(value[varName])     #set the value
-
+        #check if the name exists
+        if name in self.data:
+            #set the value
+            self.data[name].setValue(int(value))
+            return 0
+        return -1
     #function to get a value from the module, used by DataSets
     def getValues(self):
         #return a dictionary of all variable names in data, and values for those variables
