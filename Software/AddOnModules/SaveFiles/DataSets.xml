@@ -61,4 +61,14 @@
         <setting module="Apertures" name="panY" value="4.82"/>
         <setting module="Apertures" name="zoom" value="167"/>
     </set>
+    <set name="2022-05-09_1559">
+        <setting module="Lenses" name="C1" value="1"/>
+        <setting module="Lenses" name="C2" value="2"/>
+        <setting module="Lenses" name="I1" value="3"/>
+        <setting module="HV Amplifier Deflector Amplifier Controller" name="Bx1" value="-160"/>
+        <setting module="HV Amplifier Deflector Amplifier Controller" name="By1" value="302"/>
+        <setting module="HV Amplifier Deflector Amplifier Controller" name="By2" value="-10"/>
+        <setting module="HV Amplifier Deflector Amplifier Controller" name="Xin" value="10"/>
+        <setting module="HV Amplifier Deflector Amplifier Controller" name="Yin" value="50"/>
+    </set>
 </dataSets>

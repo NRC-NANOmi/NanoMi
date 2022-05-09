@@ -790,7 +790,7 @@ class IoStruct:
             return 0
         except:
             if not strValue == '':
-                QMessageBox.question(struct,'Invalid input', 'The value for setting ' + name + ' is invalid.', QMessageBox.Ok, QMessageBox.Ok)
+                QMessageBox.question(self,'Invalid input', 'The value for setting ' + name + ' is invalid.', QMessageBox.Ok, QMessageBox.Ok)
                 struct.sender().setText('0')
 
     def tempGetImage(self):

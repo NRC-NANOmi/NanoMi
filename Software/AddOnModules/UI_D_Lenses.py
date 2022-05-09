@@ -49,7 +49,7 @@ from PyQt5 import QtCore, QtGui
 
 import importlib
 # import necessary aspects of the hardware module
-from AddOnModules import Hardware
+from AddOnModules import Hardware, UI_U_DataSets as DataSets
 from AddOnModules.SoftwareFiles import TimePlot
 
 buttonName = 'Lenses'                 #name of the button on the main window that links to this code
@@ -220,21 +220,21 @@ class popWindow(QWidget):
         self.C1Set.setText('0')
         self.C1Set.setFixedWidth(100)
         self.C1Set.setAlignment(QtCore.Qt.AlignCenter)
-        self.C1Set.textChanged.connect(lambda: Hardware.IO.setAnalog('C1', self.C1Set.text()))
+        self.C1Set.textChanged.connect(lambda: self.updateC1())
         mainGrid.addWidget(self.C1Set, 1, 1)
         
         self.C2Set = QLineEdit()
         self.C2Set.setText('0')
         self.C2Set.setFixedWidth(100)
         self.C2Set.setAlignment(QtCore.Qt.AlignCenter)
-        self.C2Set.textChanged.connect(lambda: Hardware.IO.setAnalog('C2', self.C2Set.text()))
+        self.C2Set.textChanged.connect(lambda: self.updateC2())
         mainGrid.addWidget(self.C2Set, 2, 1)
         
         self.I1Set = QLineEdit()
         self.I1Set.setText('0')
         self.I1Set.setFixedWidth(100)
         self.I1Set.setAlignment(QtCore.Qt.AlignCenter)
-        self.I1Set.textChanged.connect(lambda: Hardware.IO.setAnalog('I1', self.I1Set.text()))
+        self.I1Set.textChanged.connect(lambda: self.updateI1())
         mainGrid.addWidget(self.I1Set, 3, 1)
         
         #add Feedback Labels and update them to display analog inputs from corresponding channels
@@ -310,6 +310,18 @@ class popWindow(QWidget):
         super().__init__()
         
         self.initUI()
+
+    def updateC1(self):
+        DataSets.windowHandle.refreshDataSets()
+        Hardware.IO.setAnalog('C1', self.C1Set.text())
+
+    def updateC2(self):
+        DataSets.windowHandle.refreshDataSets()
+        Hardware.IO.setAnalog('C2', self.C2Set.text())
+
+    def updateI1(self):
+        DataSets.windowHandle.refreshDataSets()
+        Hardware.IO.setAnalog('I1', self.I1Set.text())
         
     #function to be able to load data to the user interface from the DataSets module
     def setValue(self, name, value):

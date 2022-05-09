@@ -275,8 +275,8 @@ class popWindow(QWidget):
             #pull a dictionary holding all name-value pairs for this module
             varDictionary = subMod.windowHandle.getValues()
             for varName in varDictionary:
-                # if the value isn't 0, then load it
-                if varDictionary[varName] != '0':
+                # if the value isn't 0 or empty, then load it
+                if varDictionary[varName] != '0' and varDictionary[varName] != '':
                     #find the sub-module name in short human-readable form
                     subModName = ' '.join(subMod.__name__.split('_')[2:])
                     #find the value of the variable
@@ -425,7 +425,7 @@ class popWindow(QWidget):
                 varVal = varDictionary[varName]
                 #add all new required save variables one at a time
                 #check if variable value is 0
-                if varVal != '0':
+                if varVal != '0' and varVal != '':
                     ET.SubElement(newStruct, 'setting', {'module':subModName, 'name':varName, 'value':varVal})
         
         #format the entire xml file nicely so it is human readable and indented - encode it to a byte-string

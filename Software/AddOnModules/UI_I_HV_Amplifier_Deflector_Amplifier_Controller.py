@@ -10,7 +10,7 @@ from PyQt5.QtCore import Qt
 
 import importlib
 # import necessary aspects of the hardware module
-from AddOnModules import Hardware
+from AddOnModules import Hardware, UI_U_DataSets as DataSets
 from AddOnModules.SoftwareFiles import TimePlot
 import time
 import threading
@@ -388,46 +388,56 @@ class popWindow(QWidget):
 
 #The following val_changed functions are activated when the slider values change. And the IO pins output accordingly.
     def val_changed_Bx(self):
+        DataSets.windowHandle.refreshDataSets()
         self.widget2.setText("Bx1: " + str(self.slider.value()/100))
         Hardware.IO.setAnalog('Bx1',self.slider.value()/100)
 
 
     def val_changed_By1(self):
+        DataSets.windowHandle.refreshDataSets()
         self.widget3.setText("By1: " + str(self.slider2.value()/100))
         Hardware.IO.setAnalog('By1',self.slider2.value()/100)
 
 
     def val_changed_By2(self):
+        DataSets.windowHandle.refreshDataSets()
         self.widget4.setText("By2: " + str(self.slider3.value()/100))
         Hardware.IO.setAnalog('By2',self.slider3.value()/100)
 
 
     def val_changed_Xin(self):
+        DataSets.windowHandle.refreshDataSets()
         self.widget5.setText("Xin: " + str(self.slider4.value()/100))
         Hardware.IO.setAnalog('Xin',self.slider4.value()/100)
 
 
     def val_changed_Yin(self):
+        DataSets.windowHandle.refreshDataSets()
         self.widget6.setText("Yin: " + str(self.slider5.value()/100))
         Hardware.IO.setAnalog('Yin',self.slider5.value()/100)
 
     def val_changed_Bx2(self):
+        DataSets.windowHandle.refreshDataSets()
         self.widget7.setText("Bx2: " + str(self.slider6.value()/100))
         Hardware.IO.setAnalog('Bx2',self.slider6.value()/100)
 
     def val_changed_SDI1(self):
+        DataSets.windowHandle.refreshDataSets()
         self.widget_SDI1.setText("SDI: " + str(self.slider_SDI1.value()))
         return
 
     def val_changed_SDI2(self):
+        DataSets.windowHandle.refreshDataSets()
         self.widget_SDI2.setText("SDI: " + str(self.slider_SDI2.value()))
         return
 
     def val_changed_SDI3(self):
+        DataSets.windowHandle.refreshDataSets()
         self.widget_SDI3.setText("SDI: " + str(self.slider_SDI3.value()))
         return
 
     def val_changed_SDI4(self):
+        DataSets.windowHandle.refreshDataSets()
         self.widget_SDI4.setText("SDI: " + str(self.slider_SDI4.value()))
         return
 

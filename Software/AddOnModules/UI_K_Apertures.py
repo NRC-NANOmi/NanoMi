@@ -28,7 +28,7 @@ from PyQt5 import QtCore, QtGui
 #import hardware
 import importlib
 
-from AddOnModules import Hardware
+from AddOnModules import Hardware, UI_U_DataSets
 
 buttonName = 'Apertures'                #name of the button on the main window that links to this code
 windowHandle = None                     #a handle to the window on a global scope
@@ -85,7 +85,7 @@ class popWindow(QWidget):
         self.panX.setText('0')
         self.panX.setFixedWidth(100)
         self.panX.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
-        self.panX.textChanged.connect(lambda: Hardware.IO.setAnalog('PanX', self.panX.text()))
+        self.panX.textChanged.connect(lambda: self.updatePanX())
         mainGrid.addWidget(self.panX, 1, 2, 1, 1)
         
         PanYLabel = QLabel('Pan Y Setting [0-5V]')
@@ -96,7 +96,7 @@ class popWindow(QWidget):
         self.panY.setText('0')
         self.panY.setFixedWidth(100)
         self.panY.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
-        self.panY.textChanged.connect(lambda: Hardware.IO.setAnalog('PanY', self.panY.text()))
+        self.panY.textChanged.connect(lambda: self.updatePanY())
         mainGrid.addWidget(self.panY, 3, 2, 1, 1)
         
         #name the window
@@ -126,7 +126,17 @@ class popWindow(QWidget):
             "panY" : self.panY,
             "zoom" : self.slider
         }
+
+    def updatePanX(self):
+        UI_U_DataSets.windowHandle.refreshDataSets()
+        Hardware.IO.setAnalog('PanX', self.panX.text())
+
+    def updatePanY(self):
+        UI_U_DataSets.windowHandle.refreshDataSets()
+        Hardware.IO.setAnalog('PanY', self.panY.text())
+
     def valChanged(self):
+        UI_U_DataSets.windowHandle.refreshDataSets()
         Hardware.IO.setDigital("ChipSelect", True) #CS
         Hardware.IO.setDigital("SCLK", False)
         position = [int(bit) for bit in list(bin(int(self.slider.value()))[2:])]
@@ -228,9 +238,10 @@ class popWindow(QWidget):
         for var in self.data:
             if var == "zoom":
                 value = str(self.data[var].value())
+                if value != '127':
+                    varDict[var] = value
             else:
                 value = self.data[var].text()
-            if value != 0:
                 varDict[var] = value
         return varDict
     
