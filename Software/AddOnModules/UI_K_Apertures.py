@@ -121,6 +121,11 @@ class popWindow(QWidget):
         PanYLabel.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignBottom)
         mainGrid.addWidget(PanYLabel, 3, 1, 1, 1)
 
+        self.data = {
+            "panX" : self.panX,
+            "panY" : self.panY,
+            "zoom" : self.slider
+        }
     def valChanged(self):
         Hardware.IO.setDigital("ChipSelect", True) #CS
         Hardware.IO.setDigital("SCLK", False)
@@ -207,9 +212,12 @@ class popWindow(QWidget):
     
     #function to be able to load data to the user interface from the DataSets module
     def setValue(self, name, value):
-        for varName in data:
+        for varName in self.data:
             if name in varName:
-                eval(varName + '.setText("' + str(value) + '")')
+                if name == "zoom":
+                    self.data[name].setValue(int(value))
+                else:
+                    self.data[name].setText(str(value))
                 return 0
         return -1
         
@@ -217,11 +225,13 @@ class popWindow(QWidget):
     def getValues(self):
         #return a dictionary of all variable names in data, and values for those variables
         varDict = {}
-        for varName in data:
-            value = eval(varName + '.text()')
-            if 'Set' in varName:
-                varName = varName.split('Set')[0]
-            varDict[varName] = value
+        for var in self.data:
+            if var == "zoom":
+                value = str(self.data[var].value())
+            else:
+                value = self.data[var].text()
+            if value != 0:
+                varDict[var] = value
         return varDict
     
     #this function handles the closing of the pop-up window - it doesn't actually close, simply hides visibility. 

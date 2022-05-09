@@ -33,4 +33,32 @@
         <setting module="Camera" name="ImageSizeX" value="2048"/>
         <setting module="Camera" name="ImageSizeY" value="2048"/>
     </set>
+    <set name="2022-05-09_1115">
+        <setting module="DeflectorsStigmators" name="D1X" value="12"/>
+    </set>
+    <set name="2022-05-09_1125">
+        <setting module="Controller" name="Bx1" value="343"/>
+    </set>
+    <set name="2022-05-09_1129">
+        <setting module="DeflectorsStigmators" name="D1X" value="1"/>
+    </set>
+    <set name="2022-05-09_1133">
+        <setting module="Lenses" name="C1" value="1"/>
+    </set>
+    <set name="2022-05-09_1135">
+        <setting module="Controller" name="By2" value="464"/>
+    </set>
+    <set name="2022-05-09_1136">
+        <setting module="Controller" name="Bx2" value="99"/>
+    </set>
+    <set name="2022-05-09_1142"/>
+    <set name="2022-05-09_1145"/>
+    <set name="2022-05-09_1151">
+        <setting module="HV Amplifier Deflector Amplifier Controller" name="Bx2" value="278"/>
+    </set>
+    <set name="2022-05-09_1325">
+        <setting module="Apertures" name="panX" value="4.99"/>
+        <setting module="Apertures" name="panY" value="4.82"/>
+        <setting module="Apertures" name="zoom" value="167"/>
+    </set>
 </dataSets>

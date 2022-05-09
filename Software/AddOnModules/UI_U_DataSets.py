@@ -93,7 +93,7 @@ class popWindow(QWidget):
         loadTab = QWidget()
         tabs.addTab(loadTab, 'Load Data Sets')
         tabs.addTab(saveTab, 'Save Data Sets')
-        #tabs.currentChanged.connect(lambda: self.refreshDataSets())
+        tabs.currentChanged.connect(lambda: self.refreshDataSets())
         
         #import all other UI modules
         global modules
@@ -116,14 +116,15 @@ class popWindow(QWidget):
                         
                         #remove the extension from the filename
                         module_name = filename[:-3]
-                        
                         #don't load yourself, the data sets module; otherwise load everything UI related
                         if module_name in __name__:
                             continue
                         #also don't load the hardware module, as there is no settings there to save
-                        if 'hardware' in __name__.lower():
+                        if 'hardware' in module_name.lower():
                             continue
-                        
+                        #don't load camera module, same reason as hardware
+                        if 'camera' in module_name.lower():
+                            continue
                         #attempt to read in the module
                         try:
                             modules.append(importlib.import_module('.'+module_name, package='AddOnModules'))
@@ -171,7 +172,7 @@ class popWindow(QWidget):
         loadGrid.addWidget(dataValueDisplay, 4, 0, 1, 1)
         
         #set up a linkage so when the data set list changes it's selection, it automatically updates the data value list
-        dataSetDisplay.itemSelectionChanged.connect(lambda: self.showDataValues(dataSets[dataSetDisplay.currentRow()], dataValueDisplay))
+        dataSetDisplay.itemSelectionChanged.connect(lambda: self.showDataValues(dataSetDisplay.currentRow(), dataValueDisplay))
         
         #once loaded, force the current selection of the set to the first one - this will also update the data value list
         dataSetDisplay.setCurrentRow(0)
@@ -179,7 +180,7 @@ class popWindow(QWidget):
         #create a pushbutton to load the selected data set to the microscope's hardware AND software
         loadBtn = QPushButton('Load Selected Data Set')
         loadBtn.setFont(titleFont)
-        loadBtn.clicked.connect(lambda: self.loadDataValues(dataSets[dataSetDisplay.currentRow()]))
+        loadBtn.clicked.connect(lambda: self.loadDataValues(dataSetDisplay.currentRow()))
         loadGrid.addWidget(loadBtn, 5, 0, 3, 1)
         
         #set the layout to the actual tab, only once it's complete
@@ -274,31 +275,36 @@ class popWindow(QWidget):
             #pull a dictionary holding all name-value pairs for this module
             varDictionary = subMod.windowHandle.getValues()
             for varName in varDictionary:
-                #find the sub-module name in short human-readable form
-                subModName = subMod.__name__.split('_')[-1]
-                #find the value of the variable
-                varVal = varDictionary[varName]
-                
-                #insert a new row in the table
-                currentValues.insertRow(row)
-                
-                #set up the module, name and value cells
-                module = QTableWidgetItem(subModName)
-                module.setFlags(QtCore.Qt.ItemIsEnabled)
-                name = QTableWidgetItem(varName)
-                name.setFlags(QtCore.Qt.ItemIsEnabled)
-                value = QTableWidgetItem(varVal)
-                value.setFlags(QtCore.Qt.ItemIsEnabled)
-                
-                #actually set the module, name and value cells into the table
-                currentValues.setItem(row, 0, module)
-                currentValues.setItem(row, 1, name)
-                currentValues.setItem(row, 2, value)
-                row = row + 1
+                # if the value isn't 0, then load it
+                if varDictionary[varName] != '0':
+                    #find the sub-module name in short human-readable form
+                    subModName = ' '.join(subMod.__name__.split('_')[2:])
+                    #find the value of the variable
+                    varVal = varDictionary[varName]
+
+                    #insert a new row in the table
+                    currentValues.insertRow(row)
+
+                    #set up the module, name and value cells
+                    module = QTableWidgetItem(subModName)
+                    module.setFlags(QtCore.Qt.ItemIsEnabled)
+                    name = QTableWidgetItem(varName)
+                    name.setFlags(QtCore.Qt.ItemIsEnabled)
+                    value = QTableWidgetItem(varVal)
+                    value.setFlags(QtCore.Qt.ItemIsEnabled)
+
+                    #actually set the module, name and value cells into the table
+                    currentValues.setItem(row, 0, module)
+                    currentValues.setItem(row, 1, name)
+                    currentValues.setItem(row, 2, value)
+                    row = row + 1
                     
     #this function will update the data value display with a selected data set's values so users can see what they will be setting
-    def showDataValues(self, data, display):
+    def showDataValues(self, index, display):
         #reset the row count to 0 to refresh all data in the data value display
+        global dataSets
+        dataSets = self.readDataFile()
+        data = dataSets[index]
         display.setRowCount(0)
         row = 0
         #for each attribute in the data set, show it's name and value in the data value display
@@ -325,7 +331,10 @@ class popWindow(QWidget):
             row = row + 1
         
     #this function will actually load the data set values to the microscope
-    def loadDataValues(self, data):
+    def loadDataValues(self, index):
+        global dataSets
+        dataSets = self.readDataFile()
+        data = dataSets[index]
         #pull in all imported UI modules
         global modules
         
@@ -340,8 +349,8 @@ class popWindow(QWidget):
                 #pull out this piece of data's attributes
                 attributes = child.attrib
                 #if the module is a match for the subModule, load the data to it - module name matches don't have to be exact, because real module names can be super long and I don't want users to have to deal with that kinda stuff if they don't have to
-                if attributes['module'].lower() in subModule.__name__.lower():
-                    modName = attributes['module'].split('_')[-1]
+                if attributes['module'].split(' ')[0].lower() in subModule.__name__.lower():
+                    modName = attributes['module']
                     name = attributes['name']
                     value = attributes['value']
                     returnValue = subModule.windowHandle.setValue(name, value)
@@ -393,7 +402,6 @@ class popWindow(QWidget):
             if reply == QMessageBox.No:
                 print('Saving cancelled.')
                 QMessageBox.question(self,'Cancelled save.','Saving has been cancelled.', QMessageBox.Ok, QMessageBox.Ok)
-                return
             #if overwriting, modify the variables
             else:
                 print('Overwriting the save entry "' + setName + '".')
@@ -404,18 +412,21 @@ class popWindow(QWidget):
         newStruct = ET.SubElement(tree, 'set')
         #modify the name to be the chosen name
         newStruct.set('name', setName)
-        
         #sift through all modules, entering the variables in the 'data' structure in each module
         for subMod in modules:
+            print(subMod.__name__)
             #pull a dictionary holding all name-value pairs for this module
             varDictionary = subMod.windowHandle.getValues()
             for varName in varDictionary:
                 #find the sub-module name in short human-readable form
-                subModName = subMod.__name__.split('_')[-1]
+                subModName = ' '.join(subMod.__name__.split('_')[2:])
+                print(subModName)
                 #find the value of the variable
                 varVal = varDictionary[varName]
                 #add all new required save variables one at a time
-                ET.SubElement(newStruct, 'setting', {'module':subModName, 'name':varName, 'value':varVal})
+                #check if variable value is 0
+                if varVal != '0':
+                    ET.SubElement(newStruct, 'setting', {'module':subModName, 'name':varName, 'value':varVal})
         
         #format the entire xml file nicely so it is human readable and indented - encode it to a byte-string
         xmlString = ET.tostring(tree, 'utf-8', method='xml')

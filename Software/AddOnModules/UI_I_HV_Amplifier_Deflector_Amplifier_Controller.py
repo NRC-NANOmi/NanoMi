@@ -379,7 +379,11 @@ class popWindow(QWidget):
             'By1' : self.slider2,
             'By2' : self.slider3,
             'Xin' : self.slider4,
-            'Yin' : self.slider5
+            'Yin' : self.slider5,
+            'X+SDI': self.slider_SDI1,
+            'X-SDI' : self.slider_SDI2,
+            'Y+SDI' : self.slider_SDI3,
+            'Y-SDI' : self.slider_SDI4
             }
 
 #The following val_changed functions are activated when the slider values change. And the IO pins output accordingly.
@@ -733,11 +737,13 @@ class popWindow(QWidget):
     def getValues(self):
         #return a dictionary of all variable names in data, and values for those variables
         varDict = {}
+        #iterate all variables of this module
         for var in self.data:
-            value = self.data[var]
-            if 'Set' in varName:
-                varName = varName.split('Set')[0]
-            varDict[varName] = value
+            # Get the value of the current variable
+            value = self.data[var].value()
+            # Check if the value is 0(default), if not, add to dic to save
+            varDict[var] = str(value)
+        return varDict
 
     #this function handles the closing of the pop-up window - it doesn't actually close, simply hides visibility.
     #this functionality allows for permanance of objects in the background

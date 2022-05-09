@@ -324,7 +324,7 @@ class popWindow(QWidget):
         #return a dictionary of all variable names in data, and values for those variables
         varDict = {}
         for varName in self.data:
-            value = eval(varName + '.text()')
+            value = eval('self.' + varName + '.text()')
             if 'Set' in varName:
                 varName = varName.split('Set')[0]
             varDict[varName] = value
