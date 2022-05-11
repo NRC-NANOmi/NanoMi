@@ -182,6 +182,11 @@ class popWindow(QWidget):
         loadBtn.setFont(titleFont)
         loadBtn.clicked.connect(lambda: self.loadDataValues(dataSetDisplay.currentRow()))
         loadGrid.addWidget(loadBtn, 5, 0, 3, 1)
+
+        delBtb = QPushButton('Delete Selected Data Set')
+        delBtb.setFont(titleFont)
+        delBtb.clicked.connect(lambda: self.deleteData(dataSetDisplay.currentRow()))
+        loadGrid.addWidget(delBtb, 8,0,3,1)
         
         #set the layout to the actual tab, only once it's complete
         loadTab.setLayout(loadGrid)
@@ -441,6 +446,25 @@ class popWindow(QWidget):
         #write to file
         with open(os.getcwd() + '/AddOnModules/SaveFiles/DataSets.xml', 'w') as pid:
             domTree.writexml(pid, encoding='utf-8', indent='', addindent='    ', newl='\n')
+    # function that used to delete a dataset from xml
+    def deleteData(self, index):
+        tree = self.readDataFile()
+        #remove the data that want to be deleted from dataSets
+        tree.remove(tree[index])
+        #format the entire xml file nicely so it is human readable and indented - encode it to a byte-string
+        xmlString = ET.tostring(tree, 'utf-8', method='xml')
+        #now decode it to an actual string
+        xmlString = xmlString.decode()
+        #remove all newlines because new additions don't have newlines
+        xmlString = xmlString.replace('\n','')
+        #remove all double-spaces (aka portions of tabs) because new additions don't have spaces
+        xmlString = xmlString.replace('  ','')
+        #use minidom (instead of elementTree) to parse in the string back into xml
+        domTree = minidom.parseString(xmlString)
+        #write to file
+        with open(os.getcwd() + '/AddOnModules/SaveFiles/DataSets.xml', 'w') as pid:
+            domTree.writexml(pid, encoding='utf-8', indent='', addindent='    ', newl='\n')
+        self.refreshDataSets()
 
 #****************************************************************************************************************
 #BREAK - DO NOT MODIFY CODE BELOW HERE OR MAIN WINDOW'S EXECUTION MAY CRASH
