@@ -1,16 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <dataSets>
-    <set name="Set 5">
-        <setting module="Lenses" name="C1" value="0.01"/>
-        <setting module="Lenses" name="C2" value="0.02"/>
-        <setting module="Lenses" name="I1" value="0.04"/>
-        <setting module="HV_Amplifier_Deflector_Amplifier_Controller" name="Bx1" value="499"/>
-        <setting module="HV_Amplifier_Deflector_Amplifier_Controller" name="Bx2" value="-172"/>
-        <setting module="HV_Amplifier_Deflector_Amplifier_Controller" name="By1" value="499"/>
-        <setting module="HV_Amplifier_Deflector_Amplifier_Controller" name="By2" value="499"/>
-        <setting module="HV_Amplifier_Deflector_Amplifier_Controller" name="Xin" value="0"/>
-        <setting module="HV_Amplifier_Deflector_Amplifier_Controller" name="Yin" value="0"/>
-    </set>
     <set name="Set 2">
         <setting module="Lenses" name="C1" value="0.01"/>
         <setting module="Lenses" name="C2" value="0.02"/>

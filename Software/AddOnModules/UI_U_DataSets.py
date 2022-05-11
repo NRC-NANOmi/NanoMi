@@ -159,14 +159,16 @@ class popWindow(QWidget):
         #set up the data value list - this shows the individual values inside of each data set selected
         #will update when you click on one of the sets with all of the data inside of it
         dataValueDisplay = QTableWidget()
-        dataValueDisplay.setColumnCount(3)
+        dataValueDisplay.setColumnCount(4)
         dataValueDisplay.setHorizontalHeaderItem(0, QTableWidgetItem('Microscope Module:'))
         dataValueDisplay.setHorizontalHeaderItem(1, QTableWidgetItem('Setting Name:'))
         dataValueDisplay.setHorizontalHeaderItem(2, QTableWidgetItem('Value:'))
+        dataValueDisplay.setHorizontalHeaderItem(3, QTableWidgetItem('Load Button'))
         dataValueDisplay.setRowCount(0)
         dataValueDisplay.horizontalHeader().setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         dataValueDisplay.horizontalHeader().setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
         dataValueDisplay.horizontalHeader().setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
+        dataValueDisplay.horizontalHeader().setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
         
         #add the data value list to the grid
         loadGrid.addWidget(dataValueDisplay, 4, 0, 1, 1)
@@ -329,11 +331,13 @@ class popWindow(QWidget):
             name.setFlags(QtCore.Qt.ItemIsEnabled)
             value = QTableWidgetItem(attributes['value'])
             value.setFlags(QtCore.Qt.ItemIsEnabled)
-            
+            button = QPushButton("Load")
+            button.clicked.connect(lambda: self.loadSingleSetting(index, display.currentRow()))
             #actually set the module, name and value cells into the table
             display.setItem(row, 0, module)
             display.setItem(row, 1, name)
             display.setItem(row, 2, value)
+            display.setCellWidget(row, 3, button)
             row = row + 1
         
     #this function will actually load the data set values to the microscope
@@ -355,7 +359,7 @@ class popWindow(QWidget):
                 #pull out this piece of data's attributes
                 attributes = child.attrib
                 #if the module is a match for the subModule, load the data to it - module name matches don't have to be exact, because real module names can be super long and I don't want users to have to deal with that kinda stuff if they don't have to
-                if attributes['module'] ==  (' '.join(subModule.__name__.split('_')[2:])):
+                if attributes['module'] == (' '.join(subModule.__name__.split('_')[2:])):
                     modName = attributes['module']
                     name = attributes['name']
                     value = attributes['value']
@@ -445,7 +449,7 @@ class popWindow(QWidget):
         domTree = minidom.parseString(xmlString)
         #write to file
         with open(os.getcwd() + '/AddOnModules/SaveFiles/DataSets.xml', 'w') as pid:
-            domTree.writexml(pid, encoding='utf-8', indent='', addindent='    ', newl='\n')
+            domTree.writexml(pid, encoding='utf-8', indent='', addindent='    ', nepasswl='\n')
 
 
     # function that used to delete a dataset from xml
@@ -467,6 +471,32 @@ class popWindow(QWidget):
         with open(os.getcwd() + '/AddOnModules/SaveFiles/DataSets.xml', 'w') as pid:
             domTree.writexml(pid, encoding='utf-8', indent='', addindent='    ', newl='\n')
         self.refreshDataSets()
+
+    def loadSingleSetting(self, treeIndex, settingIndex):
+        print("indexes are", treeIndex, "and", settingIndex)
+        global dataSets
+        dataSets = self.readDataFile()
+        data = dataSets[treeIndex][settingIndex]
+        global modules
+
+        attributes = data.attrib
+        modName = attributes['module']
+        name = attributes['name']
+        value = attributes['value']
+
+        print("Started to loading", name, "to", modName)
+        #sift through all modules one at a time, loading all data to each one
+        for subModule in modules:
+                #pull out this piece of data's attributes
+            #if the module is a match for the subModule, load the data to it - module name matches don't have to be exact, because real module names can be super long and I don't want users to have to deal with that kinda stuff if they don't have to
+            if modName ==  (' '.join(subModule.__name__.split('_')[2:])):
+                returnValue = subModule.windowHandle.setValue(name, value)
+                if returnValue != 0:
+                    fails = fails + 1
+                    print('Failed loading variable ' + name + ' from module ' + modName + '.')
+                else:
+                    print('Changed variable ' + name + ' in the ' + modName + ' module changed to a value of ' + value + '.')
+
 
 #****************************************************************************************************************
 #BREAK - DO NOT MODIFY CODE BELOW HERE OR MAIN WINDOW'S EXECUTION MAY CRASH
