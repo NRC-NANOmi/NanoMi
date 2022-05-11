@@ -230,9 +230,10 @@ class popWindow(QWidget):
         
         #add a sample button to the first save tab
         pb = QPushButton('Save to file')
+        pb.setFont(titleFont)
         pb.clicked.connect(self.saveButton)
         #function inputs: object, row, column, rowspan, columnspan
-        saveGrid.addWidget(pb, 5, 0, 1, 2)
+        saveGrid.addWidget(pb, 5, 0, 3, 2)
         
         #set the layout to the actual tab, only once it's complete
         saveTab.setLayout(saveGrid)
@@ -354,7 +355,7 @@ class popWindow(QWidget):
                 #pull out this piece of data's attributes
                 attributes = child.attrib
                 #if the module is a match for the subModule, load the data to it - module name matches don't have to be exact, because real module names can be super long and I don't want users to have to deal with that kinda stuff if they don't have to
-                if attributes['module'].split(' ')[0].lower() in subModule.__name__.lower():
+                if attributes['module'] ==  (' '.join(subModule.__name__.split('_')[2:])):
                     modName = attributes['module']
                     name = attributes['name']
                     value = attributes['value']
@@ -425,7 +426,6 @@ class popWindow(QWidget):
             for varName in varDictionary:
                 #find the sub-module name in short human-readable form
                 subModName = ' '.join(subMod.__name__.split('_')[2:])
-                print(subModName)
                 #find the value of the variable
                 varVal = varDictionary[varName]
                 #add all new required save variables one at a time
@@ -446,6 +446,8 @@ class popWindow(QWidget):
         #write to file
         with open(os.getcwd() + '/AddOnModules/SaveFiles/DataSets.xml', 'w') as pid:
             domTree.writexml(pid, encoding='utf-8', indent='', addindent='    ', newl='\n')
+
+
     # function that used to delete a dataset from xml
     def deleteData(self, index):
         tree = self.readDataFile()
