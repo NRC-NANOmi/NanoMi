@@ -449,7 +449,7 @@ class popWindow(QWidget):
         domTree = minidom.parseString(xmlString)
         #write to file
         with open(os.getcwd() + '/AddOnModules/SaveFiles/DataSets.xml', 'w') as pid:
-            domTree.writexml(pid, encoding='utf-8', indent='', addindent='    ', nepasswl='\n')
+            domTree.writexml(pid, encoding='utf-8', indent='', addindent='    ', newl='\n')
 
 
     # function that used to delete a dataset from xml
