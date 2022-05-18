@@ -29,7 +29,7 @@ from PyQt5 import QtCore, QtGui
 import importlib
 
 from AddOnModules import Hardware, UI_U_DataSets
-
+import pyqtgraph as pg
 buttonName = 'Apertures'                #name of the button on the main window that links to this code
 windowHandle = None                     #a handle to the window on a global scope
 
@@ -50,7 +50,7 @@ class popWindow(QWidget):
     def initUI(self):
         #set width of main window (X, Y , WIDTH, HEIGHT)
         windowWidth = 200
-        windowHeight = 300
+        windowHeight = 500
         self.setGeometry(350, 50, windowWidth, windowHeight)
         
         #define a font for the title of the UI
@@ -137,11 +137,26 @@ class popWindow(QWidget):
         self.zoomIncrement.currentIndexChanged.connect(self.zoomIncrementChange)
         mainGrid.addWidget(self.zoomIncrement, 1, 1, alignment=QtCore.Qt.AlignHCenter)
 
+        self.plot = pg.PlotWidget()
+        self.plot.setXRange(0,5)
+        self.plot.setYRange(0,5)
+        self.plot.setFixedSize(300,300)
+        self.plot.setMouseEnabled(x=False,y=False)
+        mainGrid.addWidget(self.plot, 4, 0, 4, 4)
+        self.updatePlot()
+
+
+
         self.data = {
             "panX" : self.panX,
             "panY" : self.panY,
             "zoom" : self.zoom
         }
+
+    def updatePlot(self):
+        x = self.panX.value()
+        y = self.panY.value()
+        self.plot.plot([x], [y], clear=True, symbol='o', symbolBrush=.5)
 
     def zoomIncrementChange(self):
         #get the value from the spinner, turns into int then set single step of zoom as it
@@ -158,10 +173,12 @@ class popWindow(QWidget):
     def updatePanX(self):
         UI_U_DataSets.windowHandle.refreshDataSets()
         Hardware.IO.setAnalog('PanX', self.panX.value())
+        self.updatePlot()
 
     def updatePanY(self):
         UI_U_DataSets.windowHandle.refreshDataSets()
         Hardware.IO.setAnalog('PanY', self.panY.value())
+        self.updatePlot()
 
     def valChanged(self):
         UI_U_DataSets.windowHandle.refreshDataSets()
