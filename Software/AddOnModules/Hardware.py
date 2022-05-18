@@ -582,7 +582,8 @@ class IoStruct:
                     
                     #DACSetBoardRange (boardIndex, range):
                     # range: 0=0-5V, 1=+/-5V, 2=0-10V, 3=+/-10V
-                    AIOUSB.DACSetBoardRange(boardIndex, 0)
+                    AIOUSB.DACSetBoardRange(boardIndex, 1)
+                    #AIOUSB.DACSetBoardRange(boardIndex, 0)
                     
                     #set up the digital IO in software
                     struct.addBoard('D', 8*digitalIo, boardIndex)
@@ -665,7 +666,7 @@ class IoStruct:
                         #if dealing with analog outputs:
                         if entries[0] == 'AO':
                             #instantiate a list of potential matches - need to link the board index and channel value to a specific global channel index, which we then set the name to.
-                            #all this is because we can't have multiple-valued dictionaries?
+                            #all this is because we can't have multiple-valued dictionaries
                             possibles = []
                             #search through board indexes, come up with a list of potential values
                             for gChannel, bIndex in struct.AoBoard.items():
@@ -680,7 +681,7 @@ class IoStruct:
                             for dictionaryName, gChannel in struct.AoNames.items():
                                 if gChannel == globalChannel:
                                     struct.AoNames[name] = struct.AoNames.pop(dictionaryName)
-                                    break
+                                    #break
                             #define the current row in the hardware analog output table
                             row = windowHandle.AoTable.rowCount()
                             windowHandle.AoTable.insertRow(row)
@@ -757,36 +758,36 @@ class IoStruct:
             for f in fs:
                 print('    Serial number:', f)
             print('Check connections and rescan the hardware.')
-    
+
     #function to set an analog output value
     def setAnalog(struct, name, strValue):
         value = None
         try:
             value = float(strValue)
-            if value >= 0:
-                # set parameters for data writing:
-                offset = 0
-                span = 10
-                globalChannelIndex = None
-                
-                #see if the name is valid, and if so grab the globalChannelIndex
-                try:
-                    globalChannelIndex = struct.AoNames[name]
-                except:
-                    print('Did not set analog output because channel name ' + name + ' does not exist or was not set up properly.')
-                    return -1
-                
-                #if globalChannelIndex valid, get the boardIndex (0-31) and localBoardChannel
-                try:
-                    boardIndex = struct.AoBoard[globalChannelIndex]
-                    localBoardChannel = struct.AoChannel[globalChannelIndex]
-                except:
-                    print('Did not set analog output because internal dictionaries were not set up properly')
-                    return -2
-                
-                # this function writes output to device
-                AIOUSB.DACDirect(boardIndex, localBoardChannel, int(float((value + offset) * 65536.0 / span)))
-                return 0
+            # set parameters for data writing:
+            offset = 5   #We add 5 because the range now is +-5V instead of 0-5V.
+            span = 10
+            globalChannelIndex = None
+
+            #see if the name is valid, and if so grab the globalChannelIndex
+            try:
+                globalChannelIndex = struct.AoNames[name]
+            except:
+                print(struct.AoNames.items())
+                print('Did not set analog output because channel name ' + name + ' does not exist or was not set up properly.')
+                return -1
+
+            #if globalChannelIndex valid, get the boardIndex (0-31) and localBoardChannel
+            try:
+                boardIndex = struct.AoBoard[globalChannelIndex]
+                localBoardChannel = struct.AoChannel[globalChannelIndex]
+            except:
+                print('Did not set analog output because internal dictionaries were not set up properly')
+                return -2
+
+            # this function writes output to device×
+            AIOUSB.DACDirect(boardIndex, localBoardChannel, int(float((value + offset) * 65536.0 / span)))
+            return 0
         except:
             if not strValue == '':
                 QMessageBox.question(self,'Invalid input', 'The value for setting ' + name + ' is invalid.', QMessageBox.Ok, QMessageBox.Ok)

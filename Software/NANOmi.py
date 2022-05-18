@@ -86,7 +86,7 @@ class MainWindow(QWidget):
             
             #for each file in the AddOnModules directory, see if it is a proper microscope module
             for filename in addOnFiles:
-                
+
                 #continue if the name is a file, and not if it is a directory
                 if os.path.isfile(modulePath + filename):
 

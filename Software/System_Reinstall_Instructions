@@ -1,0 +1,49 @@
+Instructions for reinstall of entire system:
+
+1) Install Linux Open Suse Tumbleweed (talk to Marek).
+
+2) find/download Anaconda for 64-bit Linux - run the file to install python
+
+3) Modify the python command to run when "python" is entered, instead of "python3"
+    i)   open the file ~/.bashrc in a text editor
+    ii)  add the line    alias "python = python3"    after the conda initialization
+    iii) in a command line, run "source ~/.bashrc"
+
+4) Install files for the USB module from AccesIO
+    i)   sudo zypper install fxload
+    ii)  sudo zypper install gcc-c++
+    iii) sudo zypper install libusb-1_0-devel
+    iv)  sudo zypper install cmake
+    v)   sudo zypper install swig
+    vi)  sudo zypper install git
+
+5) Grab the latest git files from AIOUSB and install the drivers etc, so run these lines in order in a console:
+        git clone https://github.com/accesio/AIOUSB.git
+        cd AIOUSB/
+        git fetch
+        git checkout USB-AIO16-16F
+        git clean -df
+        cd AIOUSB/
+        mkdir build
+        cd build/
+        cmake ..
+        make
+        sudo make install
+        cd ..
+        sudo cp Firmware/*.hex /usr/share/usb/
+        sudo cp Firmware/10-acces*.rules /etc/udev/rules.d
+
+
+        i)   copying the .hex files into /usr/share/usb/ puts the firmware files that need to be loaded into the        hardware in a known, static place.
+        ii)  copying the .rules files into /etc/udev/rules.d makes a script be run anytime an AccesIO USB hardware device is found, and automatically loads the firmware onto it for you.
+        iii) ensure that the 10-acces_usb.rules file points to the correct location for fxload! A computer restart may be required if it's not and you modify it. Proper location should be something like /usr/sbin/fxload ?
+
+5) use "pip", a module installer, to install the following:
+    i)   pip install PyQt5
+    ii)  pip install pygame
+    iii) pip install PyQtChart
+
+6) Install the camera required files:
+    i)   Open YaST software manager
+    ii)  Search for "v4l2loopback". Select and install the "v4l2loopback-*" libraries.
+    iii) Search for "ffmpeg". Select and install all the "ffmpeg-*" libraries.

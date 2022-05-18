@@ -1,0 +1,2 @@
+voltage_frequency_default, wobble_frequency_default, wobble_percentage_default,wobble_duration_default,voltage_increment,number_of_lenses,lower_potential_boundary,higher_potential_boundary,wobble_increment
+100                       ,100                      ,10                       ,10                     ,0.001            ,3               ,0                       ,5                        ,0.001

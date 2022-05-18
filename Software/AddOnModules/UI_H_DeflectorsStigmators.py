@@ -34,6 +34,7 @@ from PyQt5 import QtCore, QtGui
 
 from time import *
 from datetime import datetime
+from AddOnModules import UI_U_DataSets as DataSets
 try:
     from numpy import *
 except ImportError:
@@ -123,7 +124,7 @@ class popWindow(QWidget):
         self.D1XSet.setText('0')
         self.D1XSet.setFixedWidth(100)
         self.D1XSet.setAlignment(QtCore.Qt.AlignCenter)
-        self.D1XSet.textChanged.connect(lambda: Hardware.IO.setAnalog('D1X', self.D1XSet.text()))
+        self.D1XSet.textChanged.connect(lambda: self.updateD1X())
         self.pEnables.append(self.D1XSet)
         mainGrid.addWidget(self.D1XSet, 1, 1)
         
@@ -131,7 +132,7 @@ class popWindow(QWidget):
         self.D1YSet.setText('0')
         self.D1YSet.setFixedWidth(100)
         self.D1YSet.setAlignment(QtCore.Qt.AlignCenter)
-        self.D1YSet.textChanged.connect(lambda: Hardware.IO.setAnalog('D1Y', self.D1YSet.text()))
+        self.D1YSet.textChanged.connect(lambda: self.updateD1Y())
         self.pEnables.append(self.D1YSet)
         mainGrid.addWidget(self.D1YSet, 1, 3)
         
@@ -139,7 +140,7 @@ class popWindow(QWidget):
         self.D2XSet.setText('0')
         self.D2XSet.setFixedWidth(100)
         self.D2XSet.setAlignment(QtCore.Qt.AlignCenter)
-        self.D2XSet.textChanged.connect(lambda: Hardware.IO.setAnalog('D2X', self.D2XSet.text()))
+        self.D2XSet.textChanged.connect(lambda: self.updateD2X())
         self.pEnables.append(self.D2XSet)
         mainGrid.addWidget(self.D2XSet, 2, 1)
         
@@ -147,7 +148,7 @@ class popWindow(QWidget):
         self.D2YSet.setText('0')
         self.D2YSet.setFixedWidth(100)
         self.D2YSet.setAlignment(QtCore.Qt.AlignCenter)
-        self.D2YSet.textChanged.connect(lambda: Hardware.IO.setAnalog('D2Y', self.D2YSet.text()))
+        self.D2YSet.textChanged.connect(lambda: self.updateD2Y())
         self.pEnables.append(self.D2YSet)
         mainGrid.addWidget(self.D2YSet, 2, 3)
         
@@ -291,8 +292,23 @@ class popWindow(QWidget):
         #name the window
         self.setWindowTitle('Deflectors and Stigmators Settings')
 
+    #update functions for D1X to D2Y
+    def updateD1X(self):
+        DataSets.windowHandle.refreshDataSets()
+        Hardware.IO.setAnalog('D1X', self.D1XSet.text())
 
-    
+    def updateD1Y(self):
+        DataSets.windowHandle.refreshDataSets()
+        Hardware.IO.setAnalog('D1Y', self.D1XSet.text())
+
+    def updateD2X(self):
+        DataSets.windowHandle.refreshDataSets()
+        Hardware.IO.setAnalog('D2X', self.D1XSet.text())
+
+    def updateD2Y(self):
+        DataSets.windowHandle.refreshDataSets()
+        Hardware.IO.setAnalog('D2Y', self.D1XSet.text())
+
     #function to enable/disable the UI (currently bugged, needs to run scanning code in another thread)
     def enableDisable(self, state):
         for obj in self.pEnables:
@@ -368,7 +384,7 @@ class popWindow(QWidget):
             while time_ns()-t1 < debounce:
                 pass
                 
-            #acquire a single pixel's data
+            #acquire a single pixDataSets.windowHandle.refreshDataSets()el's data
             value = 0
             count = 0
             t1 = time_ns()
@@ -543,6 +559,7 @@ class popWindow(QWidget):
     
     #function to actually make the scan generation unit work
     def updateInfo(self):
+        DataSets.windowHandle.refreshDataSets()
         # Udates displayed information about current scan
         willValidateInputFieldsHere=0
         #print("hi")
@@ -561,7 +578,7 @@ class popWindow(QWidget):
     def setValue(self, name, value):
         for varName in data:
             if name in varName:
-                eval(varName + '.setText("' + str(value) + '")')
+                eval('self.' + varName + '.setText("' + str(value) + '")')
                 return 0
         return -1
         
@@ -570,7 +587,7 @@ class popWindow(QWidget):
         #return a dictionary of all variable names in data, and values for those variables
         varDict = {}
         for varName in data:
-            value = eval(varName + '.text()')
+            value = eval('self.' + varName + '.text()')
             if 'Set' in varName:
                 varName = varName.split('Set')[0]
             varDict[varName] = value

@@ -26,6 +26,7 @@ import pygame                           #import module to handle video stream
 import pygame.camera
 from pygame.locals import *
 import time                             #import module to add pause (temporary)
+import datetime
 
 #import the necessary aspects of PyQt5 for this user interface window
 from PyQt5.QtWidgets import QWidget, QPushButton, QApplication, QLabel, QMessageBox, QTabWidget, QGridLayout, QLineEdit
@@ -36,7 +37,7 @@ import importlib
 
 buttonName = 'Camera'                   #name of the button on the main window that links to this code
 windowHandle = None                     #a handle to the window on a global scope
-
+videoProcess = None
 
 #This class handles the stream from the camera
 class Capture(object):
@@ -97,8 +98,8 @@ class popWindow(QWidget):
     #a function that users can modify to create their user interface
     def initUI(self):
         #set width of main window (X, Y , WIDTH, HEIGHT)
-        windowWidth = 800
-        windowHeight = 800
+        windowWidth = 30
+        windowHeight = 30
         self.setGeometry(350, 50, windowWidth, windowHeight)
         
         #define a font for the title of the UI
@@ -115,72 +116,51 @@ class popWindow(QWidget):
         mainGrid = QGridLayout()
         self.setLayout(mainGrid)
         
-        #define global variables for testing save/load
-        global ImageSizeXSet, ImageSizeYSet
-        ImageSizeXSet = QLineEdit()
-        ImageSizeXSet.setText('2048')
-        ImageSizeXSet.setFixedWidth(100)
-        ImageSizeXSet.setAlignment(QtCore.Qt.AlignCenter)
-        mainGrid.addWidget(ImageSizeXSet, 5, 0)
-        
-        ImageSizeYSet = QLineEdit()
-        ImageSizeYSet.setText('2048')
-        ImageSizeYSet.setFixedWidth(100)
-        ImageSizeYSet.setAlignment(QtCore.Qt.AlignCenter)  
-        mainGrid.addWidget(ImageSizeYSet, 5, 1)
-        
-        
-        def enableVideoStream():
-            print ("Loading camera stream ...")
-
-
-            #Run terminal command to enable mprobe
-            #os.system('echo NanoNRC1^^^= | sudo -S modprobe v4l2loopback exclusive_caps=1 max_buffer=2')
-            #subprocess.Popen('echo NanoNRC1^^^= | sudo -S modprobe v4l2loopback exclusive_caps=1 max_buffer=2',stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            #Run terminal command to enable camera streaming on video channel
-            #os.system('gphoto2 --stdout --capture-movie | ffmpeg -i - -vcodec rawvideo -pix_fmt yuv420p -threads 0 -f v4l2 /dev/video0')
-            #subprocess.Popen('gphoto2 --stdout --capture-movie | ffmpeg -i - -vcodec rawvideo -pix_fmt yuv420p -threads 0 -f v4l2 /dev/video0',stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-
-
-            pygame.init()
-            pygame.camera.init()
-            pygame.display.init()
-            myCapture=Capture()
-            myCapture.main()
-
-            '''
-            pygame.init()
-            pygame.camera.init()
-            pygame.display.init()
-            cam = pygame.camera.Camera("/dev/video0",(640,480))
-            cam.start()
-            image = cam.get_image()
-
-            displayer = pygame.display.set_mode((640,480), 0)
-            #displayer.fill((255,255,255))
-            displayer.blit(image,(0,0))
-            pygame.display.update()
-            time.sleep(3)
-            pygame.display.quit()
-
-            camlist = pygame.camera.list_cameras()
-            if camlist:
-                cam = pygame.camera.Camera(camlist[0],(640,480))
-                cam.set_controls(hflip = True, vflip = False)
-                print (cam.get_controls())
-            print ("camlist:",camlist)
-            pygame.quit()
-            '''
-            print ("Video stream finished")
-        
-        
-        #define Stream Button
         btnStreamEnabler = QPushButton('Enabe Camera Stream')
-        btnStreamEnabler.clicked.connect(enableVideoStream)
+        btnStreamEnabler.clicked.connect(self.enableVideoStream)
         mainGrid.addWidget(btnStreamEnabler, 0, 0)
-        
+
+        btnCaption = QPushButton('Capture Picture')
+        btnCaption.clicked.connect(self.capturePic)
+        mainGrid.addWidget(btnCaption, 1, 0)
+
         #name the window
         self.setWindowTitle('Camera Functions')
+        self.close()
+        #define global variables for testing save/load
+        #global ImageSizeXSet, ImageSizeYSet
+        #ImageSizeXSet = QLineEdit()
+        #ImageSizeXSet.setText('2048')
+        #ImageSizeXSet.setFixedWidth(100)
+        #ImageSizeXSet.setAlignment(QtCore.Qt.AlignCenter)
+        #mainGrid.addWidget(ImageSizeXSet, 5, 0)
+        
+        #ImageSizeYSet = QLineEdit()
+        #ImageSizeYSet.setText('2048')
+        #ImageSizeYSet.setFixedWidth(100)
+        #ImageSizeYSet.setAlignment(QtCore.Qt.AlignCenter)
+        #mainGrid.addWidget(ImageSizeYSet, 5, 1)
+    def capturePic(self):
+        reply = QMessageBox.question(self,'Warning','Take a picture will pause or may terminate the video streaming, do you want to proceed?', QMessageBox.Yes | QMessageBox.No)
+        if reply == QMessageBox.No:
+            return -1
+        else:
+            subprocess.Popen(['pkill', '-f', 'gphoto2'])
+            time.sleep(2)
+
+        fileName = 'image/'+datetime.datetime.now().strftime('%Y-%m-%d_%H%M')
+        capProcess = subprocess.run(['gphoto2', '--capture-image-and-download', '--filename', fileName], input=b'y\n')
+        #resuming the capture the movie
+        subprocess.Popen(['./AddOnModules/StartCanonM50'])
+
+        
+    def enableVideoStream(self):
+        print("Loading camera stream ...")
+        subprocess.Popen(['./AddOnModules/StartCanonM50'])
+        time.sleep(2)
+        subprocess.Popen(['vlc', 'v4l2:///dev/video0'])
+        
+
         
 #****************************************************************************************************************
 #BREAK - DO NOT MODIFY CODE BELOW HERE OR MAIN WINDOW'S EXECUTION MAY CRASH

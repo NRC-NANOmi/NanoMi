@@ -1,25 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <dataSets>
+    <set name="Set 1">
+        <setting module="Lenses" name="C1" value="1.24"/>
+        <setting module="Lenses" name="C2" value="2.48"/>
+        <setting module="Lenses" name="I1" value="3.96"/>
+        <setting module="Gun" name="GunVoltage" value="10"/>
+    </set>
     <set name="Set 2">
         <setting module="Lenses" name="C1" value="0.01"/>
         <setting module="Lenses" name="C2" value="0.02"/>
         <setting module="Lenses" name="I1" value="0.04"/>
         <setting module="Gun" name="GunVoltage" value="2"/>
     </set>
-    <set name="Set3">
-        <setting module="ElectronGun" name="GunVoltage" value="0"/>
-        <setting module="Lenses" name="C1" value="0"/>
-        <setting module="Lenses" name="C2" value="0"/>
-        <setting module="Lenses" name="I1" value="0"/>
-        <setting module="Camera" name="ImageSizeX" value="2048"/>
-        <setting module="Camera" name="ImageSizeY" value="2048"/>
+    <set name="2022-05-13_1633">
+        <setting module="HV Amplifier Deflector Amplifier Controller" name="Bx1" value="364"/>
     </set>
-    <set name="Set 1">
-        <setting module="ElectronGun" name="GunVoltage" value="10"/>
-        <setting module="Lenses" name="C1" value="1.24"/>
-        <setting module="Lenses" name="C2" value="2.48"/>
-        <setting module="Lenses" name="I1" value="3.96"/>
-        <setting module="Camera" name="ImageSizeX" value="2048"/>
-        <setting module="Camera" name="ImageSizeY" value="2048"/>
+    <set name="2022-05-13_1">
+        <setting module="HV Amplifier Deflector Amplifier Controller" name="Bx1" value="105"/>
+        <setting module="HV Amplifier Deflector Amplifier Controller" name="Bx2" value="261"/>
+        <setting module="HV Amplifier Deflector Amplifier Controller" name="By1" value="187"/>
+        <setting module="HV Amplifier Deflector Amplifier Controller" name="By2" value="110"/>
+        <setting module="HV Amplifier Deflector Amplifier Controller" name="Xin" value="134"/>
+        <setting module="HV Amplifier Deflector Amplifier Controller" name="Yin" value="140"/>
+        <setting module="Apertures" name="panX" value="2.5"/>
+        <setting module="Apertures" name="panY" value="2.5"/>
+        <setting module="Apertures" name="zoom" value="122"/>
     </set>
 </dataSets>
