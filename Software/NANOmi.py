@@ -189,7 +189,7 @@ class MainWindow(QWidget):
 def main():
     #instantiate the application
     app = QApplication(sys.argv)
-    
+    app.setQuitOnLastWindowClosed(True)
     #link the window to a variable, set the window to be visible
     screen = MainWindow()
     screen.show()

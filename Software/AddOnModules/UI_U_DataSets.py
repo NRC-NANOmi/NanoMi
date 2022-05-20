@@ -284,7 +284,7 @@ class popWindow(QWidget):
             varDictionary = subMod.windowHandle.getValues()
             for varName in varDictionary:
                 # if the value isn't 0 or empty, then load it
-                if varDictionary[varName] != '0' and varDictionary[varName] != '':
+                if varDictionary[varName] != '0' and varDictionary[varName] != '' and varDictionary[varName] != '0.0':
                     #find the sub-module name in short human-readable form
                     subModName = ' '.join(subMod.__name__.split('_')[2:])
                     #find the value of the variable

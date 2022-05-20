@@ -23,13 +23,13 @@ Notes:              Set up the initial module for creating the user interface.
 import sys                              #import sys module for system-level functions
 
 #import the necessary aspects of PyQt5 for this user interface window
-from PyQt5.QtWidgets import QWidget, QPushButton, QApplication, QLabel, QMessageBox, QTabWidget, QGridLayout, QLineEdit, QSlider
-from PyQt5 import QtCore, QtGui
+from PyQt5.QtWidgets import QWidget, QPushButton, QApplication, QLabel, QMessageBox, QTabWidget, QGridLayout, QLineEdit, QSlider, QSpinBox, QComboBox, QDoubleSpinBox
+from PyQt5 import QtCore, QtGui, QtGui
 #import hardware
 import importlib
 
 from AddOnModules import Hardware, UI_U_DataSets
-
+import pyqtgraph as pg
 buttonName = 'Apertures'                #name of the button on the main window that links to this code
 windowHandle = None                     #a handle to the window on a global scope
 
@@ -50,7 +50,7 @@ class popWindow(QWidget):
     def initUI(self):
         #set width of main window (X, Y , WIDTH, HEIGHT)
         windowWidth = 200
-        windowHeight = 300
+        windowHeight = 500
         self.setGeometry(350, 50, windowWidth, windowHeight)
         
         #define a font for the title of the UI
@@ -65,81 +65,141 @@ class popWindow(QWidget):
         mainGrid = QGridLayout()
         self.setLayout(mainGrid)
 
-        #self.zoomInBtn = QPushButton('Zoom In')
-        #self.zoomInBtn.setFont(titleFont)
-        #self.zoomInBtn.setFixedHeight(50)
-        #self.zoomInBtn.clicked.connect(lambda: self.zoomIn())
-        #mainGrid.addWidget(self.zoomInBtn, 0, 0, 1, 2)
-        
-        #self.zoomOutBtn = QPushButton('Zoom Out')
-        #self.zoomOutBtn.setFont(titleFont)
-        #self.zoomOutBtn.setFixedHeight(50)
-        #self.zoomOutBtn.clicked.connect(lambda: self.zoomOut())
-        ## mainGrid.addWidget(self.zoomOutBtn, 0, 2, 1, 2)
-        
         PanXLabel = QLabel('Pan X Setting [0-5V]')
         PanXLabel.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
         #PanXLabel.setFixedSize(200, 100)
-        mainGrid.addWidget(PanXLabel, 0, 2, 1, 1)
-        self.panX = QLineEdit(self)
-        self.panX.setText('0')
-        self.panX.setFixedWidth(100)
+        mainGrid.addWidget(PanXLabel, 0, 2)
+
+        #setting up for panX
+        self.panX = QDoubleSpinBox()
+        #setting value bound
+        self.panX.setMinimum(0)
+        self.panX.setMaximum(5)
+        #set initial value
+        self.panX.setValue(0)
+        #set inital increncrement
+        self.panX.setSingleStep(0.01)
+        self.panX.valueChanged.connect(lambda: self.updatePanX())
         self.panX.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
-        self.panX.textChanged.connect(lambda: self.updatePanX())
-        mainGrid.addWidget(self.panX, 1, 2, 1, 1)
+        mainGrid.addWidget(self.panX, 1, 2)
+
+        #set the increment value selecting spinner for panX
+        self.panXIncrement = QComboBox()
+        #setting up increment options
+        self.panXIncrement.addItems(['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1'])
+        #select the initial as 0.01
+        self.panXIncrement.setCurrentIndex(0)
+        self.panXIncrement.currentIndexChanged.connect(self.panXIncrementChange)
+        mainGrid.addWidget(self.panXIncrement, 1, 3, alignment=QtCore.Qt.AlignHCenter)
         
         PanYLabel = QLabel('Pan Y Setting [0-5V]')
         PanYLabel.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
         #PanYLabel.setFixedSize(200, 100)
-        mainGrid.addWidget(PanYLabel, 2, 2, 1, 1)
-        self.panY = QLineEdit(self)
-        self.panY.setText('0')
-        self.panY.setFixedWidth(100)
+
+        mainGrid.addWidget(PanYLabel, 2, 2)
+
+        #setting up for panX
+        self.panY = QDoubleSpinBox()
+        self.panY.setMinimum(0)
+        self.panY.setMaximum(5)
+        self.panY.setValue(0)
+        self.panY.setSingleStep(0.01)
+        self.panY.valueChanged.connect(lambda: self.updatePanY())
         self.panY.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
-        self.panY.textChanged.connect(lambda: self.updatePanY())
-        mainGrid.addWidget(self.panY, 3, 2, 1, 1)
+        mainGrid.addWidget(self.panY, 3, 2)
         
+        self.panYIncrement = QComboBox()
+        self.panYIncrement.addItems(['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1'])
+        self.panYIncrement.setCurrentIndex(0)
+        self.panYIncrement.currentIndexChanged.connect(self.panYIncrementChange)
+        mainGrid.addWidget(self.panYIncrement, 3, 3, alignment=QtCore.Qt.AlignHCenter)
+
         #name the window
         self.setWindowTitle('Aperture Motion')
         
-        #Oct 14, 2021 : these are the changes we made; added slider below and created valChanged() to send slider position via serial; this is the copy version (
-        self.slider = QSlider()
-        self.slider.setMinimum(8)
-        self.slider.setMaximum(255)
-        self.slider.setValue(127)
-        self.slider.setTickPosition(QSlider.TicksBelow)
-        self.slider.setTickInterval(8)
-        self.slider.setPageStep(8)
-        self.slider.setSingleStep(1)
-        mainGrid.addWidget(self.slider, 0, 0, 4, 1, alignment=QtCore.Qt.AlignHCenter)
-        self.slider.valueChanged.connect(self.valChanged)
+        #Setting up for zoom
+        self.zoom = QSpinBox()
+        self.zoom.setMinimum(8)
+        self.zoom.setMaximum(255)
+        self.zoom.setValue(127)
+        self.zoom.setSingleStep(1)
+        self.zoom.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
+        mainGrid.addWidget(self.zoom, 1, 0)
+        self.zoom.valueChanged.connect(self.valChanged)
 
-        PanYLabel = QLabel('<--- Zooming Out')
-        PanYLabel.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignTop)
-        mainGrid.addWidget(PanYLabel, 0, 1, 1, 1)
-        PanYLabel = QLabel('<--- Zooming In')
-        PanYLabel.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignBottom)
-        mainGrid.addWidget(PanYLabel, 3, 1, 1, 1)
+        ZoomLabel = QLabel('Zoom Setting')
+        ZoomLabel.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignTop)
+        mainGrid.addWidget(ZoomLabel, 0, 0)
+
+        self.zoomIncrement = QComboBox()
+        self.zoomIncrement.addItems(['1', '2', '5', '10', '20', '50', '100'])
+        self.zoomIncrement.setCurrentIndex(0)
+        self.zoomIncrement.currentIndexChanged.connect(self.zoomIncrementChange)
+        mainGrid.addWidget(self.zoomIncrement, 1, 1, alignment=QtCore.Qt.AlignHCenter)
+
+        self.plot = pg.PlotWidget()
+        self.plot.setXRange(0,5)
+        self.plot.setYRange(0,5)
+        self.plot.setFixedSize(300,300)
+        self.plot.setMouseEnabled(x=False,y=False)
+        mainGrid.addWidget(self.plot, 4, 0, 4, 4)
+        self.updatePlot()
+
+
 
         self.data = {
             "panX" : self.panX,
             "panY" : self.panY,
-            "zoom" : self.slider
+            "zoom" : self.zoom
         }
+
+    def updatePlot(self):
+        #get the coordinate of the beam
+        x = self.panX.value()
+        y = self.panY.value()
+        ##set the beam to the plot
+        #self.plot.plot([x], [y], clear=True, symbol='o', symbolBrush=.5)
+        #get the length of the square
+        length = (self.zoom.value()+1)/256 * 5
+
+        #coords of left bottom node
+        lbX = x - length/2
+        lbY = y - length/2
+        square_item = Square(QtCore.QRectF(lbX,lbY, length, length))
+        self.plot.clear()
+        self.plot.addItem(square_item)
+
+
+
+
+    def zoomIncrementChange(self):
+        #get the value from the spinner, turns into int then set single step of zoom as it
+        self.zoom.setSingleStep(int(self.zoomIncrement.currentText()))
+
+    def panXIncrementChange(self):
+        #get the value from the spinner, turns into int then set single step of panX as it
+        self.panX.setSingleStep(float(self.panXIncrement.currentText()))
+
+    def panYIncrementChange(self):
+        #get the value from the spinner, turns into int then set single step of panY as it
+        self.panY.setSingleStep(float(self.panYIncrement.currentText()))
 
     def updatePanX(self):
         UI_U_DataSets.windowHandle.refreshDataSets()
-        Hardware.IO.setAnalog('PanX', self.panX.text())
+        Hardware.IO.setAnalog('PanX', self.panX.value())
+        self.updatePlot()
 
     def updatePanY(self):
         UI_U_DataSets.windowHandle.refreshDataSets()
-        Hardware.IO.setAnalog('PanY', self.panY.text())
+        Hardware.IO.setAnalog('PanY', self.panY.value())
+        self.updatePlot()
 
     def valChanged(self):
         UI_U_DataSets.windowHandle.refreshDataSets()
+        self.updatePlot()
         Hardware.IO.setDigital("ChipSelect", True) #CS
         Hardware.IO.setDigital("SCLK", False)
-        position = [int(bit) for bit in list(bin(int(self.slider.value()))[2:])]
+        position = [int(bit) for bit in list(bin(int(self.zoom.value()))[2:])]
         while len(position) < 8:
             position.insert(0,0)
         dataX = [0]+position
@@ -187,30 +247,6 @@ class popWindow(QWidget):
         time.sleep(0.05)
 
 
-
-
-
-
-    #def zoomIn(self):
-        #sl = 0.001
-        ##time.sleep(sl)
-        #Hardware.IO.setDigital("UpDown",1)
-        #Hardware.IO.setDigital("ChipSelect",1)
-        #Hardware.IO.setDigital("ChipSelect",0)
-        #Hardware.IO.setDigital("UpDown",0)
-        #Hardware.IO.setDigital("UpDown",1)
-        #Hardware.IO.setDigital("ChipSelect",1)
-        
-    
-    #def zoomOut(self):
-        #sl = 0.001
-        ##time.sleep(sl)
-        #Hardware.IO.setDigital("UpDown",0)
-        #Hardware.IO.setDigital("ChipSelect",1)
-        #Hardware.IO.setDigital("ChipSelect",0)
-        #Hardware.IO.setDigital("UpDown",1)
-        #Hardware.IO.setDigital("UpDown",0)
-        #Hardware.IO.setDigital("ChipSelect",1)
         
 #****************************************************************************************************************
 #BREAK - DO NOT MODIFY CODE BELOW HERE OR MAIN WINDOW'S EXECUTION MAY CRASH
@@ -224,10 +260,7 @@ class popWindow(QWidget):
     def setValue(self, name, value):
         for varName in self.data:
             if name in varName:
-                if name == "zoom":
-                    self.data[name].setValue(int(value))
-                else:
-                    self.data[name].setText(str(value))
+                self.data[name].setValue(float(value))
                 return 0
         return -1
         
@@ -236,12 +269,8 @@ class popWindow(QWidget):
         #return a dictionary of all variable names in data, and values for those variables
         varDict = {}
         for var in self.data:
-            if var == "zoom":
-                value = str(self.data[var].value())
-                if value != '127':
-                    varDict[var] = value
-            else:
-                value = self.data[var].text()
+            value = str(self.data[var].value())
+            if value != '127':
                 varDict[var] = value
         return varDict
     
@@ -270,6 +299,30 @@ def reload_hardware():
 #the showPopUp program will show the instantiated window (which was either hidden or visible)
 def showPopUp():
     windowHandle.show()
+
+class Square(pg.GraphicsObject):
+    def __init__(self, rect, parent=None):
+        super().__init__(parent)
+        self.__rect = rect
+        self.picture = QtGui.QPicture()
+        self.__generate_picture()
+
+    @property
+    def rect(self):
+        return self.__rect
+
+    def __generate_picture(self):
+        painter = QtGui.QPainter(self.picture)
+        painter.setPen(pg.mkPen('w'))
+        painter.setBrush(pg.mkBrush('g'))
+        painter.drawRect(self.rect)
+        painter.end()
+
+    def paint(self, painter, option, widget=None):
+        painter.drawPicture(0, 0, self.picture)
+
+    def boundingRect(self):
+        return QtCore.QRectF(self.picture.boundingRect())
 
 if __name__ == '__main__':
     main()
