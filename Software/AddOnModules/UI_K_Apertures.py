@@ -24,7 +24,7 @@ import sys                              #import sys module for system-level func
 
 #import the necessary aspects of PyQt5 for this user interface window
 from PyQt5.QtWidgets import QWidget, QPushButton, QApplication, QLabel, QMessageBox, QTabWidget, QGridLayout, QLineEdit, QSlider, QSpinBox, QComboBox, QDoubleSpinBox
-from PyQt5 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtGui
 #import hardware
 import importlib
 
@@ -154,9 +154,23 @@ class popWindow(QWidget):
         }
 
     def updatePlot(self):
+        #get the coordinate of the beam
         x = self.panX.value()
         y = self.panY.value()
-        self.plot.plot([x], [y], clear=True, symbol='o', symbolBrush=.5)
+        ##set the beam to the plot
+        #self.plot.plot([x], [y], clear=True, symbol='o', symbolBrush=.5)
+        #get the length of the square
+        length = (self.zoom.value()+1)/256 * 5
+
+        #coords of left bottom node
+        lbX = x - length/2
+        lbY = y - length/2
+        square_item = Square(QtCore.QRectF(lbX,lbY, length, length))
+        self.plot.clear()
+        self.plot.addItem(square_item)
+
+
+
 
     def zoomIncrementChange(self):
         #get the value from the spinner, turns into int then set single step of zoom as it
@@ -182,6 +196,7 @@ class popWindow(QWidget):
 
     def valChanged(self):
         UI_U_DataSets.windowHandle.refreshDataSets()
+        self.updatePlot()
         Hardware.IO.setDigital("ChipSelect", True) #CS
         Hardware.IO.setDigital("SCLK", False)
         position = [int(bit) for bit in list(bin(int(self.zoom.value()))[2:])]
@@ -232,30 +247,6 @@ class popWindow(QWidget):
         time.sleep(0.05)
 
 
-
-
-
-
-    #def zoomIn(self):
-        #sl = 0.001
-        ##time.sleep(sl)
-        #Hardware.IO.setDigital("UpDown",1)
-        #Hardware.IO.setDigital("ChipSelect",1)
-        #Hardware.IO.setDigital("ChipSelect",0)
-        #Hardware.IO.setDigital("UpDown",0)
-        #Hardware.IO.setDigital("UpDown",1)
-        #Hardware.IO.setDigital("ChipSelect",1)
-        
-    
-    #def zoomOut(self):
-        #sl = 0.001
-        ##time.sleep(sl)
-        #Hardware.IO.setDigital("UpDown",0)
-        #Hardware.IO.setDigital("ChipSelect",1)
-        #Hardware.IO.setDigital("ChipSelect",0)
-        #Hardware.IO.setDigital("UpDown",1)
-        #Hardware.IO.setDigital("UpDown",0)
-        #Hardware.IO.setDigital("ChipSelect",1)
         
 #****************************************************************************************************************
 #BREAK - DO NOT MODIFY CODE BELOW HERE OR MAIN WINDOW'S EXECUTION MAY CRASH
@@ -269,7 +260,7 @@ class popWindow(QWidget):
     def setValue(self, name, value):
         for varName in self.data:
             if name in varName:
-                self.data[name].setValue(int(value))
+                self.data[name].setValue(float(value))
                 return 0
         return -1
         
@@ -308,6 +299,30 @@ def reload_hardware():
 #the showPopUp program will show the instantiated window (which was either hidden or visible)
 def showPopUp():
     windowHandle.show()
+
+class Square(pg.GraphicsObject):
+    def __init__(self, rect, parent=None):
+        super().__init__(parent)
+        self.__rect = rect
+        self.picture = QtGui.QPicture()
+        self.__generate_picture()
+
+    @property
+    def rect(self):
+        return self.__rect
+
+    def __generate_picture(self):
+        painter = QtGui.QPainter(self.picture)
+        painter.setPen(pg.mkPen('w'))
+        painter.setBrush(pg.mkBrush('g'))
+        painter.drawRect(self.rect)
+        painter.end()
+
+    def paint(self, painter, option, widget=None):
+        painter.drawPicture(0, 0, self.picture)
+
+    def boundingRect(self):
+        return QtCore.QRectF(self.picture.boundingRect())
 
 if __name__ == '__main__':
     main()
