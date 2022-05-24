@@ -4,7 +4,7 @@ import sys                              #import sys module for system-level func
 import csv
 
 #import the necessary aspects of PyQt5 for this user interface window
-from PyQt5.QtWidgets import QWidget, QPushButton, QApplication, QLabel, QMessageBox, QTabWidget, QGridLayout, QLineEdit, QCheckBox, QSlider, QButtonGroup, QSlider, QRadioButton, QGroupBox, QVBoxLayout
+from PyQt5.QtWidgets import QWidget, QPushButton, QApplication, QLabel, QMessageBox, QTabWidget, QGridLayout, QLineEdit, QCheckBox, QSlider, QButtonGroup, QSlider, QRadioButton, QGroupBox, QVBoxLayout, QDoubleSpinBox, QComboBox
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import Qt
 
@@ -51,118 +51,142 @@ class popWindow(QWidget):
 
         #The following block of code is responsible for slider Bx1 value
         self.groupBox1 = QGroupBox()
-        self.label1 = QLabel("Bx1", self)  #Add a label called Bx1 for Bx1.
+        self.label1 = QLabel("Bx", self)  #Add a label called Bx1 for Bx1.
 
-        self.slider = QSlider(Qt.Horizontal)
-#It should be from -5V to 5V. But, there is a binary overflow for output IO pins at +-5 V. Therefore, I decreased it to -4.99 and 4.99 V.
-#And SingleStep below has to be an integer, I multiplied -4.99 and 4.99 by 100.
-        self.slider.setMinimum(-499)
-        self.slider.setMaximum(499)
-        self.slider.setValue(0) #Initial value of Bx1 slider is set as 0
-        self.slider.setTickInterval(QSlider.NoTicks)
-        self.slider.setSingleStep(5)
+        self.Bx = QDoubleSpinBox()
+        self.Bx.setMinimum(-9.98)
+        self.Bx.setMaximum(9.98)
+        self.Bx.setValue(0)
+        self.Bx.setSingleStep(0.01)
+        self.Bx.valueChanged.connect(lambda: self.updateBx())
+
+        self.BxIncrement = QComboBox()
+        self.BxIncrement.addItems(['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5'])
+        self.BxIncrement.setCurrentIndex(0)
+        self.BxIncrement.currentIndexChanged.connect(self.BxIncrementChange)
+        #self.slider = QSlider(Qt.Horizontal)
+##It should be from -5V to 5V. But, there is a binary overflow for output IO pins at +-5 V. Therefore, I decreased it to -4.99 and 4.99 V.
+##And SingleStep below has to be an integer, I multiplied -4.99 and 4.99 by 100.
+        #self.slider.setMinimum(-499)
+        #self.slider.setMaximum(499)
+        #self.slider.setValue(0) #Initial value of Bx1 slider is set as 0
+        #self.slider.setTickInterval(QSlider.NoTicks)
+        #self.slider.setSingleStep(5)
 
         self.vbox = QVBoxLayout() #box containing the first slider for controlling Bx1
         self.vbox.addWidget(self.label1)
-        self.vbox.addWidget(self.slider)
+        self.vbox.addWidget(self.Bx)
+        self.vbox.addWidget(self.BxIncrement)
         self.vbox.addStretch(1)
         self.groupBox1.setLayout(self.vbox)
 
         mainGrid.addWidget(self.groupBox1, 1, 0) #First slider for Bx1
 
-        self.slider.valueChanged.connect(self.val_changed_Bx)
+        #self.slider.valueChanged.connect(self.val_changed_Bx)
 
-        self.widget2 = QLabel("Bx: 0",self) #Bx1 widget displaying Bx slider value
+        #self.widget2 = QLabel("Bx: 0",self) #Bx1 widget displaying Bx slider value
 
-        mainGrid.addWidget(self.widget2, 2, 0)
+        #mainGrid.addWidget(self.widget2, 2, 0)
 
 
 
 
         #The following block of code is responsible for slider Bx2 value
         self.groupBox6 = QGroupBox()
-        self.label6 =QLabel("Bx2",self) #Add a label called Bx2 for Bx2.
+        self.label6 =QLabel("By",self) #Add a label called Bx2 for Bx2.
 
-        self.slider6 = QSlider(Qt.Horizontal)
-#It should be from -5V to 5V. But, there is a binary overflow for output IO pins at +-5 V. Therefore, I decreased it to -4.99 and 4.99 V.
-#And SingleStep below has to be an integer, I multiplied -4.99 and 4.99 by 100.
-        self.slider6.setMinimum(-499)
-        self.slider6.setMaximum(499)
-        self.slider6.setValue(0)
-        self.slider6.setTickInterval(QSlider.NoTicks)
-        self.slider6.setSingleStep(5)
+        self.By = QDoubleSpinBox()
+        self.By.setMinimum(-9.98)
+        self.By.setMaximum(9.98)
+        self.By.setValue(0)
+        self.By.setSingleStep(0.01)
+        self.By.valueChanged.connect(lambda: self.updateBy())
+
+        self.ByIncrement = QComboBox()
+        self.ByIncrement.addItems(['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5'])
+        self.ByIncrement.setCurrentIndex(0)
+        self.ByIncrement.currentIndexChanged.connect(self.ByIncrementChange)
+        #self.slider6 = QSlider(Qt.Horizontal)
+##It should be from -5V to 5V. But, there is a binary overflow for output IO pins at +-5 V. Therefore, I decreased it to -4.99 and 4.99 V.
+##And SingleStep below has to be an integer, I multiplied -4.99 and 4.99 by 100.
+        #self.slider6.setMinimum(-499)
+        #self.slider6.setMaximum(499)
+        #self.slider6.setValue(0)
+        #self.slider6.setTickInterval(QSlider.NoTicks)
+        #self.slider6.setSingleStep(5)
 
         self.vbox6 = QVBoxLayout()
         self.vbox6.addWidget(self.label6)
-        self.vbox6.addWidget(self.slider6)
+        self.vbox6.addWidget(self.By)
+        self.vbox6.addWidget(self.ByIncrement)
         self.vbox6.addStretch(1)
         self.groupBox6.setLayout(self.vbox6)
 
-        self.slider6.valueChanged.connect(self.val_changed_Bx2)
+        #self.slider6.valueChanged.connect(self.val_changed_Bx2)
 
-        self.widget7 = QLabel("Bx2: 0",self) #Bx2 widget displaying Bx slider value
+        #self.widget7 = QLabel("Bx2: 0",self) #Bx2 widget displaying Bx slider value
 
-        mainGrid.addWidget(self.groupBox6, 3, 0) #First slider for Bx1
+        mainGrid.addWidget(self.groupBox6, 2, 0) #First slider for Bx1
 
-        mainGrid.addWidget(self.widget7, 4, 0)
+        #mainGrid.addWidget(self.widget7, 4, 0)
 
 
 
 
         #The following block of code is responsible for slider By1 value
-        self.groupBox2 = QGroupBox()
-        self.label2 =QLabel("By1", self) #Add a label called By1 for By1.
+        #self.groupBox2 = QGroupBox()
+        #self.label2 =QLabel("By1", self) #Add a label called By1 for By1.
 
-        self.slider2 = QSlider(Qt.Horizontal)
-#It should be from -5V to 5V. But, there is a binary overflow for output IO pins at +-5 V. Therefore, I decreased it to -4.99 and 4.99 V.
-#And SingleStep below has to be an integer, I multiplied -4.99 and 4.99 by 100.
-        self.slider2.setMinimum(-499)
-        self.slider2.setMaximum(499)
-        self.slider2.setValue(0)
-        self.slider2.setTickInterval(QSlider.NoTicks)
-        self.slider2.setSingleStep(5)
+        #self.slider2 = QSlider(Qt.Horizontal)
+##It should be from -5V to 5V. But, there is a binary overflow for output IO pins at +-5 V. Therefore, I decreased it to -4.99 and 4.99 V.
+##And SingleStep below has to be an integer, I multiplied -4.99 and 4.99 by 100.
+        #self.slider2.setMinimum(-499)
+        #self.slider2.setMaximum(499)
+        #self.slider2.setValue(0)
+        #self.slider2.setTickInterval(QSlider.NoTicks)
+        #self.slider2.setSingleStep(5)
 
-        self.vbox2 = QVBoxLayout()
-        self.vbox2.addWidget(self.label2)
-        self.vbox2.addWidget(self.slider2)
-        self.vbox2.addStretch(1)
-        self.groupBox2.setLayout(self.vbox2)
+        #self.vbox2 = QVBoxLayout()
+        #self.vbox2.addWidget(self.label2)
+        #self.vbox2.addWidget(self.slider2)
+        #self.vbox2.addStretch(1)
+        #self.groupBox2.setLayout(self.vbox2)
 
-        self.slider2.valueChanged.connect(self.val_changed_By1)
+        #self.slider2.valueChanged.connect(self.val_changed_By1)
 
-        self.widget3 = QLabel("By1: 0",self) #By1 widget displaying By1 slider value
+        #self.widget3 = QLabel("By1: 0",self) #By1 widget displaying By1 slider value
 
-        mainGrid.addWidget(self.groupBox2, 5, 0) #Second slider for By1
+        #mainGrid.addWidget(self.groupBox2, 5, 0) #Second slider for By1
 
-        mainGrid.addWidget(self.widget3, 6, 0)
+        #mainGrid.addWidget(self.widget3, 6, 0)
 
 
-        #The following block of code is responsible for slider By2 value
-        self.groupBox3 = QGroupBox()
-        self.label3=QLabel("By2", self) #Add a label called By2 for By2.
+        ##The following block of code is responsible for slider By2 value
+        #self.groupBox3 = QGroupBox()
+        #self.label3=QLabel("By2", self) #Add a label called By2 for By2.
 
-        self.slider3 = QSlider(Qt.Horizontal)
-#It should be from -5V to 5V. But, there is a binary overflow for output IO pins at +-5 V. Therefore, I decreased it to -4.99 and 4.99 V.
-#And SingleStep below has to be an integer, I multiplied -4.99 and 4.99 by 100.
-        self.slider3.setMinimum(-499)
-        self.slider3.setMaximum(499)
-        self.slider3.setValue(0)
-        self.slider3.setTickInterval(QSlider.NoTicks)
-        self.slider3.setSingleStep(5)
+        #self.slider3 = QSlider(Qt.Horizontal)
+##It should be from -5V to 5V. But, there is a binary overflow for output IO pins at +-5 V. Therefore, I decreased it to -4.99 and 4.99 V.
+##And SingleStep below has to be an integer, I multiplied -4.99 and 4.99 by 100.
+        #self.slider3.setMinimum(-499)
+        #self.slider3.setMaximum(499)
+        #self.slider3.setValue(0)
+        #self.slider3.setTickInterval(QSlider.NoTicks)
+        #self.slider3.setSingleStep(5)
 
-        self.vbox3 = QVBoxLayout()
-        self.vbox3.addWidget(self.label3)
-        self.vbox3.addWidget(self.slider3)
-        self.vbox3.addStretch(1)
-        self.groupBox3.setLayout(self.vbox3)
+        #self.vbox3 = QVBoxLayout()
+        #self.vbox3.addWidget(self.label3)
+        #self.vbox3.addWidget(self.slider3)
+        #self.vbox3.addStretch(1)
+        #self.groupBox3.setLayout(self.vbox3)
 
-        self.slider3.valueChanged.connect(self.val_changed_By2)
+        #self.slider3.valueChanged.connect(self.val_changed_By2)
 
-        self.widget4 = QLabel("By2: 0",self) #By2 widget displaying By2 slider value
+        #self.widget4 = QLabel("By2: 0",self) #By2 widget displaying By2 slider value
 
-        mainGrid.addWidget(self.groupBox3, 7, 0) #Third slider for By2
+        #mainGrid.addWidget(self.groupBox3, 7, 0) #Third slider for By2
 
-        mainGrid.addWidget(self.widget4, 8, 0)
+        #mainGrid.addWidget(self.widget4, 8, 0)
 
 
         #The following block of code is responsible for slider Xin value
@@ -188,9 +212,9 @@ class popWindow(QWidget):
 
         self.widget5 = QLabel("Xin: 0",self) #Xin widget displaying Xin slider value
 
-        mainGrid.addWidget(self.groupBox4, 9, 0) #Fourth slider for Xin
+        mainGrid.addWidget(self.groupBox4, 3, 0) #Fourth slider for Xin
 
-        mainGrid.addWidget(self.widget5, 10, 0)
+        mainGrid.addWidget(self.widget5, 4, 0)
 
 
 
@@ -217,22 +241,22 @@ class popWindow(QWidget):
 
         self.widget6 = QLabel("Yin: 0",self) #Yin widget displaying Yin slider value
 
-        mainGrid.addWidget(self.groupBox5, 11, 0) #Fifth slider for Yin
+        mainGrid.addWidget(self.groupBox5, 5, 0) #Fifth slider for Yin
 
-        mainGrid.addWidget(self.widget6, 12, 0)
+        mainGrid.addWidget(self.widget6, 6, 0)
 
         #Add a button for save feature
-        self.save = QPushButton()
-        self.save.setText("Save parameter values")
-        self.save.clicked.connect(self.save_button_clicked)
-        mainGrid.addWidget(self.save,13,0)
+        #self.save = QPushButton()
+        #self.save.setText("Save parameter values")
+        #self.save.clicked.connect(self.save_button_clicked)
+        #mainGrid.addWidget(self.save,13,0)
 
 
-        #Add a button for load saved parameters feature
-        self.load = QPushButton()
-        self.load.setText("Load saved parameter values")
-        self.load.clicked.connect(self.retrieve)
-        mainGrid.addWidget(self.load,14,0)
+        ##Add a button for load saved parameters feature
+        #self.load = QPushButton()
+        #self.load.setText("Load saved parameter values")
+        #self.load.clicked.connect(self.retrieve)
+        #mainGrid.addWidget(self.load,14,0)
 
 
 
@@ -258,13 +282,13 @@ class popWindow(QWidget):
         self.groupBox_slider1.setLayout(self.vbox_SDI1)
 
 
-        mainGrid.addWidget(self.groupBox_slider1, 17, 0)
+        mainGrid.addWidget(self.groupBox_slider1, 7, 0)
 
 
         self.widget_SDI1 =QLabel("SDI: 0", self) #SDI widget displays current SDI value.
 
 
-        mainGrid.addWidget(self.widget_SDI1, 18, 0)
+        mainGrid.addWidget(self.widget_SDI1, 8, 0)
 
 
 
@@ -291,13 +315,13 @@ class popWindow(QWidget):
         self.groupBox_slider2.setLayout(self.vbox_SDI2)
 
 
-        mainGrid.addWidget(self.groupBox_slider2, 19, 0)
+        mainGrid.addWidget(self.groupBox_slider2, 9, 0)
 
 
         self.widget_SDI2 =QLabel("SDI: 0", self) #SDI widget displays current SDI value.
 
 
-        mainGrid.addWidget(self.widget_SDI2, 20, 0)
+        mainGrid.addWidget(self.widget_SDI2, 10, 0)
 
 
 
@@ -325,13 +349,13 @@ class popWindow(QWidget):
         self.groupBox_slider3.setLayout(self.vbox_SDI3)
 
 
-        mainGrid.addWidget(self.groupBox_slider3, 21, 0)
+        mainGrid.addWidget(self.groupBox_slider3, 11, 0)
 
 
         self.widget_SDI3 =QLabel("SDI: 0", self) #SDI widget displays current SDI value.
 
 
-        mainGrid.addWidget(self.widget_SDI3, 22, 0)
+        mainGrid.addWidget(self.widget_SDI3, 12, 0)
 
 
 
@@ -357,13 +381,13 @@ class popWindow(QWidget):
         self.groupBox_slider4.setLayout(self.vbox_SDI4)
 
 
-        mainGrid.addWidget(self.groupBox_slider4, 23, 0)
+        mainGrid.addWidget(self.groupBox_slider4, 13, 0)
 
 
         self.widget_SDI4 =QLabel("SDI: 0", self) #SDI widget displays current SDI value.
 
 
-        mainGrid.addWidget(self.widget_SDI4, 24, 0)
+        mainGrid.addWidget(self.widget_SDI4, 14, 0)
 
 
 
@@ -374,10 +398,8 @@ class popWindow(QWidget):
 
         #Parameters of this module are saved inside of self.data, so Datasets module can use it
         self.data = {
-            'Bx1' : self.slider,
-            'Bx2' : self.slider6,
-            'By1' : self.slider2,
-            'By2' : self.slider3,
+            'Bx': self.Bx,
+            'By' : self.By,
             'Xin' : self.slider4,
             'Yin' : self.slider5,
             'X+SDI': self.slider_SDI1,
@@ -387,7 +409,36 @@ class popWindow(QWidget):
             }
 
 #The following val_changed functions are activated when the slider values change. And the IO pins output accordingly.
-    def val_changed_Bx(self):
+    def updateBx(self):
+        DataSets.windowHandle.refreshDataSets()
+        value = self.Bx.value()
+        halfVal = round(value/2,2)
+        if value > 0:
+            Hardware.IO.setAnalog('Bx1',halfVal)
+            Hardware.IO.setAnalog('Bx2',-halfVal)
+        else:
+            Hardware.IO.setAnalog('Bx1',-halfVal)
+            Hardware.IO.setAnalog('Bx2',halfVal)
+
+    def BxIncrementChange(self):
+        self.Bx.setSingleStep(float(self.BxIncrement.currentText()))
+
+    def updateBy(self):
+        DataSets.windowHandle.refreshDataSets()
+        value = self.By.value()
+        halfVal = round(value/2,2)
+        if value > 0:
+            Hardware.IO.setAnalog('By1',halfVal)
+            Hardware.IO.setAnalog('By2',-halfVal)
+        else:
+            Hardware.IO.setAnalog('By1',-halfVal)
+            Hardware.IO.setAnalog('By2',halfVal)
+
+    def ByIncrementChange(self):
+        self.By.setSingleStep(float(self.ByIncrement.currentText()))
+
+
+    def val_changed_Bx1(self):
         DataSets.windowHandle.refreshDataSets()
         self.widget2.setText("Bx1: " + str(self.slider.value()/100))
         Hardware.IO.setAnalog('Bx1',self.slider.value()/100)
@@ -440,43 +491,6 @@ class popWindow(QWidget):
         DataSets.windowHandle.refreshDataSets()
         self.widget_SDI4.setText("SDI: " + str(self.slider_SDI4.value()))
         return
-
-
-#save_button_clicked function is responsible for saving all parameter values (i.e Bx, Xin, etc) into a csv file when save button is pressed.
-    def save_button_clicked(self):
-        #Save all the slider values first.
-        Bx1 = self.slider.value()
-        Bx2 = self.slider6.value()
-        By1 = self.slider2.value()
-        By2 = self.slider3.value()
-        Xin = self.slider4.value()
-        Yin = self.slider5.value()
-
-        #Write the saved values into a csv file.
-        with open('HV_parameters.csv', mode='w') as parameter_file:
-            writer = csv.writer(parameter_file, delimiter=',')
-            writer.writerow(['Bx1', 'Bx2', 'By1', 'By2', 'Xin', 'Yin'])
-            writer.writerow([Bx1, Bx2, By1, By2, Xin, Yin])
-        return
-
-#retrieve function below loads the saved HV parameter values from the csv file above.
-    def retrieve (self):
-        #First load the csv file and read all the saved parameter values
-        with open('HV_parameters.csv') as parameter_file:
-            reader = csv.reader(parameter_file, delimiter=',')
-            line_count = 0
-            for row in reader:
-                if line_count == 0:
-                    print(f'Column names are {", ".join(row)}')
-                    line_count += 1
-                elif (line_count == 1):
-                    #Then, set all the slider values by inputting the read values into slider values by using setValue method.
-                    self.slider.setValue(int(row[0])) #Bx1
-                    self.slider6.setValue(int(row[1])) #Bx2
-                    self.slider2.setValue(int(row[2])) #By1
-                    self.slider3.setValue(int(row[3])) #By2
-                    self.slider4.setValue(int(row[4])) #Xin
-                    self.slider5.setValue(int(row[5])) #Yin
 
 
 #update SDI value fed into the digital potentiometer with a value from a slider. (For X+ plate)
@@ -750,7 +764,8 @@ class popWindow(QWidget):
         #iterate all variables of this module
         for var in self.data:
             # Get the value of the current variable
-            value = self.data[var].value()
+            #double spinbox has bug when gettting values, need to round manually
+            value = round(self.data[var].value(),2)
             # Check if the value is 0(default), if not, add to dic to save
             varDict[var] = str(value)
         return varDict

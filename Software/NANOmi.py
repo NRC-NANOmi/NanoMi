@@ -179,8 +179,8 @@ class MainWindow(QWidget):
         #respond according to the user reply
         if reply == QMessageBox.Yes:
             #if shutting down, close all spawned child windows as well via the "shutdown" method in each popup
-            for module in AddOns:
-                module.popWindow.shutdown()
+            for w in QApplication.topLevelWidgets():
+                w.close()
             event.accept()
         else:
             event.ignore()

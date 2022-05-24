@@ -269,7 +269,7 @@ class popWindow(QWidget):
         #return a dictionary of all variable names in data, and values for those variables
         varDict = {}
         for var in self.data:
-            value = str(self.data[var].value())
+            value = str(round(self.data[var].value(),2))
             if value != '127':
                 varDict[var] = value
         return varDict
