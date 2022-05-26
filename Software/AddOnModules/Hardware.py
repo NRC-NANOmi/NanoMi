@@ -169,9 +169,9 @@ class popWindow(QWidget):
         #name the window
         self.setWindowTitle('Hardware Functions')
         
-        self.AoTable.itemChanged.connect(lambda: self.triggerSave())
-        self.AiTable.itemChanged.connect(lambda: self.triggerSave())
-        self.DxTable.itemChanged.connect(lambda: self.triggerSave())
+        self.AoTable.itemChanged.connect(lambda: self.triggerSave)
+        self.AiTable.itemChanged.connect(lambda: self.triggerSave)
+        self.DxTable.itemChanged.connect(lambda: self.triggerSave)
     
     #scans for hardware, either for the first time automatically or on a button press from the hardware module
     def rescanHardware(self):

@@ -29,4 +29,14 @@
     <set name="2022-05-18_0953">
         <setting module="Lenses" name="C1" value="1"/>
     </set>
+    <set name="2022-05-20_1122">
+        <setting module="Apertures" name="panX" value="2.5"/>
+        <setting module="Apertures" name="panY" value="2.5"/>
+        <setting module="Apertures" name="zoom" value="126"/>
+    </set>
+    <set name="2022-05-24_1605">
+        <setting module="HV Amplifier Deflector Amplifier Controller" name="Bx" value="9.98"/>
+        <setting module="HV Amplifier Deflector Amplifier Controller" name="Xin" value="0.04"/>
+        <setting module="HV Amplifier Deflector Amplifier Controller" name="Yin" value="2.99"/>
+    </set>
 </dataSets>

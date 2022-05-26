@@ -158,23 +158,23 @@ class popWindow(QWidget):
         
         #set up the data value list - this shows the individual values inside of each data set selected
         #will update when you click on one of the sets with all of the data inside of it
-        dataValueDisplay = QTableWidget()
-        dataValueDisplay.setColumnCount(4)
-        dataValueDisplay.setHorizontalHeaderItem(0, QTableWidgetItem('Microscope Module:'))
-        dataValueDisplay.setHorizontalHeaderItem(1, QTableWidgetItem('Setting Name:'))
-        dataValueDisplay.setHorizontalHeaderItem(2, QTableWidgetItem('Value:'))
-        dataValueDisplay.setHorizontalHeaderItem(3, QTableWidgetItem('Load Button'))
-        dataValueDisplay.setRowCount(0)
-        dataValueDisplay.horizontalHeader().setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
-        dataValueDisplay.horizontalHeader().setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
-        dataValueDisplay.horizontalHeader().setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
-        dataValueDisplay.horizontalHeader().setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
+        self.dataValueDisplay = QTableWidget()
+        self.dataValueDisplay.setColumnCount(4)
+        self.dataValueDisplay.setHorizontalHeaderItem(0, QTableWidgetItem('Microscope Module:'))
+        self.dataValueDisplay.setHorizontalHeaderItem(1, QTableWidgetItem('Setting Name:'))
+        self.dataValueDisplay.setHorizontalHeaderItem(2, QTableWidgetItem('Value:'))
+        self.dataValueDisplay.setHorizontalHeaderItem(3, QTableWidgetItem('Load Button'))
+        self.dataValueDisplay.setRowCount(0)
+        self.dataValueDisplay.horizontalHeader().setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
+        self.dataValueDisplay.horizontalHeader().setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        self.dataValueDisplay.horizontalHeader().setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
+        self.dataValueDisplay.horizontalHeader().setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
         
         #add the data value list to the grid
-        loadGrid.addWidget(dataValueDisplay, 4, 0, 1, 1)
+        loadGrid.addWidget(self.dataValueDisplay, 4, 0, 1, 1)
         
         #set up a linkage so when the data set list changes it's selection, it automatically updates the data value list
-        dataSetDisplay.itemSelectionChanged.connect(lambda: self.showDataValues(dataSetDisplay.currentRow(), dataValueDisplay))
+        dataSetDisplay.itemSelectionChanged.connect(lambda: self.showDataValues(dataSetDisplay.currentRow(), self.dataValueDisplay))
         
         #once loaded, force the current selection of the set to the first one - this will also update the data value list
         dataSetDisplay.setCurrentRow(0)
@@ -284,7 +284,7 @@ class popWindow(QWidget):
             varDictionary = subMod.windowHandle.getValues()
             for varName in varDictionary:
                 # if the value isn't 0 or empty, then load it
-                if varDictionary[varName] != '0' and varDictionary[varName] != '' and varDictionary[varName] != '0.0':
+                if varDictionary[varName] != '0' and varDictionary[varName] != '' and varDictionary[varName] != '0.0' and varDictionary[varName] != '0.00':
                     #find the sub-module name in short human-readable form
                     subModName = ' '.join(subMod.__name__.split('_')[2:])
                     #find the value of the variable
@@ -416,7 +416,8 @@ class popWindow(QWidget):
             else:
                 print('Overwriting the save entry "' + setName + '".')
                 tree.remove(copy)
-                
+        else:
+            self.edit.setText(datetime.datetime.now().strftime('%Y-%m-%d_%H%M'))
         #if the setName is unique, or overwriting is permitted and the original is gone, go ahead and tack it on
         #add a new element under "dataSets" root in parallel with the other "set" children
         newStruct = ET.SubElement(tree, 'set')
@@ -434,7 +435,7 @@ class popWindow(QWidget):
                 varVal = varDictionary[varName]
                 #add all new required save variables one at a time
                 #check if variable value is 0
-                if varVal != '0' and varVal != '':
+                if varVal != '0' and varVal != '' and varVal != '0.0' and varVal != '0.00':
                     ET.SubElement(newStruct, 'setting', {'module':subModName, 'name':varName, 'value':varVal})
         
         #format the entire xml file nicely so it is human readable and indented - encode it to a byte-string
@@ -451,9 +452,9 @@ class popWindow(QWidget):
         with open(os.getcwd() + '/AddOnModules/SaveFiles/DataSets.xml', 'w') as pid:
             domTree.writexml(pid, encoding='utf-8', indent='', addindent='    ', newl='\n')
 
-
     # function that used to delete a dataset from xml
     def deleteData(self, index):
+        global dataSetDisplay
         tree = self.readDataFile()
         #remove the data that want to be deleted from dataSets
         tree.remove(tree[index])
@@ -470,7 +471,11 @@ class popWindow(QWidget):
         #write to file
         with open(os.getcwd() + '/AddOnModules/SaveFiles/DataSets.xml', 'w') as pid:
             domTree.writexml(pid, encoding='utf-8', indent='', addindent='    ', newl='\n')
+
+        dataSetDisplay.setCurrentRow(0)
+        self.showDataValues(dataSetDisplay.currentRow(), self.dataValueDisplay)
         self.refreshDataSets()
+
 
     def loadSingleSetting(self, treeIndex, settingIndex):
         print("indexes are", treeIndex, "and", settingIndex)
