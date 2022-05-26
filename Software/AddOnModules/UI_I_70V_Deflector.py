@@ -4,10 +4,10 @@ import sys                              #import sys module for system-level func
 import csv
 
 #import the necessary aspects of PyQt5 for this user interface window
-from PyQt5.QtWidgets import QWidget, QPushButton, QApplication, QLabel, QMessageBox, QTabWidget, QGridLayout, QLineEdit, QCheckBox, QSlider, QButtonGroup, QSlider, QRadioButton, QGroupBox, QVBoxLayout, QDoubleSpinBox, QComboBox
+from PyQt5.QtWidgets import QWidget, QPushButton, QApplication, QLabel, QMessageBox, QTabWidget, QGridLayout, QLineEdit, QCheckBox, QSlider, QButtonGroup, QSlider, QRadioButton, QGroupBox, QVBoxLayout, QDoubleSpinBox, QComboBox,QHBoxLayout
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import Qt
-
+import pyqtgraph as pg
 import importlib
 # import necessary aspects of the hardware module
 from AddOnModules import Hardware, UI_U_DataSets as DataSets
@@ -19,7 +19,7 @@ import threading
 import datetime
 
 
-buttonName = 'HV Amplifier Deflector Voltage Controller'                 #name of the button on the main window that links to this code
+buttonName = '70V Deflector'                 #name of the button on the main window that links to this code
 windowHandle = None                   #a handle to the window on a global scope
 
 
@@ -45,7 +45,7 @@ class popWindow(QWidget):
         mainGrid = QGridLayout()
         self.setLayout(mainGrid)
 
-        self.widget1 = QLabel("HV Amplifier Controller",self) #Widget name
+        self.widget1 = QLabel("70V Deflector",self) #Widget name
         mainGrid.addWidget(self.widget1, 0,0)
 
 
@@ -73,14 +73,12 @@ class popWindow(QWidget):
         #self.slider.setTickInterval(QSlider.NoTicks)
         #self.slider.setSingleStep(5)
 
-        self.vbox = QVBoxLayout() #box containing the first slider for controlling Bx1
+        self.vbox = QHBoxLayout() #box containing the first slider for controlling Bx1
         self.vbox.addWidget(self.label1)
         self.vbox.addWidget(self.Bx)
         self.vbox.addWidget(self.BxIncrement)
-        self.vbox.addStretch(1)
-        self.groupBox1.setLayout(self.vbox)
+        self.vbox.addStretch()
 
-        mainGrid.addWidget(self.groupBox1, 1, 0) #First slider for Bx1
 
         #self.slider.valueChanged.connect(self.val_changed_Bx)
 
@@ -92,7 +90,7 @@ class popWindow(QWidget):
 
 
         #The following block of code is responsible for slider Bx2 value
-        self.groupBox6 = QGroupBox()
+        #self.groupBox6 = QGroupBox()
         self.label6 =QLabel("By",self) #Add a label called Bx2 for Bx2.
 
         self.By = QDoubleSpinBox()
@@ -115,18 +113,19 @@ class popWindow(QWidget):
         #self.slider6.setTickInterval(QSlider.NoTicks)
         #self.slider6.setSingleStep(5)
 
-        self.vbox6 = QVBoxLayout()
-        self.vbox6.addWidget(self.label6)
-        self.vbox6.addWidget(self.By)
-        self.vbox6.addWidget(self.ByIncrement)
-        self.vbox6.addStretch(1)
-        self.groupBox6.setLayout(self.vbox6)
+        #self.vbox6 = QVBoxLayout()
+        self.vbox.addWidget(self.label6)
+        self.vbox.addWidget(self.By)
+        self.vbox.addWidget(self.ByIncrement)
+        #self.groupBox6.setLayout(self.vbox6)
+        self.groupBox1.setLayout(self.vbox)
 
+        mainGrid.addWidget(self.groupBox1, 1, 0) #First slider for Bx1
         #self.slider6.valueChanged.connect(self.val_changed_Bx2)
 
         #self.widget7 = QLabel("Bx2: 0",self) #Bx2 widget displaying Bx slider value
 
-        mainGrid.addWidget(self.groupBox6, 2, 0) #First slider for Bx1
+        #mainGrid.addWidget(self.groupBox6, 2, 0) #First slider for Bx1
 
         #mainGrid.addWidget(self.widget7, 4, 0)
 
@@ -193,57 +192,48 @@ class popWindow(QWidget):
         self.groupBox4 = QGroupBox()
         self.label4 =QLabel("Xin", self) #Add a label called Xin.
 
-        self.slider4 = QSlider(Qt.Horizontal)
-#It should be from -5V to 5V. But, there is a binary overflow for output IO pins at +-5 V. Therefore, I decreased it to -4.99 and 4.99 V.
-#And SingleStep below has to be an integer, I multiplied -4.99 and 4.99 by 100.
-        self.slider4.setMinimum(-499)
-        self.slider4.setMaximum(499)
-        self.slider4.setValue(0)
-        self.slider4.setTickInterval(QSlider.NoTicks)
-        self.slider4.setSingleStep(5)
+        self.Xin = QDoubleSpinBox()
+        self.Xin.setMinimum(-4.99)
+        self.Xin.setMaximum(4.99)
+        self.Xin.setValue(0)
+        self.Xin.setSingleStep(0.01)
+        self.Xin.valueChanged.connect(lambda: self.val_changed_Xin)
 
-        self.vbox4 = QVBoxLayout()
+        self.XinIncrement = QComboBox()
+        self.XinIncrement.addItems(['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5'])
+        self.XinIncrement.setCurrentIndex(0)
+        self.XinIncrement.currentIndexChanged.connect(self.XinIncrementChange)
+
+        self.vbox4 = QHBoxLayout()
         self.vbox4.addWidget(self.label4)
-        self.vbox4.addWidget(self.slider4)
-        self.vbox4.addStretch(1)
-        self.groupBox4.setLayout(self.vbox4)
+        self.vbox4.addWidget(self.Xin)
+        self.vbox4.addWidget(self.XinIncrement)
+        self.vbox4.addStretch()
 
-        self.slider4.valueChanged.connect(self.val_changed_Xin)
-
-        self.widget5 = QLabel("Xin: 0",self) #Xin widget displaying Xin slider value
-
-        mainGrid.addWidget(self.groupBox4, 3, 0) #Fourth slider for Xin
-
-        mainGrid.addWidget(self.widget5, 4, 0)
 
 
 
         #The following block of code is responsible for slider Yin value
-        self.groupBox5 = QGroupBox()
         self.label5 =QLabel("Yin", self) #Add a label called Yin.
 
-        self.slider5 = QSlider(Qt.Horizontal)
-#It should be from -5V to 5V. But, there is a binary overflow for output IO pins at +-5 V. Therefore, I decreased it to -4.99 and 4.99 V.
-#And SingleStep below has to be an integer, I multiplied -4.99 and 4.99 by 100.
-        self.slider5.setMinimum(-499)
-        self.slider5.setMaximum(499)
-        self.slider5.setValue(0)
-        self.slider5.setTickInterval(QSlider.NoTicks)
-        self.slider5.setSingleStep(5)
+        self.Yin = QDoubleSpinBox()
+        self.Yin.setMinimum(-4.99)
+        self.Yin.setMaximum(4.99)
+        self.Yin.setValue(0)
+        self.Yin.setSingleStep(0.01)
+        self.Yin.valueChanged.connect(lambda: self.val_changed_Yin)
 
-        self.vbox5 = QVBoxLayout()
-        self.vbox5.addWidget(self.label5)
-        self.vbox5.addWidget(self.slider5)
-        self.vbox5.addStretch(1)
-        self.groupBox5.setLayout(self.vbox5)
+        self.YinIncrement = QComboBox()
+        self.YinIncrement.addItems(['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5'])
+        self.YinIncrement.setCurrentIndex(0)
+        self.YinIncrement.currentIndexChanged.connect(self.YinIncrementChange)
 
-        self.slider5.valueChanged.connect(self.val_changed_Yin)
+        self.vbox4.addWidget(self.label5)
+        self.vbox4.addWidget(self.Yin)
+        self.vbox4.addWidget(self.YinIncrement)
+        self.groupBox4.setLayout(self.vbox4)
 
-        self.widget6 = QLabel("Yin: 0",self) #Yin widget displaying Yin slider value
-
-        mainGrid.addWidget(self.groupBox5, 5, 0) #Fifth slider for Yin
-
-        mainGrid.addWidget(self.widget6, 6, 0)
+        mainGrid.addWidget(self.groupBox4, 2, 0)
 
         #Add a button for save feature
         #self.save = QPushButton()
@@ -400,25 +390,42 @@ class popWindow(QWidget):
         self.data = {
             'Bx': self.Bx,
             'By' : self.By,
-            'Xin' : self.slider4,
-            'Yin' : self.slider5,
+            'Xin' : self.Xin,
+            'Yin' : self.Yin,
             'X+SDI': self.slider_SDI1,
             'X-SDI' : self.slider_SDI2,
             'Y+SDI' : self.slider_SDI3,
             'Y-SDI' : self.slider_SDI4
             }
 
+        self.plotGroupBox = QGroupBox()
+        self.plot = pg.PlotWidget()
+        self.plot.setXRange(-10,10)
+        self.plot.setYRange(-10,10)
+        self.plot.setFixedSize(400, 400)
+        self.plot.setMouseEnabled(x=False,y=False)
+        self.vboxPlot = QVBoxLayout()
+        self.vboxPlot.addWidget(self.plot)
+        self.vboxPlot.addStretch(4)
+        self.plotGroupBox.setLayout(self.vboxPlot)
+        mainGrid.addWidget(self.plotGroupBox, 15,0)
+        self.updatePlot()
+
+    def updatePlot(self):
+        #get the coordinate of the beam
+        x = self.Bx.value()
+        y = self.By.value()
+        #set the beam to the plot
+        self.plot.plot([x], [y], clear=True, symbol='o', symbolBrush=.5)
+
 #The following val_changed functions are activated when the slider values change. And the IO pins output accordingly.
     def updateBx(self):
         DataSets.windowHandle.refreshDataSets()
         value = self.Bx.value()
         halfVal = round(value/2,2)
-        if value > 0:
-            Hardware.IO.setAnalog('Bx1',halfVal)
-            Hardware.IO.setAnalog('Bx2',-halfVal)
-        else:
-            Hardware.IO.setAnalog('Bx1',-halfVal)
-            Hardware.IO.setAnalog('Bx2',halfVal)
+        Hardware.IO.setAnalog('Bx2',halfVal)
+        Hardware.IO.setAnalog('Bx1',-halfVal)
+        self.updatePlot()
 
     def BxIncrementChange(self):
         self.Bx.setSingleStep(float(self.BxIncrement.currentText()))
@@ -427,12 +434,9 @@ class popWindow(QWidget):
         DataSets.windowHandle.refreshDataSets()
         value = self.By.value()
         halfVal = round(value/2,2)
-        if value > 0:
-            Hardware.IO.setAnalog('By1',halfVal)
-            Hardware.IO.setAnalog('By2',-halfVal)
-        else:
-            Hardware.IO.setAnalog('By1',-halfVal)
-            Hardware.IO.setAnalog('By2',halfVal)
+        Hardware.IO.setAnalog('By2',halfVal)
+        Hardware.IO.setAnalog('By1',-halfVal)
+        self.updatePlot()
 
     def ByIncrementChange(self):
         self.By.setSingleStep(float(self.ByIncrement.currentText()))
@@ -458,14 +462,18 @@ class popWindow(QWidget):
 
     def val_changed_Xin(self):
         DataSets.windowHandle.refreshDataSets()
-        self.widget5.setText("Xin: " + str(self.slider4.value()/100))
-        Hardware.IO.setAnalog('Xin',self.slider4.value()/100)
+        Hardware.IO.setAnalog('Xin',self.Xin.value())
+
+    def XinIncrementChange(self):
+        self.Xin.setSingleStep(float(self.XinIncrement.currentText()))
 
 
     def val_changed_Yin(self):
         DataSets.windowHandle.refreshDataSets()
-        self.widget6.setText("Yin: " + str(self.slider5.value()/100))
-        Hardware.IO.setAnalog('Yin',self.slider5.value()/100)
+        Hardware.IO.setAnalog('Yin',self.Yin.value())
+
+    def YinIncrementChange(self):
+        self.Yin.setSingleStep(float(self.YinIncrement.currentText()))
 
     def val_changed_Bx2(self):
         DataSets.windowHandle.refreshDataSets()

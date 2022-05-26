@@ -30,7 +30,7 @@ import importlib
 
 from AddOnModules import Hardware, UI_U_DataSets
 import pyqtgraph as pg
-buttonName = 'Apertures'                #name of the button on the main window that links to this code
+buttonName = 'Scanner'                #name of the button on the main window that links to this code
 windowHandle = None                     #a handle to the window on a global scope
 
 import time
@@ -115,7 +115,7 @@ class popWindow(QWidget):
         mainGrid.addWidget(self.panYIncrement, 3, 3, alignment=QtCore.Qt.AlignHCenter)
 
         #name the window
-        self.setWindowTitle('Aperture Motion')
+        self.setWindowTitle('Scanner')
         
         #Setting up for zoom
         self.zoom = QSpinBox()
