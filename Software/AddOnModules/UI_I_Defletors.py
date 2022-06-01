@@ -145,8 +145,8 @@ class popWindow(QWidget):
         self.colorLabel = QLabel("Color: ", self)  # Add a label called Color
 
         self.colorBox = QComboBox()
-        self.colorBox.addItems(
-            ['Green', 'Blue', 'Grey', 'Red', 'Yellow', 'Orange', 'White', 'Purple'])
+        self.colorList = ['Green', 'Blue', 'Grey', 'Red', 'Yellow', 'Orange', 'White', 'Purple']
+        self.colorBox.addItems(self.colorList)
         self.colorBox.setCurrentIndex(0)
 
         self.nbox.addWidget(self.colorLabel)
@@ -192,7 +192,7 @@ class popWindow(QWidget):
         self.VnSBox.addWidget(self.slopeInput)
         self.VnS.setLayout(self.VnSBox)
 
-        self.advancedLayout.addWidget(self.offsets, 2, 0)
+        self.advancedLayout.addWidget(self.VnS, 2, 0)
 
         # self.pinsLabel = QLabel("Pins", self)
         # self.advancedLayout.addWidget(
@@ -253,14 +253,95 @@ class popWindow(QWidget):
 
         # set up for two buttons
         self.backBtn = QPushButton('Back')
-        self.saveBtn = QPushButton("Save")
+        self.saveBtn = QPushButton('Save')
+        self.addBtn = QPushButton('Add')
         self.tabLayout.addWidget(self.backBtn, 1, 0, QtCore.Qt.AlignLeft)
+        self.tabLayout.addWidget(self.addBtn, 1, 0, QtCore.Qt.AlignHCenter)
         self.tabLayout.addWidget(self.saveBtn, 1, 0, QtCore.Qt.AlignRight)
 
         self.advancedWindows.setLayout(self.tabLayout)
 
+
+        # read data
+        self.readDataFile()
+        self.tabList = []
+        self.adTabList = []
+        for i in range(len(self.settings)):
+            name = self.settings[i].attrib['name']
+            w = QWidget()
+            aw = QWidget()
+            w.setLayout(self.deflectorLayout)
+            aw.setLayout(self.advancedLayout)
+            self.tabList.append(w)
+            self.adTabList.append(aw)
+            self.tabs.addTab(w, name)
+            self.adTabs.addTab(aw, name)
+
+        #set default for both windows
+        self.tabs.setCurrentIndex(0)
+        self.adTabs.setCurrentIndex(0)
+        self.loadData(0)
+        self.loadAdvancedData(0)
+        self.tabs.currentChanged.connect(lambda: self.loadData(self.tabs.currentIndex()))
+        self.adTabs.currentChanged.connect(lambda: self.loadAdvancedData(self.adTabs.currentIndex()))
     def advancedSettings(self):
         self.advancedWindows.show()
+
+    def readDataFile(self):
+        #check to see if the user data set file is present
+        cwd = os.getcwd() + '/AddOnModules/SaveFiles'  # Get the current working directory (cwd)
+        files = os.listdir(cwd)  # Get all the files in that directory
+        if not 'DeflectorSettings.xml' in files:
+            print('No Setting files, will create one')
+            tree = ET.Element('Settings')
+            #format the entire xml file nicely so it is human readable and indented - encode it to a byte-string
+            xmlString = ET.tostring(tree, 'utf-8', method='xml')
+            #now decode it to an actual string
+            xmlString = xmlString.decode()
+            #remove all newlines because new additions don't have newlines
+            xmlString = xmlString.replace('\n','')
+            #remove all double-spaces (aka portions of tabs) because new additions don't have spaces
+            xmlString = xmlString.replace('  ','')
+            #use minidom (instead of elementTree) to parse in the string back into xml
+            domTree = minidom.parseString(xmlString)
+            #write to file
+            with open(os.getcwd() + '/AddOnModules/SaveFiles/DeflectorSettings.xml', 'w') as pid:
+                domTree.writexml(pid, encoding='utf-8', indent='', addindent='    ', newl='\n')
+            return
+        else:
+            #pull out the xml structure from the user data sets file
+            tree = ET.parse(cwd + '/DeflectorSettings.xml')
+        
+        #get the root xml structure
+        self.settings = tree.getroot()
+        if len(self.settings) == 0:
+            print('No Deflector found, please add one')
+            self.advancedWindows.show()
+
+    def loadData(self, index):
+        data = self.settings[index]
+        self.voltage = int(data.get('voltage'))
+        self.Bx.setMinimum(-self.voltage)
+        self.By.setMinimum(-self.voltage)
+        self.Bx.setMaximum(self.voltage)
+        self.By.setMaximum(self.voltage)
+        self.xOffset = float(data.get('xOffset'))
+        self.yOffset = float(data.get('yOffset'))
+        self.slope = float(data.get('slope'))
+
+    def loadAdvancedData(self, index):
+        data = self.settings[index]
+        self.nameInput.setText(data.attrib['name'])
+        self.colorBox.setCurrentIndex(self.colorList.index(data.get('Coulor')))
+        self.xOffInput.setText(data.get('xOffset'))
+        self.yOffInput.setText(data.get('yOffset'))
+        self.votageInput.setText(data.get('voltage'))
+        self.slopeInput.setText(data.get('slope'))
+        # TODO: load for pins
+
+
+
+
 
 # ****************************************************************************************************************
 # BREAK - DO NOT MODIFY CODE BELOW HERE OR MAIN WINDOW'S EXECUTION MAY CRASH
