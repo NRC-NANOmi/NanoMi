@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Settings>
+    <D1>
+        <colour>Red</colour>
+        <xOffset>1</xOffset>
+        <yOffset>0</yOffset>
+        <voltage>70</voltage>
+        <slope>70</slope>
+        <Bx1/>
+        <Bx2/>
+        <By1/>
+        <By2/>
+    </D1>
+    <Deflector2>
+        <colour>Green</colour>
+        <xOffset>1</xOffset>
+        <yOffset>1</yOffset>
+        <voltage>1</voltage>
+        <slope>1</slope>
+        <Bx1/>
+        <Bx2/>
+        <By1/>
+        <By2/>
+    </Deflector2>
+</Settings>
