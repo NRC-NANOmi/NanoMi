@@ -4,6 +4,7 @@ import os                         # allow us to access other files
 # import the necessary aspects of PyQt5 for this user interface window
 from PyQt5.QtWidgets import QWidget, QPushButton, QApplication, QLabel, QMessageBox, QTabWidget, QGridLayout, QLineEdit, QListWidget, QTableWidget, QTableWidgetItem, QGroupBox, QDoubleSpinBox, QComboBox, QHBoxLayout
 from PyQt5 import QtCore, QtGui, QtWidgets
+from AddOnModules import Hardware
 import pyqtgraph as pg
 import datetime
 import importlib
@@ -42,6 +43,8 @@ class popWindow(QWidget):
         self.currentData = []
         # def the tabs
         self.tabs = QTabWidget()
+
+        self.AOList = list(Hardware.IO.AoNames.keys())
         # TODO: Writing loading from xml files, then create tabs depending on the number of deflectors
         # self.testTab = QWidget()
         # self.tabs.addTab(self.testTab, 'Deflector1')
@@ -216,8 +219,9 @@ class popWindow(QWidget):
         self.xPins = QGroupBox('Pins')
         self.Bx1Label = QLabel("Bx1: ", self)  # Add a label called Name
         self.Bx1Drawer = QComboBox()
-        self.Bx1Drawer.addItems(['test'])
+        self.Bx1Drawer.addItems(self.AOList)
         self.Bx1Drawer.setCurrentIndex(0)
+        self.Bx1Drawer.currentIndexChanged.connect(lambda: self.updateBx1())
 
         self.xPinBox = QHBoxLayout()  # box containing the first slider for controlling Bx1
         self.xPinBox.addWidget(self.Bx1Label)
@@ -227,8 +231,9 @@ class popWindow(QWidget):
         self.Bx2Label = QLabel("Bx2: ", self)  # Add a label called Color
 
         self.Bx2Drawer = QComboBox()
-        self.Bx2Drawer.addItems(['test'])
+        self.Bx2Drawer.addItems(self.AOList)
         self.Bx2Drawer.setCurrentIndex(0)
+        self.Bx2Drawer.currentIndexChanged.connect(lambda: self.updateBx2())
 
         self.xPinBox.addWidget(self.Bx2Label)
         self.xPinBox.addWidget(self.Bx2Drawer)
@@ -240,8 +245,9 @@ class popWindow(QWidget):
         self.yPins = QGroupBox()
         self.By1Label = QLabel("By1: ", self)  # Add a label called Name
         self.By1Drawer = QComboBox()
-        self.By1Drawer.addItems(['test'])
+        self.By1Drawer.addItems(self.AOList)
         self.By1Drawer.setCurrentIndex(0)
+        self.By1Drawer.currentIndexChanged.connect(lambda: self.updateBy1())
 
         self.yPinBox = QHBoxLayout()  # box containing the first slider for controlling Bx1
         self.yPinBox.addWidget(self.By1Label)
@@ -251,8 +257,9 @@ class popWindow(QWidget):
         self.By2Label = QLabel("By2: ", self)  # Add a label called Color
 
         self.By2Drawer = QComboBox()
-        self.By2Drawer.addItems(['test'])
+        self.By2Drawer.addItems(self.AOList)
         self.By2Drawer.setCurrentIndex(0)
+        self.By2Drawer.currentIndexChanged.connect(lambda: self.updateBy2())
 
         self.yPinBox.addWidget(self.By2Label)
         self.yPinBox.addWidget(self.By2Drawer)
@@ -331,6 +338,7 @@ class popWindow(QWidget):
             self.createNewDeflector()
 
     def loadData(self, index):
+        print(index)
         self.tabList[index].setLayout(self.deflectorLayout)
         data = self.settings[index]
         self.voltage = int(data.find('voltage').text)
@@ -355,19 +363,22 @@ class popWindow(QWidget):
         self.BxIncrement.setCurrentIndex(0)
         self.ByIncrement.setCurrentIndex(0)
 
-    def foo(self):
-        pass
 
     def loadAdvancedData(self, index):
         self.adTabList[index].setLayout(self.advancedLayout)
         data = self.tempSettings[index]
         self.nameInput.setText(data.tag)
-        self.colorBox.setCurrentIndex(self.colorList.index(data.find('colour').text))
+        if data.find('colour').text:
+            self.colorBox.setCurrentIndex(self.colorList.index(data.find('colour').text))
         self.xOffInput.setText(data.find('xOffset').text)
         self.yOffInput.setText(data.find('yOffset').text)
         self.voltageInput.setText(data.find('voltage').text)
         self.slopeInput.setText(data.find('slope').text)
-        # TODO: load for pins
+        if data.find('Bx1').text:
+            self.Bx1Drawer.setCurrentIndex(self.AOList.index(data.find('Bx1').text))
+            self.Bx2Drawer.setCurrentIndex(self.AOList.index(data.find('Bx2').text))
+            self.By1Drawer.setCurrentIndex(self.AOList.index(data.find('By1').text))
+            self.By2Drawer.setCurrentIndex(self.AOList.index(data.find('By2').text))
 
     def createNewDeflector(self):
         newElement = ET.SubElement(self.tempSettings, 'Deflector'+str(len(self.adTabList)))
@@ -429,20 +440,37 @@ class popWindow(QWidget):
         name = self.nameInput.text()
         deflector = self.tempSettings[self.adTabs.currentIndex()]
         deflector.tag = name
-        print(self.tempSettings[self.adTabs.currentIndex()].tag)
 
     
     def updateColour(self):
         color = self.colorList[self.colorBox.currentIndex()]
         deflector = self.tempSettings[self.adTabs.currentIndex()]
         deflector.find('colour').text = color
-        print(self.tempSettings[self.adTabs.currentIndex()].find('colour').text)
+
+    def updateBx1(self):
+        Bx1 = self.AOList[self.Bx1Drawer.currentIndex()]
+        deflector = self.tempSettings[self.adTabs.currentIndex()]
+        deflector.find('Bx1').text = Bx1
+
+    def updateBx2(self):
+        Bx2 = self.AOList[self.Bx2Drawer.currentIndex()]
+        deflector = self.tempSettings[self.adTabs.currentIndex()]
+        deflector.find('Bx2').text = Bx2
+
+    def updateBy1(self):
+        By1 = self.AOList[self.By1Drawer.currentIndex()]
+        deflector = self.tempSettings[self.adTabs.currentIndex()]
+        deflector.find('By1').text = By1
+
+    def updateBy2(self):
+        By2 = self.AOList[self.By2Drawer.currentIndex()]
+        deflector = self.tempSettings[self.adTabs.currentIndex()]
+        deflector.find('By2').text = By2
 
     def updateXOffset(self):
         x = self.xOffInput.text()
         deflector = self.tempSettings[self.adTabs.currentIndex()]
         deflector.find('xOffset').text = x
-        print(self.tempSettings[self.adTabs.currentIndex()].find('xOffset').text)
 
     def updateYOffset(self):
         y = self.yOffInput.text()
@@ -491,7 +519,6 @@ class popWindow(QWidget):
             color = self.settings[i].find('colour').text
             maxVoltage = max(maxVoltage, int(self.settings[i].find('voltage').text))
             w = QWidget()
-            w.setLayout(self.deflectorLayout)
             self.currentData.append({'x':0, 'y': 0, 'colour': color})
             self.tabList.append(w)
             self.tabs.addTab(w, name)
@@ -504,7 +531,6 @@ class popWindow(QWidget):
         for i in range(len(self.tempSettings)):
             name = self.tempSettings[i].tag
             aw = QWidget()
-            aw.setLayout(self.advancedLayout)
             self.adTabList.append(aw)
             self.adTabs.addTab(aw, name)
         
