@@ -39,6 +39,7 @@ class popWindow(QWidget):
 
         self.tabList = []
         self.adTabList = []
+        self.currentData = []
         # def the tabs
         self.tabs = QTabWidget()
         # TODO: Writing loading from xml files, then create tabs depending on the number of deflectors
@@ -60,14 +61,14 @@ class popWindow(QWidget):
         self.Bx.setValue(0)
         self.Bx.setSingleStep(0.01)
         # TODO: Add the updateX functionality
-        # self.Bx.valueChanged.connect(lambda: self.updateBx())
+        self.Bx.valueChanged.connect(lambda: self.updateBx())
 
         self.BxIncrement = QComboBox()
         # TODO: Add changable size
         self.BxIncrement.addItems(
             ['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5'])
         self.BxIncrement.setCurrentIndex(0)
-        # self.BxIncrement.currentIndexChanged.connect(self.BxIncrementChange)
+        self.BxIncrement.currentIndexChanged.connect(self.BxIncrementChange)
 
         self.vbox = QHBoxLayout()  # box containing the first slider for controlling Bx1
         self.vbox.addWidget(self.xLabel)
@@ -82,13 +83,13 @@ class popWindow(QWidget):
         self.By.setMaximum(10)
         self.By.setValue(0)
         self.By.setSingleStep(0.01)
-        # self.By.valueChanged.connect(lambda: self.updateBy())
+        self.By.valueChanged.connect(lambda: self.updateBy())
 
         self.ByIncrement = QComboBox()
         self.ByIncrement.addItems(
             ['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5'])
         self.ByIncrement.setCurrentIndex(0)
-        # self.ByIncrement.currentIndexChanged.connect(self.ByIncrementChange)
+        self.ByIncrement.currentIndexChanged.connect(self.ByIncrementChange)
 
         self.vbox.addWidget(self.label6)
         self.vbox.addWidget(self.By)
@@ -117,6 +118,7 @@ class popWindow(QWidget):
 
         self.plot.getPlotItem().showAxis('top')
         self.plot.getPlotItem().showAxis('right')
+        self.updatePlot()
 
         # actually add the main overall grid to the popup window
         self.mainGrid.addWidget(self.tabs, 0, 0)
@@ -151,7 +153,7 @@ class popWindow(QWidget):
         self.colorLabel = QLabel("Color: ", self)  # Add a label called Color
 
         self.colorBox = QComboBox()
-        self.colorList = ['Green', 'Blue', 'Grey', 'Red', 'Yellow', 'Orange', 'White', 'Purple']
+        self.colorList = ['green', 'blue', 'grey', 'red', 'yellow', 'orange', 'white', 'purple']
         self.colorBox.addItems(self.colorList)
         self.colorBox.setCurrentIndex(0)
         self.colorBox.currentIndexChanged.connect(lambda: self.updateColour())
@@ -277,16 +279,8 @@ class popWindow(QWidget):
 
         # read data
         self.readDataFile()
-        for i in range(len(self.settings)):
-            name = self.settings[i].tag
-            w = QWidget()
-            aw = QWidget()
-            w.setLayout(self.deflectorLayout)
-            aw.setLayout(self.advancedLayout)
-            self.tabList.append(w)
-            self.adTabList.append(aw)
-            self.tabs.addTab(w, name)
-            self.adTabs.addTab(aw, name)
+        self.refreshTabs()
+        self.refreshAdtabs()
 
         #set default for both windows
         self.tabs.setCurrentIndex(0)
@@ -296,7 +290,7 @@ class popWindow(QWidget):
             self.loadAdvancedData(0)
         self.tabs.currentChanged.connect(lambda: self.loadData(self.tabs.currentIndex()))
         self.adTabs.currentChanged.connect(lambda: self.loadAdvancedData(self.adTabs.currentIndex()))
-
+        self.updatePlot()
         
 
     def advancedSettings(self):
@@ -340,13 +334,29 @@ class popWindow(QWidget):
         self.tabList[index].setLayout(self.deflectorLayout)
         data = self.settings[index]
         self.voltage = int(data.find('voltage').text)
-        self.Bx.setMinimum(-self.voltage)
-        self.By.setMinimum(-self.voltage)
-        self.Bx.setMaximum(self.voltage)
-        self.By.setMaximum(self.voltage)
+        if abs(self.Bx.value()) > self.voltage or abs(self.By.value()) > self.voltage:
+            self.Bx.setValue(self.currentData[index]['x'])
+            self.By.setValue(self.currentData[index]['y'])
+            self.Bx.setMinimum(-self.voltage)
+            self.By.setMinimum(-self.voltage)
+            self.Bx.setMaximum(self.voltage)
+            self.By.setMaximum(self.voltage)
+        else:
+            self.Bx.setMinimum(-self.voltage)
+            self.By.setMinimum(-self.voltage)
+            self.Bx.setMaximum(self.voltage)
+            self.By.setMaximum(self.voltage)
+            self.Bx.setValue(self.currentData[index]['x'])
+            self.By.setValue(self.currentData[index]['y'])
+
         self.xOffset = float(data.find('xOffset').text)
         self.yOffset = float(data.find('yOffset').text)
         self.slope = float(data.find('slope').text)
+        self.BxIncrement.setCurrentIndex(0)
+        self.ByIncrement.setCurrentIndex(0)
+
+    def foo(self):
+        pass
 
     def loadAdvancedData(self, index):
         self.adTabList[index].setLayout(self.advancedLayout)
@@ -408,7 +418,12 @@ class popWindow(QWidget):
 
         self.settings = copy.deepcopy(self.tempSettings)
         self.refreshTabs()
+        self.tabs.setCurrentIndex(self.tabs.currentIndex())
+        self.loadData(self.tabs.currentIndex())
         self.refreshAdtabs()
+        self.adTabs.setCurrentIndex(self.adTabs.currentIndex())
+        self.loadAdvancedData(self.adTabs.currentIndex())
+
 
     def updateName(self):
         name = self.nameInput.text()
@@ -444,22 +459,46 @@ class popWindow(QWidget):
         deflector = self.tempSettings[self.adTabs.currentIndex()]
         deflector.find('slope').text = s
 
+    def updateBx(self):
+        v = self.Bx.value()
+        self.currentData[self.tabs.currentIndex()]['x'] = v
+        self.updatePlot()
+        #add real update from to pins
+        print('update Bx for Deflector', self.tabs.currentIndex(), 'to', v)
+
+    def updateBy(self):
+        v = self.By.value()
+        self.currentData[self.tabs.currentIndex()]['y'] = v
+        self.updatePlot()
+        #add real update from to pins
+        print('update Bx for Deflector', self.tabs.currentIndex(), 'to', v)
+
+    def BxIncrementChange(self):
+        #get the value from the spinner, turns into int then set single step of panX as it
+        self.Bx.setSingleStep(float(self.BxIncrement.currentText()))
+
+    def ByIncrementChange(self):
+        #get the value from the spinner, turns into int then set single step of panY as it
+        self.By.setSingleStep(float(self.ByIncrement.currentText()))    
+
     def refreshTabs(self):
-        index = self.tabs.currentIndex()
+        self.currentData.clear()
         self.tabs.clear()
         self.tabList.clear()
+        maxVoltage = 0
         for i in range(len(self.settings)):
             name = self.settings[i].tag
+            color = self.settings[i].find('colour').text
+            maxVoltage = max(maxVoltage, int(self.settings[i].find('voltage').text))
             w = QWidget()
             w.setLayout(self.deflectorLayout)
+            self.currentData.append({'x':0, 'y': 0, 'colour': color})
             self.tabList.append(w)
             self.tabs.addTab(w, name)
-        
-        self.tabs.setCurrentIndex(index)
-        self.loadData(index)
+        self.plot.setXRange(-maxVoltage, maxVoltage)
+        self.plot.setYRange(-maxVoltage, maxVoltage)
     
     def refreshAdtabs(self):
-        index = self.adTabs.currentIndex()
         self.adTabs.clear()
         self.adTabList.clear()
         for i in range(len(self.tempSettings)):
@@ -469,13 +508,20 @@ class popWindow(QWidget):
             self.adTabList.append(aw)
             self.adTabs.addTab(aw, name)
         
-        self.adTabs.setCurrentIndex(index)
-        self.loadAdvancedData(index)
+
 
     def back(self):
         self.advancedWindows.close()
         self.tempSettings = copy.deepcopy(self.settings)
         self.refreshAdtabs()
+        index = self.adTabs.currentIndex()
+        self.adTabs.setCurrentIndex(index)
+        self.loadAdvancedData(index)
+
+    def updatePlot(self):
+        self.plot.clear()
+        for i in self.currentData:
+            self.plot.plot([i['x']], [i['y']], pen=i['colour'][0], symbol='o', symbolBrush=.5)
 # ****************************************************************************************************************
 # BREAK - DO NOT MODIFY CODE BELOW HERE OR MAIN WINDOW'S EXECUTION MAY CRASH
 # ****************************************************************************************************************
