@@ -286,8 +286,8 @@ class popWindow(QWidget):
 
         # read data
         self.readDataFile()
-        self.refreshTabs()
-        self.refreshAdtabs()
+        self.loadTabs()
+        self.loadAdtabs()
 
         #set default for both windows
         self.tabs.setCurrentIndex(0)
@@ -434,7 +434,7 @@ class popWindow(QWidget):
             self.refreshTabs()
             self.tabs.setCurrentIndex(self.tabs.currentIndex())
             self.loadData(self.tabs.currentIndex())
-            self.refreshAdtabs()
+            self.loadAdtabs()
             self.adTabs.setCurrentIndex(self.adTabs.currentIndex())
             self.loadAdvancedData(self.adTabs.currentIndex())
 
@@ -512,7 +512,7 @@ class popWindow(QWidget):
         #get the value from the spinner, turns into int then set single step of panY as it
         self.By.setSingleStep(float(self.ByIncrement.currentText()))    
 
-    def refreshTabs(self):
+    def loadTabs(self):
         self.currentData.clear()
         self.tabs.clear()
         self.tabList.clear()
@@ -529,7 +529,7 @@ class popWindow(QWidget):
         self.plot.setXRange(-maxVoltage, maxVoltage)
         self.plot.setYRange(-maxVoltage, maxVoltage)
     
-    def refreshAdtabs(self):
+    def loadAdtabs(self):
         self.adTabs.clear()
         self.adTabList.clear()
         for i in range(len(self.tempSettings)):
@@ -537,6 +537,24 @@ class popWindow(QWidget):
             aw = QWidget()
             self.adTabList.append(aw)
             self.adTabs.addTab(aw, name)
+
+
+    def refreshTabs(self):
+        self.currentData.clear()
+        maxVoltage = 0
+        if (self.tabs.count() < len(self.settings)):
+            while self.tabs.count() != len(self.settings):
+                w = QWidget()
+                self.tabList.append(w)
+                self.tabs.addTab(w, 'temp')
+        for i in range(len(self.settings)):
+            name = self.settings[i].tag
+            color = self.settings[i].find('colour').text
+            maxVoltage = max(maxVoltage, int(self.settings[i].find('voltage').text))
+            self.currentData.append({'x':0, 'y': 0, 'colour': color})
+            self.tabs.setTabText(i, name)
+            self.tabs.tabBar().setTabTextColor(i, QtGui.QColor(color))
+
         
 
 
@@ -545,7 +563,7 @@ class popWindow(QWidget):
         if reply == QMessageBox.Yes:
             self.advancedWindows.close()
             self.tempSettings = copy.deepcopy(self.settings)
-            self.refreshAdtabs()
+            self.loadAdtabs()
             index = self.adTabs.currentIndex()
             self.adTabs.setCurrentIndex(index)
             self.loadAdvancedData(index)
