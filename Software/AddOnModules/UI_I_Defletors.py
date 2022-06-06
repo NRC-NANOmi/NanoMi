@@ -156,7 +156,7 @@ class popWindow(QWidget):
         self.colorLabel = QLabel("Color: ", self)  # Add a label called Color
 
         self.colorBox = QComboBox()
-        self.colorList = ['green', 'blue', 'grey', 'red', 'yellow', 'orange', 'white', 'purple']
+        self.colorList = ['green', 'blue', 'gray', 'red', 'yellow', 'cyan', 'magenta', 'darkRed']
         self.colorBox.addItems(self.colorList)
         self.colorBox.setCurrentIndex(0)
         self.colorBox.currentIndexChanged.connect(lambda: self.updateColour())
@@ -414,26 +414,29 @@ class popWindow(QWidget):
         self.By1Drawer.setCurrentIndex(0)
 
     def saveSettings(self):
-        xmlString = ET.tostring(self.tempSettings, 'utf-8', method='xml')
-        #now decode it to an actual string
-        xmlString = xmlString.decode()
-        #remove all newlines because new additions don't have newlines
-        xmlString = xmlString.replace('\n','')
-        #remove all double-spaces (aka portions of tabs) because new additions don't have spaces
-        xmlString = xmlString.replace('  ','')
-        #use minidom (instead of elementTree) to parse in the string back into xml
-        domTree = minidom.parseString(xmlString)
-        #write to file
-        with open(os.getcwd() + '/AddOnModules/SaveFiles/DeflectorSettings.xml', 'w') as pid:
-            domTree.writexml(pid, encoding='utf-8', indent='', addindent='    ', newl='\n')
+        reply = QMessageBox.question(self, 'Save', "Saving new advanced setting will reset all your deflectors' data, press Yes to confirm", QMessageBox.Yes, QMessageBox.No)
 
-        self.settings = copy.deepcopy(self.tempSettings)
-        self.refreshTabs()
-        self.tabs.setCurrentIndex(self.tabs.currentIndex())
-        self.loadData(self.tabs.currentIndex())
-        self.refreshAdtabs()
-        self.adTabs.setCurrentIndex(self.adTabs.currentIndex())
-        self.loadAdvancedData(self.adTabs.currentIndex())
+        if reply == QMessageBox.Yes:
+            xmlString = ET.tostring(self.tempSettings, 'utf-8', method='xml')
+            #now decode it to an actual string
+            xmlString = xmlString.decode()
+            #remove all newlines because new additions don't have newlines
+            xmlString = xmlString.replace('\n','')
+            #remove all double-spaces (aka portions of tabs) because new additions don't have spaces
+            xmlString = xmlString.replace('  ','')
+            #use minidom (instead of elementTree) to parse in the string back into xml
+            domTree = minidom.parseString(xmlString)
+            #write to file
+            with open(os.getcwd() + '/AddOnModules/SaveFiles/DeflectorSettings.xml', 'w') as pid:
+                domTree.writexml(pid, encoding='utf-8', indent='', addindent='    ', newl='\n')
+
+            self.settings = copy.deepcopy(self.tempSettings)
+            self.refreshTabs()
+            self.tabs.setCurrentIndex(self.tabs.currentIndex())
+            self.loadData(self.tabs.currentIndex())
+            self.refreshAdtabs()
+            self.adTabs.setCurrentIndex(self.adTabs.currentIndex())
+            self.loadAdvancedData(self.adTabs.currentIndex())
 
 
     def updateName(self):
@@ -522,6 +525,7 @@ class popWindow(QWidget):
             self.currentData.append({'x':0, 'y': 0, 'colour': color})
             self.tabList.append(w)
             self.tabs.addTab(w, name)
+            self.tabs.tabBar().setTabTextColor(i, QtGui.QColor(color))
         self.plot.setXRange(-maxVoltage, maxVoltage)
         self.plot.setYRange(-maxVoltage, maxVoltage)
     
@@ -537,12 +541,14 @@ class popWindow(QWidget):
 
 
     def back(self):
-        self.advancedWindows.close()
-        self.tempSettings = copy.deepcopy(self.settings)
-        self.refreshAdtabs()
-        index = self.adTabs.currentIndex()
-        self.adTabs.setCurrentIndex(index)
-        self.loadAdvancedData(index)
+        reply = QMessageBox.question(self, 'Back', 'Go Back will lose all unsaved advance setting, press Yes to confirm', QMessageBox.Yes, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            self.advancedWindows.close()
+            self.tempSettings = copy.deepcopy(self.settings)
+            self.refreshAdtabs()
+            index = self.adTabs.currentIndex()
+            self.adTabs.setCurrentIndex(index)
+            self.loadAdvancedData(index)
 
     def updatePlot(self):
         self.plot.clear()
