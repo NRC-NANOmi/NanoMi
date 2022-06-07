@@ -45,6 +45,7 @@ class popWindow(QWidget):
         self.tabs = QTabWidget()
 
         self.AOList = list(Hardware.IO.AoNames.keys())
+        self.AOList.insert(0,'')
         # TODO: Writing loading from xml files, then create tabs depending on the number of deflectors
         # self.testTab = QWidget()
         # self.tabs.addTab(self.testTab, 'Deflector1')
@@ -291,10 +292,10 @@ class popWindow(QWidget):
 
         #set default for both windows
         self.tabs.setCurrentIndex(0)
-        self.adTabs.setCurrentIndex(0)
         if len(self.settings) > 0:
             self.loadData(0)
             self.loadAdvancedData(0)
+            self.adTabs.setCurrentIndex(0)
         self.tabs.currentChanged.connect(lambda: self.loadData(self.tabs.currentIndex()))
         self.adTabs.currentChanged.connect(lambda: self.loadAdvancedData(self.adTabs.currentIndex()))
         self.updatePlot()
@@ -374,11 +375,42 @@ class popWindow(QWidget):
         self.yOffInput.setText(data.find('yOffset').text)
         self.voltageInput.setText(data.find('voltage').text)
         self.slopeInput.setText(data.find('slope').text)
+        #check if it's new created
         if data.find('Bx1').text:
-            self.Bx1Drawer.setCurrentIndex(self.AOList.index(data.find('Bx1').text))
-            self.Bx2Drawer.setCurrentIndex(self.AOList.index(data.find('Bx2').text))
-            self.By1Drawer.setCurrentIndex(self.AOList.index(data.find('By1').text))
-            self.By2Drawer.setCurrentIndex(self.AOList.index(data.find('By2').text))
+            #check if the saved pin exists
+            if data.find('Bx1').text not in self.AOList:
+                self.AOList.append(data.find('Bx1').text + '-unfound')
+                self.Bx1Drawer.clear()
+                self.Bx1Drawer.addItems(self.AOList)
+                self.Bx1Drawer.setCurrentIndex(len(self.AOList)-1)
+            else:
+                self.Bx1Drawer.setCurrentIndex(self.AOList.index(data.find('Bx1').text))
+            if data.find('Bx2').text not in self.AOList:
+                self.AOList.append(data.find('Bx2').text + '-unfound')
+                self.Bx2Drawer.clear()
+                self.Bx2Drawer.addItems(self.AOList)
+                self.Bx2Drawer.setCurrentIndex(len(self.AOList)-1)
+            else:   
+                self.Bx2Drawer.setCurrentIndex(self.AOList.index(data.find('Bx2').text))
+            if data.find('By1').text not in self.AOList:
+                self.AOList.append(data.find('By1').text + '-unfound')
+                self.By1Drawer.clear()
+                self.By1Drawer.addItems(self.AOList)
+                self.By1Drawer.setCurrentIndex(len(self.AOList)-1)
+            else:
+                self.By1Drawer.setCurrentIndex(self.AOList.index(data.find('By1').text))
+            if data.find('By2').text not in self.AOList:
+                self.AOList.append(data.find('By2').text + '-unfound')
+                self.By2Drawer.clear()
+                self.By2Drawer.addItems(self.AOList)
+                self.By2Drawer.setCurrentIndex(len(self.AOList)-1)
+            else:
+                self.By2Drawer.setCurrentIndex(self.AOList.index(data.find('By2').text))
+        else:
+           self.Bx1Drawer.setCurrentIndex(0)
+           self.Bx2Drawer.setCurrentIndex(0) 
+           self.By1Drawer.setCurrentIndex(0) 
+           self.By2Drawer.setCurrentIndex(0) 
 
     def createNewDeflector(self):
         newElement = ET.SubElement(self.tempSettings, 'Deflector'+str(len(self.adTabList)))
@@ -434,39 +466,46 @@ class popWindow(QWidget):
             self.refreshTabs()
             self.tabs.setCurrentIndex(self.tabs.currentIndex())
             self.loadData(self.tabs.currentIndex())
-            self.loadAdtabs()
-            self.adTabs.setCurrentIndex(self.adTabs.currentIndex())
-            self.loadAdvancedData(self.adTabs.currentIndex())
 
 
     def updateName(self):
         name = self.nameInput.text()
         deflector = self.tempSettings[self.adTabs.currentIndex()]
         deflector.tag = name
+        self.refreshAdtabs()
 
     
     def updateColour(self):
         color = self.colorList[self.colorBox.currentIndex()]
         deflector = self.tempSettings[self.adTabs.currentIndex()]
         deflector.find('colour').text = color
+        self.refreshAdtabs()
 
     def updateBx1(self):
         Bx1 = self.AOList[self.Bx1Drawer.currentIndex()]
+        if len(Bx1) > 9 and Bx1[-7:] == "unfound":
+            Bx1 = Bx1[:-8]
         deflector = self.tempSettings[self.adTabs.currentIndex()]
         deflector.find('Bx1').text = Bx1
 
     def updateBx2(self):
         Bx2 = self.AOList[self.Bx2Drawer.currentIndex()]
+        if len(Bx2) > 9 and Bx2[-7:] == "unfound":
+            Bx2 = Bx2[:-8]
         deflector = self.tempSettings[self.adTabs.currentIndex()]
         deflector.find('Bx2').text = Bx2
 
     def updateBy1(self):
         By1 = self.AOList[self.By1Drawer.currentIndex()]
+        if len(By1) > 9 and By1[-7:] == "unfound":
+            By1 = By1[:-8]
         deflector = self.tempSettings[self.adTabs.currentIndex()]
         deflector.find('By1').text = By1
 
     def updateBy2(self):
         By2 = self.AOList[self.By2Drawer.currentIndex()]
+        if len(By2) > 9 and By2[-7:] == "unfound":
+            By2 = By2[:-8]
         deflector = self.tempSettings[self.adTabs.currentIndex()]
         deflector.find('By2').text = By2
 
@@ -534,9 +573,25 @@ class popWindow(QWidget):
         self.adTabList.clear()
         for i in range(len(self.tempSettings)):
             name = self.tempSettings[i].tag
+            color = self.tempSettings[i].find('colour').text
             aw = QWidget()
             self.adTabList.append(aw)
             self.adTabs.addTab(aw, name)
+            self.adTabs.tabBar().setTabTextColor(i, QtGui.QColor(color))
+
+
+    def refreshAdtabs(self):
+        if (self.adTabs.count() < len(self.tempSettings)):
+            while self.tabs.count() != len(self.tempSettings):
+                w = QWidget()
+                self.adTabList.append(w)
+                self.adTabs.addTab(w, 'temp')
+        for i in range(len(self.settings)):
+            name = self.tempSettings[i].tag
+            color = self.tempSettings[i].find('colour').text
+            self.adTabs.setTabText(i, name)
+            self.adTabs.tabBar().setTabTextColor(i, QtGui.QColor(color))
+
 
 
     def refreshTabs(self):
@@ -563,7 +618,7 @@ class popWindow(QWidget):
         if reply == QMessageBox.Yes:
             self.advancedWindows.close()
             self.tempSettings = copy.deepcopy(self.settings)
-            self.loadAdtabs()
+            self.refreshAdtabs()
             index = self.adTabs.currentIndex()
             self.adTabs.setCurrentIndex(index)
             self.loadAdvancedData(index)
