@@ -512,7 +512,7 @@ class popWindow(QWidget):
     def updateXOffset(self):
         x = self.xOffInput.text()
         deflector = self.tempSettings[self.adTabs.currentIndex()]
-        deflector.find('xOffset').text = x
+        deflector.find('xOffset').text = x   
 
     def updateYOffset(self):
         y = self.yOffInput.text()
@@ -535,6 +535,10 @@ class popWindow(QWidget):
         self.updatePlot()
         #add real update from to pins
         print('update Bx for Deflector', self.tabs.currentIndex(), 'to', v)
+        x = round(round(float(v), 2)/2,2)
+        x = x * 5/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(self.self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('xOffset').text)
+        Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('Bx1').text, -round(x,2))
+        Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('Bx2').text, round(x,2))
 
     def updateBy(self):
         v = self.By.value()
@@ -542,6 +546,10 @@ class popWindow(QWidget):
         self.updatePlot()
         #add real update from to pins
         print('update Bx for Deflector', self.tabs.currentIndex(), 'to', v)
+        y = round(round(float(v), 2)/2,2)
+        y = y * 5/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(self.self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('yOffset').text)
+        Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('By1').text, -round(y,2))
+        Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('By2').text, round(y,2))
 
     def BxIncrementChange(self):
         #get the value from the spinner, turns into int then set single step of panX as it
