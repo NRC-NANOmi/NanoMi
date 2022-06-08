@@ -472,6 +472,8 @@ class popWindow(QWidget):
             color = self.tempSettings[i].find('colour').text
             slope = self.tempSettings[i].find('slope').text
             voltage = self.tempSettings[i].find('voltage').text
+            xOffset = self.tempSettings[i].find('xOffset').text
+            yOffset = self.tempSettings[i].find('yOffset').text
             if len(name) > 10:
                 reply = QMessageBox.question(self.advancedWindows, 'Illegal Name', "The name of deflector can't longer than 10 characters, please change the illegal names", QMessageBox.Ok, QMessageBox.Ok)
                 return 0
@@ -493,6 +495,12 @@ class popWindow(QWidget):
                 return 0
             if not voltage.isnumeric():
                 reply = QMessageBox.question(self.advancedWindows, 'Illegal Voltage Input', "Voltage should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
+                return 0
+            if not xOffset.isnumeric():
+                reply = QMessageBox.question(self.advancedWindows, 'Illegal Voltage Input', "X Offset should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
+                return 0
+            if not yOffset.isnumeric():
+                reply = QMessageBox.question(self.advancedWindows, 'Illegal Voltage Input', "Y Offset should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
                 return 0
 
         return 1
@@ -625,7 +633,7 @@ class popWindow(QWidget):
                 w = QWidget()
                 self.adTabList.append(w)
                 self.adTabs.addTab(w, 'temp')
-        for i in range(len(self.settings)):
+        for i in range(len(self.tempSettings)):
             name = self.tempSettings[i].tag
             color = self.tempSettings[i].find('colour').text
             self.adTabs.setTabText(i, name)
@@ -658,9 +666,8 @@ class popWindow(QWidget):
             self.advancedWindows.close()
             self.tempSettings = copy.deepcopy(self.settings)
             self.refreshAdtabs()
-            index = self.adTabs.currentIndex()
-            self.adTabs.setCurrentIndex(index)
-            self.loadAdvancedData(index)
+            self.adTabs.setCurrentIndex(0)
+            self.loadAdvancedData(0)
 
     def updatePlot(self):
         self.plot.clear()

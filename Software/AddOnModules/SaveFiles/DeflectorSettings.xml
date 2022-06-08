@@ -33,4 +33,15 @@
         <By1>By1</By1>
         <By2>PanX</By2>
     </D3>
+    <D4>
+        <colour>cyan</colour>
+        <xOffset>1</xOffset>
+        <yOffset>1</yOffset>
+        <voltage>12</voltage>
+        <slope>1</slope>
+        <Bx1>By1</Bx1>
+        <Bx2>By1</Bx2>
+        <By1>By1</By1>
+        <By2>Bx1</By2>
+    </D4>
 </Settings>
