@@ -5,7 +5,7 @@
         <xOffset>1</xOffset>
         <yOffset>0</yOffset>
         <voltage>70</voltage>
-        <slope>70</slope>
+        <slope>1</slope>
         <Bx1>Bx1</Bx1>
         <Bx2>Bx2</Bx2>
         <By1>By1</By1>
@@ -16,7 +16,7 @@
         <xOffset>1</xOffset>
         <yOffset>1</yOffset>
         <voltage>30</voltage>
-        <slope>30</slope>
+        <slope>1</slope>
         <Bx1>Placeholder_AO0</Bx1>
         <Bx2>Placeholder_AO1</Bx2>
         <By1>Placeholder_AO1</By1>
@@ -27,7 +27,7 @@
         <xOffset>1</xOffset>
         <yOffset>1</yOffset>
         <voltage>100</voltage>
-        <slope>100</slope>
+        <slope>1</slope>
         <Bx1>PanX</Bx1>
         <Bx2>C1_Lens</Bx2>
         <By1>By1</By1>

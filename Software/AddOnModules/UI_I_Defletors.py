@@ -46,11 +46,6 @@ class popWindow(QWidget):
 
         self.AOList = list(Hardware.IO.AoNames.keys())
         self.AOList.insert(0,'')
-        # TODO: Writing loading from xml files, then create tabs depending on the number of deflectors
-        # self.testTab = QWidget()
-        # self.tabs.addTab(self.testTab, 'Deflector1')
-        # TODO: write changing tabs function, then connect to this
-        # self.tabs.currentChanged.connect(lambda: )
 
         # set up layout for deflector tabs
         self.deflectorLayout = QGridLayout()
@@ -64,7 +59,6 @@ class popWindow(QWidget):
         self.Bx.setMaximum(10)
         self.Bx.setValue(0)
         self.Bx.setSingleStep(0.01)
-        # TODO: Add the updateX functionality
         self.Bx.valueChanged.connect(lambda: self.updateBx())
 
         self.BxIncrement = QComboBox()
@@ -446,7 +440,9 @@ class popWindow(QWidget):
         self.By1Drawer.setCurrentIndex(0)
 
     def saveSettings(self):
-        reply = QMessageBox.question(self, 'Save', "Saving new advanced setting will reset all your deflectors' data, press Yes to confirm", QMessageBox.Yes, QMessageBox.No)
+        if not self.saveChecking():
+            return
+        reply = QMessageBox.question(self.advancedWindows, 'Save', "Saving new advanced setting will reset all your deflectors' data, press Yes to confirm", QMessageBox.Yes, QMessageBox.No)
 
         if reply == QMessageBox.Yes:
             xmlString = ET.tostring(self.tempSettings, 'utf-8', method='xml')
@@ -466,6 +462,41 @@ class popWindow(QWidget):
             self.refreshTabs()
             self.tabs.setCurrentIndex(self.tabs.currentIndex())
             self.loadData(self.tabs.currentIndex())
+
+    def saveChecking(self):
+        colorList = []
+        nameList = []
+
+        for i in range(len(self.tempSettings)):
+            name = self.tempSettings[i].tag
+            color = self.tempSettings[i].find('colour').text
+            slope = self.tempSettings[i].find('slope').text
+            voltage = self.tempSettings[i].find('voltage').text
+            if len(name) > 10:
+                reply = QMessageBox.question(self.advancedWindows, 'Illegal Name', "The name of deflector can't longer than 10 characters, please change the illegal names", QMessageBox.Ok, QMessageBox.Ok)
+                return 0
+            if name in nameList:
+                reply = QMessageBox.question(self.advancedWindows, 'Duplicate Names', "Every deflector should have a unique name, please change the duplicate names", QMessageBox.Ok, QMessageBox.Ok)
+                return 0
+            else:
+                nameList.append(name)
+            if color in colorList:
+                reply = QMessageBox.question(self.advancedWindows, 'Duplicate Colours', "Every deflector should have a unique color, please change the duplicate colors", QMessageBox.Ok, QMessageBox.Ok)
+                return 0
+            else:
+                colorList.append(color)
+            if not slope.isnumeric():
+                reply = QMessageBox.question(self.advancedWindows, 'Illegal Slope Input', "Slope should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
+                return 0
+            if float(slope) > 2:
+                reply = QMessageBox.question(self.advancedWindows, 'Illegal Slope Input', "Slope shouldn't be greater than 2, please check your input", QMessageBox.Ok, QMessageBox.Ok)
+                return 0
+            if not voltage.isnumeric():
+                reply = QMessageBox.question(self.advancedWindows, 'Illegal Voltage Input', "Voltage should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
+                return 0
+
+        return 1
+
 
 
     def updateName(self):
@@ -525,7 +556,7 @@ class popWindow(QWidget):
         deflector.find('voltage').text = v
 
     def updateSlope(self):
-        s = self.voltageInput.text()
+        s = self.slopeInput.text()
         deflector = self.tempSettings[self.adTabs.currentIndex()]
         deflector.find('slope').text = s
 
@@ -622,7 +653,7 @@ class popWindow(QWidget):
 
 
     def back(self):
-        reply = QMessageBox.question(self, 'Back', 'Go Back will lose all unsaved advance setting, press Yes to confirm', QMessageBox.Yes, QMessageBox.No)
+        reply = QMessageBox.question(self.advancedWindows, 'Back', 'Go Back will lose all unsaved advance setting, press Yes to confirm', QMessageBox.Yes, QMessageBox.No)
         if reply == QMessageBox.Yes:
             self.advancedWindows.close()
             self.tempSettings = copy.deepcopy(self.settings)
