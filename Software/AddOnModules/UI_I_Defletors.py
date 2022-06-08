@@ -536,7 +536,7 @@ class popWindow(QWidget):
         #add real update from to pins
         print('update Bx for Deflector', self.tabs.currentIndex(), 'to', v)
         x = round(round(float(v), 2)/2,2)
-        x = x * 5/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(self.self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('xOffset').text)
+        x = x * 5/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('xOffset').text)
         Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('Bx1').text, -round(x,2))
         Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('Bx2').text, round(x,2))
 
@@ -634,7 +634,8 @@ class popWindow(QWidget):
     def updatePlot(self):
         self.plot.clear()
         for i in self.currentData:
-            self.plot.plot([i['x']], [i['y']], pen=i['colour'][0], symbol='o', symbolBrush=.5)
+            print(i['colour'])
+            self.plot.plot([i['x']], [i['y']], symbolBrush=QtGui.QColor(i['colour']), symbol='o')
 # ****************************************************************************************************************
 # BREAK - DO NOT MODIFY CODE BELOW HERE OR MAIN WINDOW'S EXECUTION MAY CRASH
 # ****************************************************************************************************************
