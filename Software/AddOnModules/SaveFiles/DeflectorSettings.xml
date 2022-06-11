@@ -1,47 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Settings>
-    <D1>
+    <New_Deflector>
         <colour>red</colour>
-        <xOffset>1</xOffset>
-        <yOffset>0</yOffset>
-        <voltage>70</voltage>
-        <slope>1</slope>
-        <Bx1>Bx1</Bx1>
-        <Bx2>Bx2</Bx2>
-        <By1>By1</By1>
-        <By2>By2</By2>
-    </D1>
-    <D2>
-        <colour>green</colour>
-        <xOffset>1</xOffset>
-        <yOffset>1</yOffset>
-        <voltage>30</voltage>
-        <slope>1</slope>
-        <Bx1>Placeholder_AO0</Bx1>
-        <Bx2>Placeholder_AO1</Bx2>
-        <By1>Placeholder_AO1</By1>
-        <By2>Placeholder_AO1</By2>
-    </D2>
-    <D3>
-        <colour>yellow</colour>
         <xOffset>1</xOffset>
         <yOffset>1</yOffset>
         <voltage>100</voltage>
         <slope>1</slope>
-        <Bx1>PanX</Bx1>
-        <Bx2>C1_Lens</Bx2>
-        <By1>By1</By1>
-        <By2>PanX</By2>
-    </D3>
-    <D4>
-        <colour>cyan</colour>
-        <xOffset>1</xOffset>
-        <yOffset>1</yOffset>
-        <voltage>12</voltage>
-        <slope>1</slope>
-        <Bx1>By1</Bx1>
-        <Bx2>By1</Bx2>
-        <By1>By1</By1>
-        <By2>Bx1</By2>
-    </D4>
+        <Bx1/>
+        <Bx2/>
+        <By1/>
+        <By2/>
+        <hasLower/>
+        <Bx3/>
+        <Bx4/>
+        <By3/>
+        <By4/>
+        <shift/>
+        <tile/>
+    </New_Deflector>
 </Settings>

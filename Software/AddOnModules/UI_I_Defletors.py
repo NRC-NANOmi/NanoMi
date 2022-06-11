@@ -97,6 +97,24 @@ class popWindow(QWidget):
 
         self.deflectorLayout.addWidget(self.XnY, 0, 0)  # First slider for Bx1
 
+        self.SnT = QGroupBox()
+        self.shiftMode = QPushButton('Shift Mode')
+        self.shiftMode.setCheckable(True)
+        self.shiftMode.setChecked(False)
+        self.shiftMode.clicked.connect(lambda: self.shiftOnClick())
+        self.tileMode = QPushButton('Tile Mode')
+        self.tileMode.setCheckable(True)
+        self.tileMode.setChecked(False)
+        self.tileMode.clicked.connect(lambda: self.tileOnClick())
+        self.SnTBox = QHBoxLayout()
+        self.SnTBox.addWidget(self.shiftMode)
+        self.SnTBox.addStretch()
+        self.SnTBox.addWidget(self.tileMode)
+        self.SnT.setLayout(self.SnTBox)
+
+        self.deflectorLayout.addWidget(self.SnT, 1, 0)
+
+
         # self.testTab.setLayout(self.deflectorLayout)
 
         self.noDeflectorLayout = QGridLayout()
@@ -151,7 +169,7 @@ class popWindow(QWidget):
         self.colorLabel = QLabel("Color: ", self)  # Add a label called Color
 
         self.colorBox = QComboBox()
-        self.colorList = ['green', 'blue', 'gray', 'red', 'yellow', 'cyan', 'magenta', 'darkRed']
+        self.colorList = ['','green', 'blue', 'gray', 'red', 'yellow', 'cyan', 'magenta', 'darkRed']
         self.colorBox.addItems(self.colorList)
         self.colorBox.setCurrentIndex(0)
         self.colorBox.currentIndexChanged.connect(lambda: self.updateColour())
@@ -168,7 +186,6 @@ class popWindow(QWidget):
         self.xOffInput = QLineEdit()
         self.xOffInput.textChanged.connect(lambda: self.updateXOffset())
 
-        # box containing the first slider for controlling Bx1
         self.offsetsBox = QHBoxLayout()
         self.offsetsBox.addWidget(self.xOffLabel)
         self.offsetsBox.addWidget(self.xOffInput)
@@ -210,8 +227,9 @@ class popWindow(QWidget):
         # self.advancedLayout.addWidget(
         #     self.pinsLabel, 3, 0, QtCore.Qt.AlignHCenter)
 
+        #set for upper plates
         # set pins for x
-        self.xPins = QGroupBox('Pins')
+        self.xPins = QGroupBox('Upper Plate')
         self.Bx1Label = QLabel("Bx1: ", self)  # Add a label called Name
         self.Bx1Drawer = QComboBox()
         self.Bx1Drawer.addItems(self.AOList)
@@ -262,6 +280,86 @@ class popWindow(QWidget):
 
         self.advancedLayout.addWidget(self.yPins, 4, 0)
 
+
+        #Lower deflector pins
+        # set pins for x
+        self.LxPins = QGroupBox('Lower Plate')
+        self.LxPins.setCheckable(True)
+        self.LxPins.clicked.connect(lambda: self.selectLower())
+        self.Bx3Label = QLabel("Bx3: ")
+        self.Bx3Drawer = QComboBox()
+        self.Bx3Drawer.addItems(self.AOList)
+        self.Bx3Drawer.setCurrentIndex(0)
+        self.Bx3Drawer.currentIndexChanged.connect(lambda: self.updateBx3())
+
+        self.LxPinBox = QHBoxLayout()  # box containing the first slider for controlling Bx1
+        self.LxPinBox.addWidget(self.Bx3Label)
+        self.LxPinBox.addWidget(self.Bx3Drawer)
+        self.LxPinBox.addStretch()
+
+        self.Bx4Label = QLabel("Bx4: ", self)  # Add a label called Color
+
+        self.Bx4Drawer = QComboBox()
+        self.Bx4Drawer.addItems(self.AOList)
+        self.Bx4Drawer.setCurrentIndex(0)
+        self.Bx4Drawer.currentIndexChanged.connect(lambda: self.updateBx4())
+
+        self.LxPinBox.addWidget(self.Bx4Label)
+        self.LxPinBox.addWidget(self.Bx4Drawer)
+        self.LxPins.setLayout(self.LxPinBox)
+
+        self.advancedLayout.addWidget(self.LxPins, 5, 0)
+        self.LxPins.setChecked(False)
+
+        # set pins for Y
+        self.LyPins = QGroupBox()
+        self.By3Label = QLabel("By3: ")  # Add a label called Name
+        self.By3Drawer = QComboBox()
+        self.By3Drawer.addItems(self.AOList)
+        self.By3Drawer.setCurrentIndex(0)
+        self.By3Drawer.currentIndexChanged.connect(lambda: self.updateBy3())
+
+        self.LyPinBox = QHBoxLayout()  # box containing the first slider for controlling Bx1
+        self.LyPinBox.addWidget(self.By3Label)
+        self.LyPinBox.addWidget(self.By3Drawer)
+        self.LyPinBox.addStretch()
+
+        self.By4Label = QLabel("By4: ")  # Add a label called Color
+
+        self.By4Drawer = QComboBox()
+        self.By4Drawer.addItems(self.AOList)
+        self.By4Drawer.setCurrentIndex(0)
+        self.By4Drawer.currentIndexChanged.connect(lambda: self.updateBy4())
+
+        self.LyPinBox.addWidget(self.By4Label)
+        self.LyPinBox.addWidget(self.By4Drawer)
+        self.LyPins.setLayout(self.LyPinBox)
+
+        self.advancedLayout.addWidget(self.LyPins, 6, 0)
+        self.LyPins.setDisabled(True)
+
+        # shift and tiled ratio
+        self.ratios = QGroupBox()
+        self.shiftLable = QLabel("Shift ratio:")
+        self.shiftInput = QLineEdit() 
+        self.shiftInput.textChanged.connect(lambda: self.updateShift())
+
+        self.ratiosBox = QHBoxLayout()
+        self.ratiosBox.addWidget(self.shiftLable)
+        self.ratiosBox.addWidget(self.shiftInput)
+        self.ratiosBox.addStretch()
+
+        self.tileLabel = QLabel("Tile ratio: ")  # Add a label for tile ratio
+        self.tileInput = QLineEdit()
+        self.tileInput.textChanged.connect(lambda: self.updateTile())
+
+        self.ratiosBox.addWidget(self.tileLabel)
+        self.ratiosBox.addWidget(self.tileInput)
+        self.ratios.setLayout(self.ratiosBox)
+
+        self.advancedLayout.addWidget(self.ratios, 7, 0)
+        self.ratios.setDisabled(True)
+
         self.tabLayout = QGridLayout()
         self.tabLayout.addWidget(self.adTabs, 0, 0)
 
@@ -281,18 +379,45 @@ class popWindow(QWidget):
 
         # read data
         self.readDataFile()
-        self.loadTabs()
-        self.loadAdtabs()
 
         #set default for both windows
         self.tabs.setCurrentIndex(0)
+        self.loadAdvancedData(0)
         if len(self.settings) > 0:
             self.loadData(0)
-            self.loadAdvancedData(0)
             self.adTabs.setCurrentIndex(0)
         self.tabs.currentChanged.connect(lambda: self.loadData(self.tabs.currentIndex()))
         self.adTabs.currentChanged.connect(lambda: self.loadAdvancedData(self.adTabs.currentIndex()))
         self.updatePlot()
+    
+    def shiftOnClick(self):
+        # if button is checked
+        if self.shiftMode.isChecked():
+            if self.tileMode.isChecked():
+                self.tileMode.setChecked(False)
+        self.updateBx()
+        self.updateBy()
+
+    def tileOnClick(self):
+        # if button is checked
+        if self.tileMode.isChecked():
+            if self.shiftMode.isChecked():
+                self.shiftMode.setChecked(False)
+
+        self.updateBx()
+        self.updateBy()
+
+    def selectLower(self):
+        deflector = self.tempSettings[self.adTabs.currentIndex()]
+        checked = self.LxPins.isChecked()
+        if not checked:
+            deflector.find('hasLower').text = 'False'
+            self.LyPins.setDisabled(True)
+            self.ratios.setDisabled(True)
+        else:
+            deflector.find('hasLower').text = 'True'
+            self.LyPins.setDisabled(False)
+            self.ratios.setDisabled(False) 
         
 
     def advancedSettings(self):
@@ -318,22 +443,20 @@ class popWindow(QWidget):
             #write to file
             with open(os.getcwd() + '/AddOnModules/SaveFiles/DeflectorSettings.xml', 'w') as pid:
                 domTree.writexml(pid, encoding='utf-8', indent='', addindent='    ', newl='\n')
-        else:
-            #pull out the xml structure from the user data sets file
-            tree = ET.parse(cwd + '/DeflectorSettings.xml')
+        tree = ET.parse(cwd + '/DeflectorSettings.xml')
         
         #get the root xml structure
         self.settings = tree.getroot()
+        l = len(self.settings)
         self.tempSettings = copy.deepcopy(self.settings)
-        if len(self.settings) == 0:
-            print('No Deflector found, please add one')
-            emptyTab = QWidget()
-            emptyTab.setLayout(self.noDeflectorLayout)
-            self.tabs.addTab(emptyTab, 'No Deflector')
-            self.createNewDeflector()
+        self.loadTabs()
+        if(l != 0):
+            self.loadAdtabs()
 
     def loadData(self, index):
         print(index)
+        if self.tabList[index].layout() == 0:
+            QWidget().setLayout(self.tabList[index].layout())
         self.tabList[index].setLayout(self.deflectorLayout)
         data = self.settings[index]
         self.voltage = int(data.find('voltage').text)
@@ -357,6 +480,10 @@ class popWindow(QWidget):
         self.slope = float(data.find('slope').text)
         self.BxIncrement.setCurrentIndex(0)
         self.ByIncrement.setCurrentIndex(0)
+        if data.find('hasLower').text == 'True':
+            self.SnT.setDisabled(False)
+        else:
+            self.SnT.setDisabled(True)
 
 
     def loadAdvancedData(self, index):
@@ -369,45 +496,97 @@ class popWindow(QWidget):
         self.yOffInput.setText(data.find('yOffset').text)
         self.voltageInput.setText(data.find('voltage').text)
         self.slopeInput.setText(data.find('slope').text)
-        #check if it's new created
-        if data.find('Bx1').text:
-            #check if the saved pin exists
-            if data.find('Bx1').text not in self.AOList:
-                self.AOList.append(data.find('Bx1').text + '-unfound')
-                self.Bx1Drawer.clear()
-                self.Bx1Drawer.addItems(self.AOList)
-                self.Bx1Drawer.setCurrentIndex(len(self.AOList)-1)
-            else:
-                self.Bx1Drawer.setCurrentIndex(self.AOList.index(data.find('Bx1').text))
-            if data.find('Bx2').text not in self.AOList:
-                self.AOList.append(data.find('Bx2').text + '-unfound')
-                self.Bx2Drawer.clear()
-                self.Bx2Drawer.addItems(self.AOList)
-                self.Bx2Drawer.setCurrentIndex(len(self.AOList)-1)
-            else:   
-                self.Bx2Drawer.setCurrentIndex(self.AOList.index(data.find('Bx2').text))
-            if data.find('By1').text not in self.AOList:
-                self.AOList.append(data.find('By1').text + '-unfound')
-                self.By1Drawer.clear()
-                self.By1Drawer.addItems(self.AOList)
-                self.By1Drawer.setCurrentIndex(len(self.AOList)-1)
-            else:
-                self.By1Drawer.setCurrentIndex(self.AOList.index(data.find('By1').text))
-            if data.find('By2').text not in self.AOList:
-                self.AOList.append(data.find('By2').text + '-unfound')
-                self.By2Drawer.clear()
-                self.By2Drawer.addItems(self.AOList)
-                self.By2Drawer.setCurrentIndex(len(self.AOList)-1)
-            else:
-                self.By2Drawer.setCurrentIndex(self.AOList.index(data.find('By2').text))
+        self.shiftInput.setText(data.find('shift').text)
+        self.tileInput.setText(data.find('tile').text)
+        print(data.find('Bx1').text)
+        if not data.find('Bx1').text:
+            self.Bx1Drawer.setCurrentIndex(0)
+        elif data.find('Bx1').text not in self.AOList:
+            self.AOList.append(data.find('Bx1').text + '-unfound')
+            self.Bx1Drawer.clear()
+            self.Bx1Drawer.addItems(self.AOList)
+            self.Bx1Drawer.setCurrentIndex(len(self.AOList)-1)
         else:
-           self.Bx1Drawer.setCurrentIndex(0)
-           self.Bx2Drawer.setCurrentIndex(0) 
-           self.By1Drawer.setCurrentIndex(0) 
-           self.By2Drawer.setCurrentIndex(0) 
+            self.Bx1Drawer.setCurrentIndex(self.AOList.index(data.find('Bx1').text))
+
+        if not data.find('Bx2').text:
+            self.Bx2Drawer.setCurrentIndex(0)
+        elif data.find('Bx2').text not in self.AOList:
+            self.AOList.append(data.find('Bx2').text + '-unfound')
+            self.Bx2Drawer.clear()
+            self.Bx2Drawer.addItems(self.AOList)
+            self.Bx2Drawer.setCurrentIndex(len(self.AOList)-1)
+        else:   
+            self.Bx2Drawer.setCurrentIndex(self.AOList.index(data.find('Bx2').text))
+
+        if not data.find('By1').text:
+            self.By1Drawer.setCurrentIndex(0)
+        elif data.find('By1').text not in self.AOList:
+            self.AOList.append(data.find('By1').text + '-unfound')
+            self.By1Drawer.clear()
+            self.By1Drawer.addItems(self.AOList)
+            self.By1Drawer.setCurrentIndex(len(self.AOList)-1)
+        else:
+            self.By1Drawer.setCurrentIndex(self.AOList.index(data.find('By1').text))
+
+        if not data.find('By2').text:
+            self.By2Drawer.setCurrentIndex(0)
+        elif data.find('By2').text not in self.AOList:
+            self.AOList.append(data.find('By2').text + '-unfound')
+            self.By2Drawer.clear()
+            self.By2Drawer.addItems(self.AOList)
+            self.By2Drawer.setCurrentIndex(len(self.AOList)-1)
+        else:
+            self.By2Drawer.setCurrentIndex(self.AOList.index(data.find('By2').text))
+        
+        if data.find('hasLower').text == 'True':
+            self.LxPins.setChecked(True)
+        else:
+            self.LxPins.setChecked(False)
+
+        if not data.find('Bx3').text:
+            self.Bx3Drawer.setCurrentIndex(0)
+        elif data.find('Bx3').text not in self.AOList:
+            self.AOList.append(data.find('Bx3').text + '-unfound')
+            self.Bx3Drawer.clear()
+            self.Bx3Drawer.addItems(self.AOList)
+            self.Bx3Drawer.setCurrentIndex(len(self.AOList)-1)
+        else:
+            self.Bx3Drawer.setCurrentIndex(self.AOList.index(data.find('Bx3').text))
+
+        if not data.find('Bx4').text:
+            self.Bx4Drawer.setCurrentIndex(0)
+        elif data.find('Bx4').text not in self.AOList:
+            self.AOList.append(data.find('Bx4').text + '-unfound')
+            self.Bx4Drawer.clear()
+            self.Bx4Drawer.addItems(self.AOList)
+            self.Bx4Drawer.setCurrentIndex(len(self.AOList)-1)
+        else:   
+            self.Bx4Drawer.setCurrentIndex(self.AOList.index(data.find('Bx4').text))
+
+        if not data.find('By3').text:
+            self.By3Drawer.setCurrentIndex(0)
+        elif data.find('By3').text not in self.AOList:
+            self.AOList.append(data.find('By3').text + '-unfound')
+            self.By3Drawer.clear()
+            self.By3Drawer.addItems(self.AOList)
+            self.By3Drawer.setCurrentIndex(len(self.AOList)-1)
+        else:
+            self.By3Drawer.setCurrentIndex(self.AOList.index(data.find('By3').text))
+
+        if not data.find('By4').text:
+            self.By4Drawer.setCurrentIndex(0)
+        elif data.find('By4').text not in self.AOList:
+            self.AOList.append(data.find('By4').text + '-unfound')
+            self.By4Drawer.clear()
+            self.By4Drawer.addItems(self.AOList)
+            self.By4Drawer.setCurrentIndex(len(self.AOList)-1)
+        else:
+            self.By4Drawer.setCurrentIndex(self.AOList.index(data.find('By2').text))
+
 
     def createNewDeflector(self):
-        newElement = ET.SubElement(self.tempSettings, 'Deflector'+str(len(self.adTabList)))
+        newElement = ET.SubElement(self.tempSettings, 'New_Deflector')
         ET.SubElement(newElement, 'colour')
         ET.SubElement(newElement, 'xOffset')
         ET.SubElement(newElement, 'yOffset')
@@ -417,14 +596,24 @@ class popWindow(QWidget):
         ET.SubElement(newElement, 'Bx2')
         ET.SubElement(newElement, 'By1')
         ET.SubElement(newElement, 'By2')
-
-        newTab = QWidget()
-        newTab.setLayout(self.advancedLayout)
-        self.adTabList.append(newTab)
-        self.adTabs.addTab(newTab, 'Deflector'+str(len(self.adTabList)))
-        self.adTabs.setCurrentIndex(len(self.adTabList)-1)
-        self.clearAdvanceWindow()
-        self.nameInput.setText('Deflector'+str(len(self.adTabList)))
+        ET.SubElement(newElement, 'hasLower')
+        ET.SubElement(newElement, 'Bx3')
+        ET.SubElement(newElement, 'Bx4')
+        ET.SubElement(newElement, 'By3')
+        ET.SubElement(newElement, 'By4')
+        ET.SubElement(newElement, 'shift')
+        ET.SubElement(newElement, 'tile')
+        if len(self.tempSettings) == 1:
+            self.loadAdtabs()
+        else:
+            self.LxPins.setChecked(False)
+            newTab = QWidget()
+            newTab.setLayout(self.advancedLayout)
+            self.adTabList.append(newTab)
+            self.adTabs.addTab(newTab, 'New_Deflector')
+            self.adTabs.setCurrentIndex(len(self.adTabList)-1)
+            self.clearAdvanceWindow()
+            self.nameInput.setText('New_Deflector')
         print(self.tempSettings[0])
 
     def clearAdvanceWindow(self):
@@ -437,7 +626,11 @@ class popWindow(QWidget):
         self.Bx1Drawer.setCurrentIndex(0)
         self.Bx2Drawer.setCurrentIndex(0)
         self.By1Drawer.setCurrentIndex(0)
-        self.By1Drawer.setCurrentIndex(0)
+        self.By2Drawer.setCurrentIndex(0)
+        self.Bx3Drawer.setCurrentIndex(0)
+        self.Bx4Drawer.setCurrentIndex(0)
+        self.By3Drawer.setCurrentIndex(0)
+        self.By4Drawer.setCurrentIndex(0)
 
     def saveSettings(self):
         if not self.saveChecking():
@@ -474,14 +667,22 @@ class popWindow(QWidget):
             voltage = self.tempSettings[i].find('voltage').text
             xOffset = self.tempSettings[i].find('xOffset').text
             yOffset = self.tempSettings[i].find('yOffset').text
-            if len(name) > 10:
-                reply = QMessageBox.question(self.advancedWindows, 'Illegal Name', "The name of deflector can't longer than 10 characters, please change the illegal names", QMessageBox.Ok, QMessageBox.Ok)
+            shift = self.tempSettings[i].find('shift').text
+            tile = self.tempSettings[i].find('tile').text
+            hasLower = self.tempSettings[i].find('hasLower').text 
+            if len(name) > 20:
+                reply = QMessageBox.question(self.advancedWindows, 'Illegal Name', "The name of deflector can't longer than 20 characters, please change the illegal names", QMessageBox.Ok, QMessageBox.Ok)
                 return 0
             if name in nameList:
                 reply = QMessageBox.question(self.advancedWindows, 'Duplicate Names', "Every deflector should have a unique name, please change the duplicate names", QMessageBox.Ok, QMessageBox.Ok)
                 return 0
             else:
                 nameList.append(name)
+            if ' ' in name:
+                reply = QMessageBox.question(self.advancedWindows, 'Illegal Name', "The name of deflector can't have space, please change the illegal names", QMessageBox.Ok, QMessageBox.Ok)
+            if color == None or color == '':
+               reply = QMessageBox.question(self.advancedWindows, 'No Colours', "Every deflector should have a color, please select color for deflector has no color", QMessageBox.Ok, QMessageBox.Ok)
+               return 0
             if color in colorList:
                 reply = QMessageBox.question(self.advancedWindows, 'Duplicate Colours', "Every deflector should have a unique color, please change the duplicate colors", QMessageBox.Ok, QMessageBox.Ok)
                 return 0
@@ -493,15 +694,22 @@ class popWindow(QWidget):
             if float(slope) > 2:
                 reply = QMessageBox.question(self.advancedWindows, 'Illegal Slope Input', "Slope shouldn't be greater than 2, please check your input", QMessageBox.Ok, QMessageBox.Ok)
                 return 0
-            if not voltage.isnumeric():
+            if not voltage or not voltage.isnumeric():
                 reply = QMessageBox.question(self.advancedWindows, 'Illegal Voltage Input', "Voltage should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
                 return 0
-            if not xOffset.isnumeric():
-                reply = QMessageBox.question(self.advancedWindows, 'Illegal Voltage Input', "X Offset should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
+            if not xOffset or not xOffset.isnumeric():
+                reply = QMessageBox.question(self.advancedWindows, 'Illegal X offset Input', "X Offset should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
                 return 0
-            if not yOffset.isnumeric():
-                reply = QMessageBox.question(self.advancedWindows, 'Illegal Voltage Input', "Y Offset should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
+            if not yOffset or not yOffset.isnumeric():
+                reply = QMessageBox.question(self.advancedWindows, 'Illegal Y offset Input', "Y Offset should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
                 return 0
+            
+            if shift and not shift.isnumeric():
+                reply = QMessageBox.question(self.advancedWindows, 'Illegal shift Input', "Shift ratio should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
+                return 0
+            if tile and not tile.isnumeric():
+                reply = QMessageBox.question(self.advancedWindows, 'Illegal tile Input', "Tile ratio should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
+                return 0 
 
         return 1
 
@@ -547,6 +755,34 @@ class popWindow(QWidget):
             By2 = By2[:-8]
         deflector = self.tempSettings[self.adTabs.currentIndex()]
         deflector.find('By2').text = By2
+    
+    def updateBx3(self):
+        Bx3 = self.AOList[self.Bx1Drawer.currentIndex()]
+        if len(Bx3) > 9 and Bx3[-7:] == "unfound":
+            Bx3 = Bx3[:-8]
+        deflector = self.tempSettings[self.adTabs.currentIndex()]
+        deflector.find('Bx3').text = Bx3
+
+    def updateBx4(self):
+        Bx4 = self.AOList[self.Bx4Drawer.currentIndex()]
+        if len(Bx4) > 9 and Bx4[-7:] == "unfound":
+            Bx4 = Bx4[:-8]
+        deflector = self.tempSettings[self.adTabs.currentIndex()]
+        deflector.find('Bx4').text = Bx4
+
+    def updateBy3(self):
+        By3 = self.AOList[self.By1Drawer.currentIndex()]
+        if len(By3) > 9 and By3[-7:] == "unfound":
+            By3 = By3[:-8]
+        deflector = self.tempSettings[self.adTabs.currentIndex()]
+        deflector.find('By3').text = By3
+
+    def updateBy4(self):
+        By4 = self.AOList[self.By4Drawer.currentIndex()]
+        if len(By4) > 9 and By4[-7:] == "unfound":
+            By4 = By4[:-8]
+        deflector = self.tempSettings[self.adTabs.currentIndex()]
+        deflector.find('By4').text = By4
 
     def updateXOffset(self):
         x = self.xOffInput.text()
@@ -568,6 +804,16 @@ class popWindow(QWidget):
         deflector = self.tempSettings[self.adTabs.currentIndex()]
         deflector.find('slope').text = s
 
+    def updateShift(self):
+        s = self.shiftInput.text()
+        deflector = self.tempSettings[self.adTabs.currentIndex()]
+        deflector.find('shift').text = s
+
+    def updateTile(self):
+        t = self.tileInput.text()
+        deflector = self.tempSettings[self.adTabs.currentIndex()]
+        deflector.find('tile').text = t
+
     def updateBx(self):
         v = self.Bx.value()
         self.currentData[self.tabs.currentIndex()]['x'] = v
@@ -578,7 +824,22 @@ class popWindow(QWidget):
         x = x * 5/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('xOffset').text)
         Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('Bx1').text, -round(x,2))
         Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('Bx2').text, round(x,2))
-
+        if self.shiftMode.isChecked():
+            shiftRatio = float(self.settings[self.tabs.currentIndex()].find('shift').text)
+            shiftedX = x * shiftRatio, 2
+            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('Bx3').text, -round(shiftedX,2))
+            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('Bx4').text, round(shiftedX,2)) 
+        elif self.tileMode.isChecked():
+            tiledRatio = float(self.settings[self.tabs.currentIndex()].find('tile').text)
+            tiledX = x * tiledRatio, 2
+            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('Bx3').text, -round(tiledX,2))
+            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('Bx4').text, round(tiledX,2))
+        else:
+            x = round(round(float(v), 2)/2,2)
+            x = x * 5/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('xOffset').text)
+            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('Bx3').text, -round(x,2))
+            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('Bx4').text, round(x,2))
+            
     def updateBy(self):
         v = self.By.value()
         self.currentData[self.tabs.currentIndex()]['y'] = v
@@ -589,6 +850,19 @@ class popWindow(QWidget):
         y = y * 5/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(self.self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('yOffset').text)
         Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('By1').text, -round(y,2))
         Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('By2').text, round(y,2))
+        if self.shiftMode.isChecked():
+            shiftRatio = float(self.settings[self.tabs.currentIndex()].find('shift').text)
+            shiftedY = y * shiftRatio, 2
+            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('By3').text, -round(shiftedY,2))
+            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('By4').text, round(shiftedY,2)) 
+        elif self.tileMode.isChecked():
+            tiledRatio = float(self.settings[self.tabs.currentIndex()].find('tile').text)
+            tiledY = y * tiledRatio, 2
+            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('By3').text, -round(tiledY,2))
+            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('By4').text, round(tiledY,2))
+        else:
+            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('By3').text, -round(y,2))
+            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('By4').text, round(y,2))
 
     def BxIncrementChange(self):
         #get the value from the spinner, turns into int then set single step of panX as it
@@ -603,6 +877,14 @@ class popWindow(QWidget):
         self.tabs.clear()
         self.tabList.clear()
         maxVoltage = 0
+        if len(self.settings) == 0:
+            print('No Deflector found, please add one')
+            emptyTab = QWidget()
+            emptyTab.setLayout(self.noDeflectorLayout)
+            self.tabList.append(emptyTab)
+            self.tabs.addTab(emptyTab, 'No Deflector')
+            self.createNewDeflector()
+            return
         for i in range(len(self.settings)):
             name = self.settings[i].tag
             color = self.settings[i].find('colour').text
@@ -619,6 +901,7 @@ class popWindow(QWidget):
         self.adTabs.clear()
         self.adTabList.clear()
         for i in range(len(self.tempSettings)):
+            print('adtab no.'+str(i))
             name = self.tempSettings[i].tag
             color = self.tempSettings[i].find('colour').text
             aw = QWidget()
@@ -629,10 +912,14 @@ class popWindow(QWidget):
 
     def refreshAdtabs(self):
         if (self.adTabs.count() < len(self.tempSettings)):
-            while self.tabs.count() != len(self.tempSettings):
+            while self.adtabs.count() != len(self.tempSettings):
                 w = QWidget()
                 self.adTabList.append(w)
                 self.adTabs.addTab(w, 'temp')
+        elif (self.adTabs.count() > len(self.tempSettings)):
+            while self.adTabs.count() != len(self.tempSettings): 
+                self.adTabs.removeTab(0)
+                self.adTabList.pop()
         for i in range(len(self.tempSettings)):
             name = self.tempSettings[i].tag
             color = self.tempSettings[i].find('colour').text
@@ -665,6 +952,8 @@ class popWindow(QWidget):
         if reply == QMessageBox.Yes:
             self.advancedWindows.close()
             self.tempSettings = copy.deepcopy(self.settings)
+            if (len(self.tempSettings) == 0):
+                self.createNewDeflector()
             self.refreshAdtabs()
             self.adTabs.setCurrentIndex(0)
             self.loadAdvancedData(0)
