@@ -6,10 +6,10 @@
         <yOffset>1</yOffset>
         <voltage>100</voltage>
         <slope>1</slope>
-        <Bx1/>
-        <Bx2/>
-        <By1/>
-        <By2/>
+        <Bx1>Placeholder_AO0</Bx1>
+        <Bx2>Placeholder_AO1</Bx2>
+        <By1>Placeholder_AO1</By1>
+        <By2>Placeholder_AO1</By2>
         <hasLower/>
         <Bx3/>
         <Bx4/>
@@ -18,4 +18,22 @@
         <shift/>
         <tile/>
     </New_Deflector>
+    <New_Deflector1>
+        <colour>blue</colour>
+        <xOffset>1</xOffset>
+        <yOffset>1</yOffset>
+        <voltage>70</voltage>
+        <slope>1</slope>
+        <Bx1>Bx1</Bx1>
+        <Bx2>By1</Bx2>
+        <By1>By1</By1>
+        <By2>By1</By2>
+        <hasLower>True</hasLower>
+        <Bx3>Bx1</Bx3>
+        <Bx4>By1</Bx4>
+        <By3>By1</By3>
+        <By4>Bx1</By4>
+        <shift>1</shift>
+        <tile>1</tile>
+    </New_Deflector1>
 </Settings>

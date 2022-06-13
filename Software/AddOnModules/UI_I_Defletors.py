@@ -134,6 +134,7 @@ class popWindow(QWidget):
 
         self.plot.getPlotItem().showAxis('top')
         self.plot.getPlotItem().showAxis('right')
+        self.plot.showGrid(x=True, y=True, alpha=0.3)
         self.updatePlot()
 
         # actually add the main overall grid to the popup window
@@ -391,6 +392,7 @@ class popWindow(QWidget):
         self.updatePlot()
     
     def shiftOnClick(self):
+        self.currentData[self.tabs.currentIndex()]['mode'] = 'shift'
         # if button is checked
         if self.shiftMode.isChecked():
             if self.tileMode.isChecked():
@@ -408,6 +410,7 @@ class popWindow(QWidget):
         self.updateBy()
 
     def selectLower(self):
+        self.currentData[self.tabs.currentIndex()]['mode'] = 'tile'
         deflector = self.tempSettings[self.adTabs.currentIndex()]
         checked = self.LxPins.isChecked()
         if not checked:
@@ -484,6 +487,15 @@ class popWindow(QWidget):
             self.SnT.setDisabled(False)
         else:
             self.SnT.setDisabled(True)
+        if self.currentData[index]['mode'] == 'shift':
+            self.shiftMode.setChecked(True)
+            self.tileMode.setChecked(False)
+        elif self.currentData[index]['mode'] == 'tile':
+            self.shiftMode.setChecked(False)
+            self.tileMode.setChecked(True)
+        else:
+            self.shiftMode.setChecked(False)
+            self.tileMode.setChecked(False)
 
 
     def loadAdvancedData(self, index):
@@ -541,8 +553,12 @@ class popWindow(QWidget):
         
         if data.find('hasLower').text == 'True':
             self.LxPins.setChecked(True)
+            self.LyPins.setDisabled(False)
+            self.ratios.setDisabled(False)
         else:
             self.LxPins.setChecked(False)
+            self.LyPins.setDisabled(True)
+            self.ratios.setDisabled(True)
 
         if not data.find('Bx3').text:
             self.Bx3Drawer.setCurrentIndex(0)
@@ -826,12 +842,12 @@ class popWindow(QWidget):
         Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('Bx2').text, round(x,2))
         if self.shiftMode.isChecked():
             shiftRatio = float(self.settings[self.tabs.currentIndex()].find('shift').text)
-            shiftedX = x * shiftRatio, 2
+            shiftedX = x * shiftRatio
             Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('Bx3').text, -round(shiftedX,2))
             Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('Bx4').text, round(shiftedX,2)) 
         elif self.tileMode.isChecked():
             tiledRatio = float(self.settings[self.tabs.currentIndex()].find('tile').text)
-            tiledX = x * tiledRatio, 2
+            tiledX = x * tiledRatio
             Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('Bx3').text, -round(tiledX,2))
             Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('Bx4').text, round(tiledX,2))
         else:
@@ -852,12 +868,12 @@ class popWindow(QWidget):
         Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('By2').text, round(y,2))
         if self.shiftMode.isChecked():
             shiftRatio = float(self.settings[self.tabs.currentIndex()].find('shift').text)
-            shiftedY = y * shiftRatio, 2
+            shiftedY = y * shiftRatio
             Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('By3').text, -round(shiftedY,2))
             Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('By4').text, round(shiftedY,2)) 
         elif self.tileMode.isChecked():
             tiledRatio = float(self.settings[self.tabs.currentIndex()].find('tile').text)
-            tiledY = y * tiledRatio, 2
+            tiledY = y * tiledRatio
             Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('By3').text, -round(tiledY,2))
             Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('By4').text, round(tiledY,2))
         else:
@@ -890,7 +906,7 @@ class popWindow(QWidget):
             color = self.settings[i].find('colour').text
             maxVoltage = max(maxVoltage, int(self.settings[i].find('voltage').text))
             w = QWidget()
-            self.currentData.append({'x':0, 'y': 0, 'colour': color})
+            self.currentData.append({'x':0, 'y': 0, 'colour': color, 'mode': None})
             self.tabList.append(w)
             self.tabs.addTab(w, name)
             self.tabs.tabBar().setTabTextColor(i, QtGui.QColor(color))
@@ -940,7 +956,7 @@ class popWindow(QWidget):
             name = self.settings[i].tag
             color = self.settings[i].find('colour').text
             maxVoltage = max(maxVoltage, int(self.settings[i].find('voltage').text))
-            self.currentData.append({'x':0, 'y': 0, 'colour': color})
+            self.currentData.append({'x':0, 'y': 0, 'colour': color, 'mode': None})
             self.tabs.setTabText(i, name)
             self.tabs.tabBar().setTabTextColor(i, QtGui.QColor(color))
 
