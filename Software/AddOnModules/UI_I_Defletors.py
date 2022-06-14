@@ -940,11 +940,17 @@ class popWindow(QWidget):
         self.updatePlot()
         # add real update from to pins
         print('update Bx for Deflector', self.tabs.currentIndex(), 'to', v)
-        # divide the value by two
-        x = round(round(float(v), 2)/2, 2)
-        # x times the ratio of 5(input)and real voltage then divide by slope and minus offset
-        x = x * 5/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(
-            self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('xOffset').text)
+        if self.settings[self.tabs.currentIndex()].find('Bx2').text:
+            # divide the value by two
+            x = round(round(float(v), 2)/2, 2)
+            # x times the ratio of 5(input)and real voltage then divide by slope and minus offset
+            x = x * 5/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(
+                self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('xOffset').text)
+        else:
+            x = round(float(v), 2)
+            # x times the ratio of 5(input)and real voltage then divide by slope and minus offset
+            x = x * 10/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(
+                self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('xOffset').text) 
         Hardware.IO.setAnalog(
             self.settings[self.tabs.currentIndex()].find('Bx1').text, -round(x, 2))
         Hardware.IO.setAnalog(
@@ -969,9 +975,6 @@ class popWindow(QWidget):
             Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find(
                 'Bx4').text, round(tiledX, 2))
         else:
-            x = round(round(float(v), 2)/2, 2)
-            x = x * 5/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(
-                self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('xOffset').text)
             Hardware.IO.setAnalog(
                 self.settings[self.tabs.currentIndex()].find('Bx3').text, -round(x, 2))
             Hardware.IO.setAnalog(
@@ -983,9 +986,16 @@ class popWindow(QWidget):
         self.updatePlot()
         # add real update from to pins
         print('update By for Deflector', self.tabs.currentIndex(), 'to', v)
-        y = round(round(float(v), 2)/2, 2)
-        y = y * 5/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(
-            self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('yOffset').text)
+        if self.settings[self.tabs.currentIndex()].find('By2').text:
+            y = round(round(float(v), 2)/2, 2)
+            y = y * 5/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(
+                self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('yOffset').text)
+        else:
+            y = round(float(v), 2)
+            y = y * 10/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(
+                self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('yOffset').text)
+        
+            
         Hardware.IO.setAnalog(
             self.settings[self.tabs.currentIndex()].find('By1').text, -round(y, 2))
         Hardware.IO.setAnalog(
