@@ -494,7 +494,7 @@ class popWindow(QWidget):
     '''
     def loadData(self, index):
         #if the current widget has layout, empty it
-        if self.tabList[index].layout() != 0:
+        if self.tabList[index].layout() == 0:
             QWidget().setLayout(self.tabList[index].layout())
         #set the layout
         self.tabList[index].setLayout(self.deflectorLayout)
