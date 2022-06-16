@@ -11,7 +11,7 @@ import importlib
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 import copy
-
+import math
 # name of the button on the main window that links to this code
 buttonName = 'Stigmators'
 windowHandle = None  # a handle to the window on a global scope
@@ -51,6 +51,8 @@ class popWindow(QWidget):
         self.ySpinBoxs = []
 
         self.yIncrements = []
+
+        self.plots = []
         # Get Analog output pins list from hardware module
         self.AOList = list(Hardware.IO.AoNames.keys())
         # insert an empty element as new deflector default
@@ -563,10 +565,10 @@ class popWindow(QWidget):
         deflector.find('tile').text = t
 
     def updateBx(self, index):
-        pass
+        self.updatePlot()
 
     def updateBy(self, index):
-        pass
+        self.updatePlot()
 
     def BxIncrementChange(self, index):
         print(index)
@@ -576,7 +578,7 @@ class popWindow(QWidget):
     def ByIncrementChange(self, index):
         print(index)
         # get the value from the spinner, turns into int then set single step of panY as it
-        self.ySpinBoxs[index].setSingleStep(float(self.xIncrements[index].currentText()))
+        self.ySpinBoxs[index].setSingleStep(float(self.yIncrements[index].currentText()))
 
     def lambdaGenerator(self, index, function):
         return lambda: function(index)
@@ -642,7 +644,22 @@ class popWindow(QWidget):
             self.groupBoxs[i].setLayout(self.boxLayouts[i])
 
             self.mainGrid.addWidget(self.groupBoxs[i], i, 0)
-        self.mainGrid.addWidget(self.advanceBtn, len(self.settings), 0, QtCore.Qt.AlignRight) 
+            self.plots.append(pg.PlotWidget())
+            # X and Y range, will be updated to the max voltage when loading deflectors
+            self.plots[i].setXRange(-int(self.settings[i].find("voltage").text), int(self.settings[i].find("voltage").text))
+            self.plots[i].setYRange(-int(self.settings[i].find("voltage").text), int(self.settings[i].find("voltage").text))
+            # plot size
+            self.plots[i].setFixedSize(200, 200)
+            # disable mouse draging/zooming
+            self.plots[i].setMouseEnabled(x=False, y=False)
+            # show axis for 4 sides
+            self.plots[i].getPlotItem().showAxis('top')
+            self.plots[i].getPlotItem().showAxis('right')
+            # show grids
+            self.plots[i].showGrid(x=True, y=True, alpha=0.3)
+            # call updatePlot to initialize the plot
+            self.mainGrid.addWidget(self.plots[i], i, 1, alignment=QtCore.Qt.AlignHCenter)
+            self.mainGrid.addWidget(self.advanceBtn, len(self.settings), 0, QtCore.Qt.AlignRight)
     def loadAdtabs(self):
         self.adTabs.clear()
         self.adTabList.clear()
@@ -671,24 +688,6 @@ class popWindow(QWidget):
             self.adTabs.setTabText(i, name)
             self.adTabs.tabBar().setTabTextColor(i, QtGui.QColor(color))
 
-    def refreshTabs(self):
-        self.currentData.clear()
-        maxVoltage = 0
-        if (self.tabs.count() < len(self.settings)):
-            while self.tabs.count() != len(self.settings):
-                w = QWidget()
-                self.tabList.append(w)
-                self.tabs.addTab(w, 'temp')
-        for i in range(len(self.settings)):
-            name = self.settings[i].tag
-            color = self.settings[i].find('colour').text
-            maxVoltage = max(maxVoltage, int(
-                self.settings[i].find('voltage').text))
-            self.currentData.append(
-                {'x': 0, 'y': 0, 'colour': color, 'mode': None})
-            self.tabs.setTabText(i, name)
-            self.tabs.tabBar().setTabTextColor(i, QtGui.QColor(color))
-
     def back(self):
         reply = QMessageBox.question(
             self.advancedWindows, 'Back', 'Go Back will lose all unsaved advance setting, press Yes to confirm', QMessageBox.Yes, QMessageBox.No)
@@ -702,7 +701,20 @@ class popWindow(QWidget):
             self.loadAdvancedData(0)
 
     def updatePlot(self):
-        pass
+        for i in range(len(self.plots)):
+            x = self.xSpinBoxs[i].value()
+            y = self.ySpinBoxs[i].value()
+            if x > 0 and y > 0:
+                coordX = (x-y/math.sqrt(2))/2 + y/math.sqrt(2)
+                coordY = y/2*math.sqrt(2)
+                l = math.sqrt(coordX**2 + coordY**2)
+                e = pg.QtGui.QGraphicsEllipseItem(-l, -4, 2*l, 8)
+                angle = math.degrees(math.atan2(coordY, coordX))
+                e.rotate(angle)
+                e.setPen(QtGui.QColor(self.settings[i].find('colour').text))
+                self.plots[i].clear()
+                self.plots[i].addItem(e)
+
 
     # function to handle initialization - mainly calls a subfunction to create the user interface
     def __init__(self):
