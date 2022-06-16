@@ -226,61 +226,7 @@ class popWindow(QWidget):
             lambda: self.loadAdvancedData(self.adTabs.currentIndex()))
         self.updatePlot()
 
-    '''
-    Function that response to when the shift mode button is clicked
-    '''
 
-    def shiftOnClick(self):
-        # if button is checked
-        if self.shiftMode.isChecked():
-            # update the mode in current data to shift
-            self.currentData[self.tabs.currentIndex()]['mode'] = 'shift'
-            # uncheck the tile mode button
-            if self.tileMode.isChecked():
-                self.tileMode.setChecked(False)
-        else:
-            # update the mode in current data to shift when the button is unchecked
-            self.currentData[self.tabs.currentIndex()]['mode'] = None
-        # since mode changed, needs to update Bx and By
-        self.updateBx()
-        self.updateBy()
-    '''
-    Function that response to when the tilt mode button is clicked
-    '''
-
-    def tileOnClick(self):
-        # if button is checked
-        if self.tileMode.isChecked():
-            # update the mode in current data to tilt
-            self.currentData[self.tabs.currentIndex()]['mode'] = 'tile'
-            # uncheck the shift mode button
-            if self.shiftMode.isChecked():
-                self.shiftMode.setChecked(False)
-        else:
-            # update the mode in current data to shift when the button is unchecked
-            self.currentData[self.tabs.currentIndex()]['mode'] = None
-        # since mode changed, needs to update Bx and By
-        self.updateBx()
-        self.updateBy()
-
-    '''
-    Function that response to when the check box of lower plate in advanced setting
-    is checked
-    '''
-
-    def selectLower(self):
-        deflector = self.tempSettings[self.adTabs.currentIndex()]
-        checked = self.LxPins.isChecked()
-        if not checked:
-            # update xml file
-            deflector.find('hasLower').text = 'False'
-            # disable other lower y pins and ratio group box
-            self.LyPins.setDisabled(True)
-            self.ratios.setDisabled(True)
-        else:
-            deflector.find('hasLower').text = 'True'
-            self.LyPins.setDisabled(False)
-            self.ratios.setDisabled(False)
 
     '''
     Function that response to when the advanced button is clicked
@@ -327,60 +273,6 @@ class popWindow(QWidget):
             self.loadAdtabs()
         else:
             self.createNewDeflector()
-
-    '''
-    Function that load data into tab.
-    index = the index of deflector you want to load
-    '''
-
-    def loadData(self, index):
-        # if the current widget has layout, empty it
-        if self.tabList[index].layout() == 0:
-            QWidget().setLayout(self.tabList[index].layout())
-        # set the layout
-        self.tabList[index].setLayout(self.deflectorLayout)
-        # get data from the xml root using the index
-        data = self.settings[index]
-        self.voltage = int(data.find('voltage').text)
-        # if the last bx or by is greater than the current voltage, if we reset min and max will cause value change,
-        # so we need to load the bx and by first, then set the minmax value
-        if abs(self.Bx.value()) > self.voltage or abs(self.By.value()) > self.voltage:
-            self.Bx.setValue(self.currentData[index]['x'])
-            self.By.setValue(self.currentData[index]['y'])
-            self.Bx.setMinimum(-self.voltage)
-            self.By.setMinimum(-self.voltage)
-            self.Bx.setMaximum(self.voltage)
-            self.By.setMaximum(self.voltage)
-        # otherwise, set the minmax first then set real value
-        else:
-            self.Bx.setMinimum(-self.voltage)
-            self.By.setMinimum(-self.voltage)
-            self.Bx.setMaximum(self.voltage)
-            self.By.setMaximum(self.voltage)
-            self.Bx.setValue(self.currentData[index]['x'])
-            self.By.setValue(self.currentData[index]['y'])
-
-        self.xOffset = float(data.find('xOffset').text)
-        self.yOffset = float(data.find('yOffset').text)
-        self.slope = float(data.find('slope').text)
-        # set the increment index to 0 as default
-        self.BxIncrement.setCurrentIndex(0)
-        self.ByIncrement.setCurrentIndex(0)
-        # check the setting has lower plate or not, if not disable toggle buttons
-        if data.find('hasLower').text == 'True':
-            self.SnT.setDisabled(False)
-        else:
-            self.SnT.setDisabled(True)
-        # from the current value check the current mode and load it
-        if self.currentData[index]['mode'] == 'shift':
-            self.shiftMode.setChecked(True)
-            self.tileMode.setChecked(False)
-        elif self.currentData[index]['mode'] == 'tile':
-            self.shiftMode.setChecked(False)
-            self.tileMode.setChecked(True)
-        else:
-            self.shiftMode.setChecked(False)
-            self.tileMode.setChecked(False)
 
     '''
     Function that load data into advanced setting tab.
@@ -677,12 +569,17 @@ class popWindow(QWidget):
         pass
 
     def BxIncrementChange(self, index):
+        print(index)
         # get the value from the spinner, turns into int then set single step of panX as it
         self.xSpinBoxs[index].setSingleStep(float(self.xIncrements[index].currentText()))
 
     def ByIncrementChange(self, index):
+        print(index)
         # get the value from the spinner, turns into int then set single step of panY as it
         self.ySpinBoxs[index].setSingleStep(float(self.xIncrements[index].currentText()))
+
+    def lambdaGenerator(self, index, function):
+        return lambda: function(index)
 
     def loadTabs(self):
         self.groupBoxs.clear()
@@ -710,11 +607,12 @@ class popWindow(QWidget):
             self.xSpinBoxs[i].setMaximum(int(self.settings[i].find("voltage").text))
             self.xSpinBoxs[i].setValue(0)
             self.xSpinBoxs[i].setSingleStep(0.01)
-            self.xSpinBoxs[i].valueChanged.connect(lambda: self.updateBx(i))
+            self.xSpinBoxs[i].valueChanged.connect(self.lambdaGenerator(i, self.updateBx))
             self.xIncrements.append(QComboBox())
             self.xIncrements[i].addItems(['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5'])
             self.xIncrements[i].setCurrentIndex(0)
-            self.xIncrements[i].currentIndexChanged.connect(lambda: self.BxIncrementChange(i))
+
+            self.xIncrements[i].currentIndexChanged.connect(self.lambdaGenerator(i, self.BxIncrementChange))
             self.boxLayouts.append(QHBoxLayout())
             self.boxLayouts[i].addWidget(nameLabel)
             self.boxLayouts[i].addWidget(xLabel)
@@ -729,13 +627,13 @@ class popWindow(QWidget):
             self.ySpinBoxs[i].setMaximum(int(self.settings[i].find("voltage").text))
             self.ySpinBoxs[i].setValue(0)
             self.ySpinBoxs[i].setSingleStep(0.01)
-            self.ySpinBoxs[i].valueChanged.connect(lambda: self.updateBy(i))
+            self.ySpinBoxs[i].valueChanged.connect(self.lambdaGenerator(i, self.updateBy))
 
             self.yIncrements.append(QComboBox())
             self.yIncrements[i].addItems(
                 ['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5'])
             self.yIncrements[i].setCurrentIndex(0)
-            self.yIncrements[i].currentIndexChanged.connect(lambda: self.ByIncrementChange(i))
+            self.yIncrements[i].currentIndexChanged.connect(self.lambdaGenerator(i, self.ByIncrementChange))
 
             self.boxLayouts[i].addWidget(yLabel)
             self.boxLayouts[i].addWidget(self.ySpinBoxs[i])
