@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Settings>
+    <New_Stigmator>
+        <colour>gray</colour>
+        <xOffset>0</xOffset>
+        <yOffset>0</yOffset>
+        <voltage>100</voltage>
+        <slope>1</slope>
+        <Bx1/>
+        <Bx2/>
+        <By1/>
+        <By2/>
+    </New_Stigmator>
+</Settings>
