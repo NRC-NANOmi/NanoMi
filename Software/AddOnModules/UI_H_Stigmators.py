@@ -565,10 +565,45 @@ class popWindow(QWidget):
         deflector.find('tile').text = t
 
     def updateBx(self, index):
+        # get the value from bx and update currentdata list and plot
+        v = self.xSpinBoxs[index].value()
         self.updatePlot()
+        # add real update from to pins
+        x = round(float(v), 2)
+        x = x * 5/(int(self.settings[index].find('voltage').text)) / float(
+            self.settings[index].find('slope').text) - float(self.settings[index].find('xOffset').text)
+
+        if self.settings[index].find('Bx2').text:
+            # divide the value by two
+            x = round(x/2, 2)
+            Hardware.IO.setAnalog(
+                self.settings[index].find('Bx1').text, -round(x, 2))
+            Hardware.IO.setAnalog(
+                self.settings[index].find('Bx2').text, round(x, 2))
+
+        else:
+            Hardware.IO.setAnalog(
+                self.settings[index].find('Bx1').text, round(x, 2))
 
     def updateBy(self, index):
+        v = self.ySpinBoxs[index].value()
         self.updatePlot()
+        # add real update from to pins
+        y = round(float(v), 2)
+        y = y * 5/(int(self.settings[index].find('voltage').text)) / float(
+            self.settings[index].find('slope').text) - float(self.settings[index].find('yOffset').text)
+
+        if self.settings[index].find('By2').text:
+            # divide the value by two
+            y = round(y/2, 2)
+            Hardware.IO.setAnalog(
+                self.settings[index].find('By1').text, -round(y, 2))
+            Hardware.IO.setAnalog(
+                self.settings[index].find('By2').text, round(y, 2))
+
+        else:
+            Hardware.IO.setAnalog(
+                self.settings[index].find('By1').text, round(y, 2))
 
     def BxIncrementChange(self, index):
         print(index)

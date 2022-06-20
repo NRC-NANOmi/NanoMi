@@ -940,45 +940,27 @@ class popWindow(QWidget):
         self.updatePlot()
         # add real update from to pins
         print('update Bx for Deflector', self.tabs.currentIndex(), 'to', v)
+        x = round(float(v), 2)
+
+            # x times the ratio of 5(input)and real voltage then divide by slope and minus offset
+                        # x times the ratio of 5(input)and real voltage then divide by slope and minus offset
+        x = x * 4.99/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(
+            self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('xOffset').text)
+        Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('Bx1').text, -round(x, 2))
         if self.settings[self.tabs.currentIndex()].find('Bx2').text:
-            # divide the value by two
-            x = round(round(float(v), 2)/2, 2)
-            # x times the ratio of 5(input)and real voltage then divide by slope and minus offset
-            x = x * 5/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(
-                self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('xOffset').text)
-        else:
-            x = round(float(v), 2)
-            # x times the ratio of 5(input)and real voltage then divide by slope and minus offset
-            x = x * 10/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(
-                self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('xOffset').text) 
-        Hardware.IO.setAnalog(
-            self.settings[self.tabs.currentIndex()].find('Bx1').text, -round(x, 2))
-        Hardware.IO.setAnalog(
-            self.settings[self.tabs.currentIndex()].find('Bx2').text, round(x, 2))
-        # check which mode currently is
-        if self.shiftMode.isChecked():
-            shiftRatio = float(
-                self.settings[self.tabs.currentIndex()].find('shift').text)
-            # apply shift ratio
-            shiftedX = x * shiftRatio
-            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find(
-                'Bx3').text, -round(shiftedX, 2))
-            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find(
-                'Bx4').text, round(shiftedX, 2))
-        elif self.tileMode.isChecked():
-            tiledRatio = float(
-                self.settings[self.tabs.currentIndex()].find('tile').text)
-            # apply tilt ratio
-            tiledX = x * tiledRatio
-            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find(
-                'Bx3').text, -round(tiledX, 2))
-            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find(
-                'Bx4').text, round(tiledX, 2))
-        else:
-            Hardware.IO.setAnalog(
-                self.settings[self.tabs.currentIndex()].find('Bx3').text, -round(x, 2))
-            Hardware.IO.setAnalog(
-                self.settings[self.tabs.currentIndex()].find('Bx4').text, round(x, 2))
+            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('Bx2').text, round(x, 2))
+        if self.settings[self.tabs.currentIndex()].find('hasLower').text == True:
+            if self.shiftMode.isChecked():
+                shiftRatio = float(
+                    self.settings[self.tabs.currentIndex()].find('shift').text)
+                x = x * shiftRatio
+            elif self.tileMod.isChecked():
+                tiledRatio = float(
+                    self.settings[self.tabs.currentIndex()].find('tile').text)
+                x = x * tiledRatio
+            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('Bx3').text, -round(x, 2))
+            if self.settings[self.tabs.currentIndex()].find('Bx4').text:
+                Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('Bx3').text, round(x, 2))
 
     def updateBy(self):
         v = self.By.value()
@@ -986,41 +968,23 @@ class popWindow(QWidget):
         self.updatePlot()
         # add real update from to pins
         print('update By for Deflector', self.tabs.currentIndex(), 'to', v)
+        y = y * 4.99/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(
+            self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('yOffset').text)
+        Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('By1').text, -round(y, 2))
         if self.settings[self.tabs.currentIndex()].find('By2').text:
-            y = round(round(float(v), 2)/2, 2)
-            y = y * 5/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(
-                self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('yOffset').text)
-        else:
-            y = round(float(v), 2)
-            y = y * 10/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(
-                self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('yOffset').text)
-        
-            
-        Hardware.IO.setAnalog(
-            self.settings[self.tabs.currentIndex()].find('By1').text, -round(y, 2))
-        Hardware.IO.setAnalog(
-            self.settings[self.tabs.currentIndex()].find('By2').text, round(y, 2))
-        if self.shiftMode.isChecked():
-            shiftRatio = float(
-                self.settings[self.tabs.currentIndex()].find('shift').text)
-            shiftedY = y * shiftRatio
-            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find(
-                'By3').text, -round(shiftedY, 2))
-            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find(
-                'By4').text, round(shiftedY, 2))
-        elif self.tileMode.isChecked():
-            tiledRatio = float(
-                self.settings[self.tabs.currentIndex()].find('tile').text)
-            tiledY = y * tiledRatio
-            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find(
-                'By3').text, -round(tiledY, 2))
-            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find(
-                'By4').text, round(tiledY, 2))
-        else:
-            Hardware.IO.setAnalog(
-                self.settings[self.tabs.currentIndex()].find('By3').text, -round(y, 2))
-            Hardware.IO.setAnalog(
-                self.settings[self.tabs.currentIndex()].find('By4').text, round(y, 2))
+            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('By2').text, round(y, 2))
+        if self.settings[self.tabs.currentIndex()].find('hasLower').text == True:
+            if self.shiftMode.isChecked():
+                shiftRatio = float(
+                    self.settings[self.tabs.currentIndex()].find('shift').text)
+                y = y * shiftRatio
+            elif self.tileMod.isChecked():
+                tiledRatio = float(
+                    self.settings[self.tabs.currentIndex()].find('tile').text)
+                y = y * tiledRatio
+            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('By3').text, -round(y, 2))
+            if self.settings[self.tabs.currentIndex()].find('By4').text:
+                Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('By3').text, round(y, 2))
 
     def BxIncrementChange(self):
         # get the value from the spinner, turns into int then set single step of panX as it
