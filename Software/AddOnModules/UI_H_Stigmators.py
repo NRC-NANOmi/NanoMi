@@ -4,6 +4,7 @@ import os                         # allow us to access other files
 # import the necessary aspects of PyQt5 for this user interface window
 from PyQt5.QtWidgets import QWidget, QPushButton, QApplication, QLabel, QMessageBox, QTabWidget, QGridLayout, QLineEdit, QListWidget, QTableWidget, QTableWidgetItem, QGroupBox, QDoubleSpinBox, QComboBox, QHBoxLayout
 from PyQt5 import QtCore, QtGui, QtWidgets
+from matplotlib.pyplot import angle_spectrum
 from AddOnModules import Hardware
 import pyqtgraph as pg
 import datetime
@@ -45,7 +46,7 @@ class popWindow(QWidget):
         self.boxLayouts = []
 
         self.xSpinBoxs = []
-        
+
         self.xIncrements = []
 
         self.ySpinBoxs = []
@@ -57,7 +58,6 @@ class popWindow(QWidget):
         self.AOList = list(Hardware.IO.AoNames.keys())
         # insert an empty element as new deflector default
         self.AOList.insert(0, '')
-
 
         # TODO:set up plot
 
@@ -228,8 +228,6 @@ class popWindow(QWidget):
             lambda: self.loadAdvancedData(self.adTabs.currentIndex()))
         self.updatePlot()
 
-
-
     '''
     Function that response to when the advanced button is clicked
     '''
@@ -341,7 +339,6 @@ class popWindow(QWidget):
         else:
             self.By2Drawer.setCurrentIndex(
                 self.AOList.index(data.find('By2').text))
-    
 
     '''
     Function that create a new deflector
@@ -399,7 +396,7 @@ class popWindow(QWidget):
         #     return
         # reply = QMessageBox.question(
         #     self.advancedWindows, 'Save', "Saving new advanced setting will reset all your deflectors' data, press Yes to confirm", QMessageBox.Yes, QMessageBox.No)
-        reply = QMessageBox.Yes 
+        reply = QMessageBox.Yes
         if reply == QMessageBox.Yes:
             xmlString = ET.tostring(self.tempSettings, 'utf-8', method='xml')
             # now decode it to an actual string
@@ -533,7 +530,6 @@ class popWindow(QWidget):
         deflector = self.tempSettings[self.adTabs.currentIndex()]
         deflector.find('By2').text = By2
 
-
     def updateXOffset(self):
         x = self.xOffInput.text()
         deflector = self.tempSettings[self.adTabs.currentIndex()]
@@ -608,12 +604,14 @@ class popWindow(QWidget):
     def BxIncrementChange(self, index):
         print(index)
         # get the value from the spinner, turns into int then set single step of panX as it
-        self.xSpinBoxs[index].setSingleStep(float(self.xIncrements[index].currentText()))
+        self.xSpinBoxs[index].setSingleStep(
+            float(self.xIncrements[index].currentText()))
 
     def ByIncrementChange(self, index):
         print(index)
         # get the value from the spinner, turns into int then set single step of panY as it
-        self.ySpinBoxs[index].setSingleStep(float(self.yIncrements[index].currentText()))
+        self.ySpinBoxs[index].setSingleStep(
+            float(self.yIncrements[index].currentText()))
 
     def lambdaGenerator(self, index, function):
         return lambda: function(index)
@@ -632,24 +630,31 @@ class popWindow(QWidget):
             boxLayout.addWidget(label)
             gb.setLayout(boxLayout)
             self.mainGrid.addWidget(gb, 0, 0)
-            self.mainGrid.addWidget(self.advanceBtn, 2, 0, QtCore.Qt.AlignRight)
+            self.mainGrid.addWidget(
+                self.advanceBtn, 2, 0, QtCore.Qt.AlignRight)
             return
         for i in range(len(self.settings)):
             self.groupBoxs.append(QGroupBox())
             nameLabel = QLabel(self.settings[i].tag)
-            nameLabel.setStyleSheet('color: '+ self.settings[i].find("colour").text)
+            nameLabel.setStyleSheet(
+                'color: ' + self.settings[i].find("colour").text)
             xLabel = QLabel("X", self)  # Add a label called X
             self.xSpinBoxs.append(QDoubleSpinBox())
-            self.xSpinBoxs[i].setMinimum(-int(self.settings[i].find("voltage").text))
-            self.xSpinBoxs[i].setMaximum(int(self.settings[i].find("voltage").text))
+            self.xSpinBoxs[i].setMinimum(
+                -int(self.settings[i].find("voltage").text))
+            self.xSpinBoxs[i].setMaximum(
+                int(self.settings[i].find("voltage").text))
             self.xSpinBoxs[i].setValue(0)
             self.xSpinBoxs[i].setSingleStep(0.01)
-            self.xSpinBoxs[i].valueChanged.connect(self.lambdaGenerator(i, self.updateBx))
+            self.xSpinBoxs[i].valueChanged.connect(
+                self.lambdaGenerator(i, self.updateBx))
             self.xIncrements.append(QComboBox())
-            self.xIncrements[i].addItems(['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5'])
+            self.xIncrements[i].addItems(
+                ['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5'])
             self.xIncrements[i].setCurrentIndex(0)
 
-            self.xIncrements[i].currentIndexChanged.connect(self.lambdaGenerator(i, self.BxIncrementChange))
+            self.xIncrements[i].currentIndexChanged.connect(
+                self.lambdaGenerator(i, self.BxIncrementChange))
             self.boxLayouts.append(QHBoxLayout())
             self.boxLayouts[i].addWidget(nameLabel)
             self.boxLayouts[i].addWidget(xLabel)
@@ -660,17 +665,21 @@ class popWindow(QWidget):
             yLabel = QLabel("Y", self)  # Add a label called Y
 
             self.ySpinBoxs.append(QDoubleSpinBox())
-            self.ySpinBoxs[i].setMinimum(-int(self.settings[i].find("voltage").text))
-            self.ySpinBoxs[i].setMaximum(int(self.settings[i].find("voltage").text))
+            self.ySpinBoxs[i].setMinimum(
+                -int(self.settings[i].find("voltage").text))
+            self.ySpinBoxs[i].setMaximum(
+                int(self.settings[i].find("voltage").text))
             self.ySpinBoxs[i].setValue(0)
             self.ySpinBoxs[i].setSingleStep(0.01)
-            self.ySpinBoxs[i].valueChanged.connect(self.lambdaGenerator(i, self.updateBy))
+            self.ySpinBoxs[i].valueChanged.connect(
+                self.lambdaGenerator(i, self.updateBy))
 
             self.yIncrements.append(QComboBox())
             self.yIncrements[i].addItems(
                 ['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5'])
             self.yIncrements[i].setCurrentIndex(0)
-            self.yIncrements[i].currentIndexChanged.connect(self.lambdaGenerator(i, self.ByIncrementChange))
+            self.yIncrements[i].currentIndexChanged.connect(
+                self.lambdaGenerator(i, self.ByIncrementChange))
 
             self.boxLayouts[i].addWidget(yLabel)
             self.boxLayouts[i].addWidget(self.ySpinBoxs[i])
@@ -681,8 +690,10 @@ class popWindow(QWidget):
             self.mainGrid.addWidget(self.groupBoxs[i], i, 0)
             self.plots.append(pg.PlotWidget())
             # X and Y range, will be updated to the max voltage when loading deflectors
-            self.plots[i].setXRange(-int(self.settings[i].find("voltage").text), int(self.settings[i].find("voltage").text))
-            self.plots[i].setYRange(-int(self.settings[i].find("voltage").text), int(self.settings[i].find("voltage").text))
+            self.plots[i].setXRange(-int(self.settings[i].find("voltage").text),
+                                    int(self.settings[i].find("voltage").text))
+            self.plots[i].setYRange(-int(self.settings[i].find("voltage").text),
+                                    int(self.settings[i].find("voltage").text))
             # plot size
             self.plots[i].setFixedSize(200, 200)
             # disable mouse draging/zooming
@@ -693,8 +704,11 @@ class popWindow(QWidget):
             # show grids
             self.plots[i].showGrid(x=True, y=True, alpha=0.3)
             # call updatePlot to initialize the plot
-            self.mainGrid.addWidget(self.plots[i], i, 1, alignment=QtCore.Qt.AlignHCenter)
-            self.mainGrid.addWidget(self.advanceBtn, len(self.settings), 0, QtCore.Qt.AlignRight)
+            self.mainGrid.addWidget(
+                self.plots[i], i, 1, alignment=QtCore.Qt.AlignHCenter)
+            self.mainGrid.addWidget(self.advanceBtn, len(
+                self.settings), 0, QtCore.Qt.AlignRight)
+
     def loadAdtabs(self):
         self.adTabs.clear()
         self.adTabList.clear()
@@ -739,19 +753,58 @@ class popWindow(QWidget):
         for i in range(len(self.plots)):
             x = self.xSpinBoxs[i].value()
             y = self.ySpinBoxs[i].value()
+            r = int(self.settings[i].find("voltage").text)/16
             if x > 0 and y > 0:
-                coordX = (x-y/math.sqrt(2))/2 + y/math.sqrt(2)
-                coordY = y/2*math.sqrt(2)
-                l = math.sqrt(coordX**2 + coordY**2)
-                e = pg.QtGui.QGraphicsEllipseItem(-l, -4, 2*l, 8)
-                angle = math.degrees(math.atan2(coordY, coordX))
+                angle = y/(x+y) * 45
+                print("angle is", angle)
+                # length of the box
+                l = max(x, y)/(x+y) * max(x, y)
+                print("Length is", l)
+                e = pg.QtGui.QGraphicsEllipseItem(-l, -r, 2*l, 2*r)
                 e.rotate(angle)
-                e.setPen(QtGui.QColor(self.settings[i].find('colour').text))
-                self.plots[i].clear()
-                self.plots[i].addItem(e)
-
+            elif y == 0 and x > 0:
+                e = pg.QtGui.QGraphicsEllipseItem(-x, -r, 2*x, 2*r)
+            elif x == 0 and y > 0:
+                e = pg.QtGui.QGraphicsEllipseItem(-y, -r, 2*y, 2*r)
+                e.rotate(45)
+            elif y == 0 and x < 0:
+                e = pg.QtGui.QGraphicsEllipseItem(-x, -r, 2*x, 2*r)
+                e.rotate(90)
+            elif x == 0 and y < 0:
+                e = pg.QtGui.QGraphicsEllipseItem(-y, -r, 2*y, 2*r)
+                e.rotate(135)
+            elif x == 0 and y == 0:
+                e = pg.QtGui.QGraphicsEllipseItem(-r, -r, 2*r, 2*r)
+            elif x > 0 and y < 0:
+                angle = 360 - abs(y)/(x+abs(y)) * 45
+                print("angle is", angle)
+                # length of the box
+                l = max(x, abs(y))/(x+abs(y)) * max(x, abs(y))
+                print("Length is", l)
+                e = pg.QtGui.QGraphicsEllipseItem(-l, -r, 2*l, 2*r)
+                e.rotate(angle)
+            elif x < 0 and y > 0:
+                angle = 45 + y/(abs(x)+y) * 45
+                print("angle is", angle)
+                # length of the box
+                l = max(abs(x), y)/(abs(x)+y) * max(abs(x), y)
+                print("Length is", l)
+                e = pg.QtGui.QGraphicsEllipseItem(-l, -r, 2*l, 2*r)
+                e.rotate(angle)
+            elif x < 0 and y < 0:
+                angle = 270 + abs(y)/(abs(x)+abs(y)) * 45
+                print("angle is", angle)
+                # length of the box
+                l = max(abs(x), abs(y))/(abs(x)+abs(y)) * max(abs(x), abs(y))
+                print("Length is", l)
+                e = pg.QtGui.QGraphicsEllipseItem(-l, -r, 2*l, 2*r)
+                e.rotate(angle)
+            e.setPen(QtGui.QColor(self.settings[i].find('colour').text))
+            self.plots[i].clear()
+            self.plots[i].addItem(e)
 
     # function to handle initialization - mainly calls a subfunction to create the user interface
+
     def __init__(self):
         super().__init__()
         self.initUI()
