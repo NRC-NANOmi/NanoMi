@@ -429,9 +429,6 @@ class popWindow(QWidget):
             voltage = self.tempSettings[i].find('voltage').text
             xOffset = self.tempSettings[i].find('xOffset').text
             yOffset = self.tempSettings[i].find('yOffset').text
-            shift = self.tempSettings[i].find('shift').text
-            tile = self.tempSettings[i].find('tile').text
-            hasLower = self.tempSettings[i].find('hasLower').text
             if len(name) > 20:
                 reply = QMessageBox.question(self.advancedWindows, 'Illegal Name',
                                              "The name of deflector can't longer than 20 characters, please change the illegal names", QMessageBox.Ok, QMessageBox.Ok)
@@ -445,6 +442,7 @@ class popWindow(QWidget):
             if ' ' in name:
                 reply = QMessageBox.question(self.advancedWindows, 'Illegal Name',
                                              "The name of deflector can't have space, please change the illegal names", QMessageBox.Ok, QMessageBox.Ok)
+                return 0
             if color == None or color == '':
                 reply = QMessageBox.question(
                     self.advancedWindows, 'No Colours', "Every deflector should have a color, please select color for deflector has no color", QMessageBox.Ok, QMessageBox.Ok)
@@ -455,7 +453,7 @@ class popWindow(QWidget):
                 return 0
             else:
                 colorList.append(color)
-            if not slope.isnumeric():
+            if not isnumber(slope):
                 reply = QMessageBox.question(self.advancedWindows, 'Illegal Slope Input',
                                              "Slope should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
                 return 0
@@ -463,26 +461,17 @@ class popWindow(QWidget):
                 reply = QMessageBox.question(self.advancedWindows, 'Illegal Slope Input',
                                              "Slope shouldn't be greater than 2, please check your input", QMessageBox.Ok, QMessageBox.Ok)
                 return 0
-            if not voltage or not voltage.isnumeric():
+            if not voltage or not isnumber(voltage):
                 reply = QMessageBox.question(self.advancedWindows, 'Illegal Voltage Input',
                                              "Voltage should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
                 return 0
-            if not xOffset or not xOffset.isnumeric():
+            if not xOffset or not isnumber(xOffset):
                 reply = QMessageBox.question(self.advancedWindows, 'Illegal X offset Input',
                                              "X Offset should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
                 return 0
-            if not yOffset or not yOffset.isnumeric():
+            if not yOffset or not isnumber(yOffset):
                 reply = QMessageBox.question(self.advancedWindows, 'Illegal Y offset Input',
                                              "Y Offset should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
-                return 0
-
-            if shift and not shift.isnumeric():
-                reply = QMessageBox.question(self.advancedWindows, 'Illegal shift Input',
-                                             "Shift ratio should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
-                return 0
-            if tile and not tile.isnumeric():
-                reply = QMessageBox.question(self.advancedWindows, 'Illegal tile Input',
-                                             "Tile ratio should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
                 return 0
 
         return 1
@@ -848,6 +837,15 @@ def reload_hardware():
 def showPopUp():
     windowHandle.show()
 
+def isnumber(x):
+    if x:
+        try:
+            # only integers and float converts safely
+            num = float(x)
+            return True
+        except ValueError as e: # not convertable to float
+            return False
+    return False
 
 if __name__ == '__main__':
     main()

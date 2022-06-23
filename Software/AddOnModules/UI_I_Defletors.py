@@ -388,16 +388,14 @@ class popWindow(QWidget):
 
     def selectLower(self):
         deflector = self.tempSettings[self.adTabs.currentIndex()]
-        checked = self.LxPins.isChecked()
+        checked = self.lowerPins.isChecked()
         if not checked:
             # update xml file
             deflector.find('hasLower').text = 'False'
             # disable other lower y pins and ratio group box
-            self.LyPins.setDisabled(True)
             self.ratios.setDisabled(True)
         else:
             deflector.find('hasLower').text = 'True'
-            self.LyPins.setDisabled(False)
             self.ratios.setDisabled(False)
 
     '''
@@ -633,7 +631,7 @@ class popWindow(QWidget):
             return
         reply = QMessageBox.question(
             self.advancedWindows, 'Save', "Saving new advanced setting will reset all your deflectors' data, press Yes to confirm", QMessageBox.Yes, QMessageBox.No)
-
+        # reply = QMessageBox.Yes 
         if reply == QMessageBox.Yes:
             xmlString = ET.tostring(self.tempSettings, 'utf-8', method='xml')
             # now decode it to an actual string
@@ -669,7 +667,8 @@ class popWindow(QWidget):
             xOffset = self.tempSettings[i].find('xOffset').text
             yOffset = self.tempSettings[i].find('yOffset').text
             shift = self.tempSettings[i].find('shift').text
-            tile = self.tempSettings[i].find('tilt').text
+            print(shift)
+            tilt = self.tempSettings[i].find('tilt').text
             hasLower = self.tempSettings[i].find('hasLower').text
             if len(name) > 20:
                 reply = QMessageBox.question(self.advancedWindows, 'Illegal Name',
@@ -684,6 +683,7 @@ class popWindow(QWidget):
             if ' ' in name:
                 reply = QMessageBox.question(self.advancedWindows, 'Illegal Name',
                                              "The name of deflector can't have space, please change the illegal names", QMessageBox.Ok, QMessageBox.Ok)
+                return 0
             if color == None or color == '':
                 reply = QMessageBox.question(
                     self.advancedWindows, 'No Colours', "Every deflector should have a color, please select color for deflector has no color", QMessageBox.Ok, QMessageBox.Ok)
@@ -694,7 +694,7 @@ class popWindow(QWidget):
                 return 0
             else:
                 colorList.append(color)
-            if not slope.isnumeric():
+            if not isnumber(slope):
                 reply = QMessageBox.question(self.advancedWindows, 'Illegal Slope Input',
                                              "Slope should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
                 return 0
@@ -702,24 +702,24 @@ class popWindow(QWidget):
                 reply = QMessageBox.question(self.advancedWindows, 'Illegal Slope Input',
                                              "Slope shouldn't be greater than 2, please check your input", QMessageBox.Ok, QMessageBox.Ok)
                 return 0
-            if not voltage or not voltage.isnumeric():
+            if not voltage or not isnumber(voltage):
                 reply = QMessageBox.question(self.advancedWindows, 'Illegal Voltage Input',
                                              "Voltage should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
                 return 0
-            if not xOffset or not xOffset.isnumeric():
+            if not xOffset or not isnumber(xOffset):
                 reply = QMessageBox.question(self.advancedWindows, 'Illegal X offset Input',
                                              "X Offset should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
                 return 0
-            if not yOffset or not yOffset.isnumeric():
+            if not yOffset or not isnumber(yOffset):
                 reply = QMessageBox.question(self.advancedWindows, 'Illegal Y offset Input',
                                              "Y Offset should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
                 return 0
 
-            if shift and not shift.isnumeric():
+            if shift and not isnumber(shift):
                 reply = QMessageBox.question(self.advancedWindows, 'Illegal shift Input',
                                              "Shift ratio should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
                 return 0
-            if tile and not tile.isnumeric():
+            if tilt and not isnumber(tilt):
                 reply = QMessageBox.question(self.advancedWindows, 'Illegal tilt Input',
                                              "Tile ratio should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
                 return 0
@@ -763,7 +763,7 @@ class popWindow(QWidget):
         deflector.find('y1').text = y1
 
     def updatey2(self):
-        y2 = self.AOList[self.By2Drawer.currentIndex()]
+        y2 = self.AOList[self.y2Drawer.currentIndex()]
         if len(y2) > 9 and y2[-7:] == "unfound":
             y2 = y2[:-8]
         deflector = self.tempSettings[self.adTabs.currentIndex()]
@@ -915,6 +915,7 @@ class popWindow(QWidget):
                 w = QWidget()
                 self.tabList.append(w)
                 self.tabs.addTab(w, 'temp')
+                print("Adding")
         for i in range(len(self.settings)):
             name = self.settings[i].tag
             color = self.settings[i].find('colour').text
@@ -924,7 +925,8 @@ class popWindow(QWidget):
                 {'x': 0, 'y': 0, 'colour': color, 'mode': None})
             self.tabs.setTabText(i, name)
             self.tabs.tabBar().setTabTextColor(i, QtGui.QColor(color))
-
+        self.plot.setXRange(-maxVoltage, maxVoltage)
+        self.plot.setYRange(-maxVoltage, maxVoltage)
     def back(self):
         reply = QMessageBox.question(
             self.advancedWindows, 'Back', 'Go Back will lose all unsaved advance setting, press Yes to confirm', QMessageBox.Yes, QMessageBox.No)
@@ -984,6 +986,15 @@ def main():
 def showPopUp():
     windowHandle.show()
 
+def isnumber(x):
+    if x:
+        try:
+            # only integers and float converts safely
+            num = float(x)
+            return True
+        except ValueError as e: # not convertable to float
+            return False
+    return False
 
 if __name__ == '__main__':
     main()
