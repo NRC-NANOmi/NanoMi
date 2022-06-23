@@ -233,113 +233,61 @@ class popWindow(QWidget):
 
         # set up ui for upper plates
         # set pins for x
-        self.xPins = QGroupBox('Upper Plate')
-        self.Bx1Label = QLabel("Bx1: ", self)  # Add a label called Name
-        self.Bx1Drawer = QComboBox()
-        self.Bx1Drawer.addItems(self.AOList)
-        self.Bx1Drawer.setCurrentIndex(0)
-        self.Bx1Drawer.currentIndexChanged.connect(lambda: self.updateBx1())
+        self.upperPins = QGroupBox('Upper Plate')
+        self.x1Label = QLabel("x1: ")  # Add a label called Name
+        self.x1Drawer = QComboBox()
+        self.x1Drawer.addItems(self.AOList)
+        self.x1Drawer.setCurrentIndex(0)
+        self.x1Drawer.currentIndexChanged.connect(lambda: self.updatex1())
 
-        self.xPinBox = QHBoxLayout()  # box containing the first slider for controlling Bx1
-        self.xPinBox.addWidget(self.Bx1Label)
-        self.xPinBox.addWidget(self.Bx1Drawer)
-        self.xPinBox.addStretch()
+        self.upperPinBox = QHBoxLayout()
+        self.upperPinBox.addWidget(self.x1Label)
+        self.upperPinBox.addWidget(self.x1Drawer)
+        self.upperPinBox.addStretch()
 
-        self.Bx2Label = QLabel("Bx2: ", self)  # Add a label called Color
+        self.y1Label = QLabel("y1: ")  # Add a label called Color
 
-        self.Bx2Drawer = QComboBox()
-        self.Bx2Drawer.addItems(self.AOList)
-        self.Bx2Drawer.setCurrentIndex(0)
-        self.Bx2Drawer.currentIndexChanged.connect(lambda: self.updateBx2())
+        self.y1Drawer = QComboBox()
+        self.y1Drawer.addItems(self.AOList)
+        self.y1Drawer.setCurrentIndex(0)
+        self.y1Drawer.currentIndexChanged.connect(lambda: self.updatey1())
 
-        self.xPinBox.addWidget(self.Bx2Label)
-        self.xPinBox.addWidget(self.Bx2Drawer)
-        self.xPins.setLayout(self.xPinBox)
+        self.upperPinBox.addWidget(self.y1Label)
+        self.upperPinBox.addWidget(self.y1Drawer)
+        self.upperPins.setLayout(self.upperPinBox)
 
-        self.advancedLayout.addWidget(self.xPins, 3, 0)
-
-        # set pins for Y
-        self.yPins = QGroupBox()
-        self.By1Label = QLabel("By1: ", self)  # Add a label called Name
-        self.By1Drawer = QComboBox()
-        self.By1Drawer.addItems(self.AOList)
-        self.By1Drawer.setCurrentIndex(0)
-        self.By1Drawer.currentIndexChanged.connect(lambda: self.updateBy1())
-
-        self.yPinBox = QHBoxLayout()  # box containing the first slider for controlling Bx1
-        self.yPinBox.addWidget(self.By1Label)
-        self.yPinBox.addWidget(self.By1Drawer)
-        self.yPinBox.addStretch()
-
-        self.By2Label = QLabel("By2: ", self)  # Add a label called Color
-
-        self.By2Drawer = QComboBox()
-        self.By2Drawer.addItems(self.AOList)
-        self.By2Drawer.setCurrentIndex(0)
-        self.By2Drawer.currentIndexChanged.connect(lambda: self.updateBy2())
-
-        self.yPinBox.addWidget(self.By2Label)
-        self.yPinBox.addWidget(self.By2Drawer)
-        self.yPins.setLayout(self.yPinBox)
-
-        self.advancedLayout.addWidget(self.yPins, 4, 0)
+        self.advancedLayout.addWidget(self.upperPins, 3, 0)
 
         # Lower deflector pins
         # set pins for x
-        self.LxPins = QGroupBox('Lower Plate')
-        self.LxPins.setCheckable(True)
-        self.LxPins.clicked.connect(lambda: self.selectLower())
-        self.Bx3Label = QLabel("Bx3: ")
-        self.Bx3Drawer = QComboBox()
-        self.Bx3Drawer.addItems(self.AOList)
-        self.Bx3Drawer.setCurrentIndex(0)
-        self.Bx3Drawer.currentIndexChanged.connect(lambda: self.updateBx3())
+        self.lowerPins = QGroupBox('Lower Plate')
+        self.lowerPins.setCheckable(True)
+        self.lowerPins.clicked.connect(lambda: self.selectLower())
+        self.x2Label = QLabel("x2: ")
+        self.x2Drawer = QComboBox()
+        self.x2Drawer.addItems(self.AOList)
+        self.x2Drawer.setCurrentIndex(0)
+        self.x2Drawer.currentIndexChanged.connect(lambda: self.updatex2())
 
-        self.LxPinBox = QHBoxLayout()  # box containing the first slider for controlling Bx1
-        self.LxPinBox.addWidget(self.Bx3Label)
-        self.LxPinBox.addWidget(self.Bx3Drawer)
-        self.LxPinBox.addStretch()
+        self.lowerPinBox = QHBoxLayout()  # box containing the first slider for controlling Bx1
+        self.lowerPinBox.addWidget(self.x2Label)
+        self.lowerPinBox.addWidget(self.x2Drawer)
+        self.lowerPinBox.addStretch()
 
-        self.Bx4Label = QLabel("Bx4: ", self)  # Add a label called Color
+        self.y2Label = QLabel("y2: ", self)  # Add a label called Color
 
-        self.Bx4Drawer = QComboBox()
-        self.Bx4Drawer.addItems(self.AOList)
-        self.Bx4Drawer.setCurrentIndex(0)
-        self.Bx4Drawer.currentIndexChanged.connect(lambda: self.updateBx4())
+        self.y2Drawer = QComboBox()
+        self.y2Drawer.addItems(self.AOList)
+        self.y2Drawer.setCurrentIndex(0)
+        self.y2Drawer.currentIndexChanged.connect(lambda: self.updatey2())
 
-        self.LxPinBox.addWidget(self.Bx4Label)
-        self.LxPinBox.addWidget(self.Bx4Drawer)
-        self.LxPins.setLayout(self.LxPinBox)
+        self.lowerPinBox.addWidget(self.y2Label)
+        self.lowerPinBox.addWidget(self.y2Drawer)
+        self.lowerPins.setLayout(self.lowerPinBox)
 
-        self.advancedLayout.addWidget(self.LxPins, 5, 0)
-        self.LxPins.setChecked(False)
+        self.advancedLayout.addWidget(self.lowerPins, 4, 0)
+        self.lowerPins.setChecked(False)
 
-        # set pins for Y
-        self.LyPins = QGroupBox()
-        self.By3Label = QLabel("By3: ")  # Add a label called Name
-        self.By3Drawer = QComboBox()
-        self.By3Drawer.addItems(self.AOList)
-        self.By3Drawer.setCurrentIndex(0)
-        self.By3Drawer.currentIndexChanged.connect(lambda: self.updateBy3())
-
-        self.LyPinBox = QHBoxLayout()  # box containing the first slider for controlling Bx1
-        self.LyPinBox.addWidget(self.By3Label)
-        self.LyPinBox.addWidget(self.By3Drawer)
-        self.LyPinBox.addStretch()
-
-        self.By4Label = QLabel("By4: ")  # Add a label called Color
-
-        self.By4Drawer = QComboBox()
-        self.By4Drawer.addItems(self.AOList)
-        self.By4Drawer.setCurrentIndex(0)
-        self.By4Drawer.currentIndexChanged.connect(lambda: self.updateBy4())
-
-        self.LyPinBox.addWidget(self.By4Label)
-        self.LyPinBox.addWidget(self.By4Drawer)
-        self.LyPins.setLayout(self.LyPinBox)
-
-        self.advancedLayout.addWidget(self.LyPins, 6, 0)
-        self.LyPins.setDisabled(True)
 
         # set up ui for shift and tiled ratio
         self.ratios = QGroupBox()
@@ -360,7 +308,7 @@ class popWindow(QWidget):
         self.ratiosBox.addWidget(self.tileInput)
         self.ratios.setLayout(self.ratiosBox)
 
-        self.advancedLayout.addWidget(self.ratios, 7, 0)
+        self.advancedLayout.addWidget(self.ratios, 5, 0)
         self.ratios.setDisabled(True)
 
         self.tabLayout = QGridLayout()
@@ -422,7 +370,7 @@ class popWindow(QWidget):
         # if button is checked
         if self.tileMode.isChecked():
             # update the mode in current data to tilt
-            self.currentData[self.tabs.currentIndex()]['mode'] = 'tile'
+            self.currentData[self.tabs.currentIndex()]['mode'] = 'tilt'
             # uncheck the shift mode button
             if self.shiftMode.isChecked():
                 self.shiftMode.setChecked(False)
@@ -543,7 +491,7 @@ class popWindow(QWidget):
         if self.currentData[index]['mode'] == 'shift':
             self.shiftMode.setChecked(True)
             self.tileMode.setChecked(False)
-        elif self.currentData[index]['mode'] == 'tile':
+        elif self.currentData[index]['mode'] == 'tilt':
             self.shiftMode.setChecked(False)
             self.tileMode.setChecked(True)
         else:
@@ -570,106 +518,60 @@ class popWindow(QWidget):
         self.voltageInput.setText(data.find('voltage').text)
         self.slopeInput.setText(data.find('slope').text)
         self.shiftInput.setText(data.find('shift').text)
-        self.tileInput.setText(data.find('tile').text)
+        self.tileInput.setText(data.find('tilt').text)
         # if doesn't have pin, use the empty which index 0
-        if not data.find('Bx1').text:
-            self.Bx1Drawer.setCurrentIndex(0)
+        if not data.find('x1').text:
+            self.x1Drawer.setCurrentIndex(0)
         # if has pin but not in the pin list, add -unfound
-        elif data.find('Bx1').text not in self.AOList:
-            self.AOList.append(data.find('Bx1').text + '-unfound')
-            self.Bx1Drawer.clear()
-            self.Bx1Drawer.addItems(self.AOList)
-            self.Bx1Drawer.setCurrentIndex(len(self.AOList)-1)
+        elif data.find('x1').text not in self.AOList:
+            self.AOList.append(data.find('x1').text + '-unfound')
+            self.x1Drawer.clear()
+            self.x1Drawer.addItems(self.AOList)
+            self.x1Drawer.setCurrentIndex(len(self.AOList)-1)
         # load normally
         else:
-            self.Bx1Drawer.setCurrentIndex(
-                self.AOList.index(data.find('Bx1').text))
+            self.x1Drawer.setCurrentIndex(
+                self.AOList.index(data.find('x1').text))
         # same thing for the rest of pins
-        if not data.find('Bx2').text:
-            self.Bx2Drawer.setCurrentIndex(0)
-        elif data.find('Bx2').text not in self.AOList:
-            self.AOList.append(data.find('Bx2').text + '-unfound')
-            self.Bx2Drawer.clear()
-            self.Bx2Drawer.addItems(self.AOList)
-            self.Bx2Drawer.setCurrentIndex(len(self.AOList)-1)
+        if not data.find('y1').text:
+            self.y1Drawer.setCurrentIndex(0)
+        elif data.find('y1').text not in self.AOList:
+            self.AOList.append(data.find('y1').text + '-unfound')
+            self.y1Drawer.clear()
+            self.y1Drawer.addItems(self.AOList)
+            self.y1Drawer.setCurrentIndex(len(self.AOList)-1)
         else:
-            self.Bx2Drawer.setCurrentIndex(
-                self.AOList.index(data.find('Bx2').text))
-
-        if not data.find('By1').text:
-            self.By1Drawer.setCurrentIndex(0)
-        elif data.find('By1').text not in self.AOList:
-            self.AOList.append(data.find('By1').text + '-unfound')
-            self.By1Drawer.clear()
-            self.By1Drawer.addItems(self.AOList)
-            self.By1Drawer.setCurrentIndex(len(self.AOList)-1)
-        else:
-            self.By1Drawer.setCurrentIndex(
-                self.AOList.index(data.find('By1').text))
-
-        if not data.find('By2').text:
-            self.By2Drawer.setCurrentIndex(0)
-        elif data.find('By2').text not in self.AOList:
-            self.AOList.append(data.find('By2').text + '-unfound')
-            self.By2Drawer.clear()
-            self.By2Drawer.addItems(self.AOList)
-            self.By2Drawer.setCurrentIndex(len(self.AOList)-1)
-        else:
-            self.By2Drawer.setCurrentIndex(
-                self.AOList.index(data.find('By2').text))
+            self.y1Drawer.setCurrentIndex(
+                self.AOList.index(data.find('y1').text))
 
         if data.find('hasLower').text == 'True':
-            self.LxPins.setChecked(True)
-            self.LyPins.setDisabled(False)
+            self.lowerPins.setChecked(True)
             self.ratios.setDisabled(False)
         else:
-            self.LxPins.setChecked(False)
-            self.LyPins.setDisabled(True)
+            self.lowerPins.setChecked(False)
             self.ratios.setDisabled(True)
 
-        if not data.find('Bx3').text:
-            self.Bx3Drawer.setCurrentIndex(0)
-        elif data.find('Bx3').text not in self.AOList:
-            self.AOList.append(data.find('Bx3').text + '-unfound')
-            self.Bx3Drawer.clear()
-            self.Bx3Drawer.addItems(self.AOList)
-            self.Bx3Drawer.setCurrentIndex(len(self.AOList)-1)
+        if not data.find('x2').text:
+            self.x2Drawer.setCurrentIndex(0)
+        elif data.find('x2').text not in self.AOList:
+            self.AOList.append(data.find('x2').text + '-unfound')
+            self.x2Drawer.clear()
+            self.x2Drawer.addItems(self.AOList)
+            self.x2Drawer.setCurrentIndex(len(self.AOList)-1)
         else:
-            self.Bx3Drawer.setCurrentIndex(
-                self.AOList.index(data.find('Bx3').text))
+            self.x2Drawer.setCurrentIndex(
+                self.AOList.index(data.find('x2').text))
 
-        if not data.find('Bx4').text:
-            self.Bx4Drawer.setCurrentIndex(0)
-        elif data.find('Bx4').text not in self.AOList:
-            self.AOList.append(data.find('Bx4').text + '-unfound')
-            self.Bx4Drawer.clear()
-            self.Bx4Drawer.addItems(self.AOList)
-            self.Bx4Drawer.setCurrentIndex(len(self.AOList)-1)
+        if not data.find('y2').text:
+            self.y2Drawer.setCurrentIndex(0)
+        elif data.find('y2').text not in self.AOList:
+            self.AOList.append(data.find('y2').text + '-unfound')
+            self.y2Drawer.clear()
+            self.y2Drawer.addItems(self.AOList)
+            self.y2Drawer.setCurrentIndex(len(self.AOList)-1)
         else:
-            self.Bx4Drawer.setCurrentIndex(
-                self.AOList.index(data.find('Bx4').text))
-
-        if not data.find('By3').text:
-            self.By3Drawer.setCurrentIndex(0)
-        elif data.find('By3').text not in self.AOList:
-            self.AOList.append(data.find('By3').text + '-unfound')
-            self.By3Drawer.clear()
-            self.By3Drawer.addItems(self.AOList)
-            self.By3Drawer.setCurrentIndex(len(self.AOList)-1)
-        else:
-            self.By3Drawer.setCurrentIndex(
-                self.AOList.index(data.find('By3').text))
-
-        if not data.find('By4').text:
-            self.By4Drawer.setCurrentIndex(0)
-        elif data.find('By4').text not in self.AOList:
-            self.AOList.append(data.find('By4').text + '-unfound')
-            self.By4Drawer.clear()
-            self.By4Drawer.addItems(self.AOList)
-            self.By4Drawer.setCurrentIndex(len(self.AOList)-1)
-        else:
-            self.By4Drawer.setCurrentIndex(
-                self.AOList.index(data.find('By4').text))
+            self.y2Drawer.setCurrentIndex(
+                self.AOList.index(data.find('y2').text))
 
     '''
     Function that create a new deflector
@@ -684,23 +586,19 @@ class popWindow(QWidget):
         ET.SubElement(newElement, 'yOffset')
         ET.SubElement(newElement, 'voltage')
         ET.SubElement(newElement, 'slope')
-        ET.SubElement(newElement, 'Bx1')
-        ET.SubElement(newElement, 'Bx2')
-        ET.SubElement(newElement, 'By1')
-        ET.SubElement(newElement, 'By2')
+        ET.SubElement(newElement, 'x1')
+        ET.SubElement(newElement, 'y1')
         ET.SubElement(newElement, 'hasLower')
-        ET.SubElement(newElement, 'Bx3')
-        ET.SubElement(newElement, 'Bx4')
-        ET.SubElement(newElement, 'By3')
-        ET.SubElement(newElement, 'By4')
+        ET.SubElement(newElement, 'x2')
+        ET.SubElement(newElement, 'y2')
         ET.SubElement(newElement, 'shift')
-        ET.SubElement(newElement, 'tile')
+        ET.SubElement(newElement, 'tilt')
         # if len is 1, means the xml was empty, then didn;t load adtabs before, so call loadAdtabs
         if len(self.tempSettings) == 1:
             self.loadAdtabs()
         else:
             # manually add
-            self.LxPins.setChecked(False)
+            self.lowerPins.setChecked(False)
             newTab = QWidget()
             newTab.setLayout(self.advancedLayout)
             self.adTabList.append(newTab)
@@ -720,14 +618,10 @@ class popWindow(QWidget):
         self.yOffInput.clear()
         self.voltageInput.clear()
         self.slopeInput.clear()
-        self.Bx1Drawer.setCurrentIndex(0)
-        self.Bx2Drawer.setCurrentIndex(0)
-        self.By1Drawer.setCurrentIndex(0)
-        self.By2Drawer.setCurrentIndex(0)
-        self.Bx3Drawer.setCurrentIndex(0)
-        self.Bx4Drawer.setCurrentIndex(0)
-        self.By3Drawer.setCurrentIndex(0)
-        self.By4Drawer.setCurrentIndex(0)
+        self.x1Drawer.setCurrentIndex(0)
+        self.x2Drawer.setCurrentIndex(0)
+        self.y1Drawer.setCurrentIndex(0)
+        self.y2Drawer.setCurrentIndex(0)
 
     '''
     Function that save advanced settings and write it into xml
@@ -775,7 +669,7 @@ class popWindow(QWidget):
             xOffset = self.tempSettings[i].find('xOffset').text
             yOffset = self.tempSettings[i].find('yOffset').text
             shift = self.tempSettings[i].find('shift').text
-            tile = self.tempSettings[i].find('tile').text
+            tile = self.tempSettings[i].find('tilt').text
             hasLower = self.tempSettings[i].find('hasLower').text
             if len(name) > 20:
                 reply = QMessageBox.question(self.advancedWindows, 'Illegal Name',
@@ -826,7 +720,7 @@ class popWindow(QWidget):
                                              "Shift ratio should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
                 return 0
             if tile and not tile.isnumeric():
-                reply = QMessageBox.question(self.advancedWindows, 'Illegal tile Input',
+                reply = QMessageBox.question(self.advancedWindows, 'Illegal tilt Input',
                                              "Tile ratio should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
                 return 0
 
@@ -847,61 +741,33 @@ class popWindow(QWidget):
         deflector.find('colour').text = color
         self.refreshAdtabs()
 
-    def updateBx1(self):
-        Bx1 = self.AOList[self.Bx1Drawer.currentIndex()]
-        if len(Bx1) > 9 and Bx1[-7:] == "unfound":
-            Bx1 = Bx1[:-8]
+    def updatex1(self):
+        x1 = self.AOList[self.x1Drawer.currentIndex()]
+        if len(x1) > 9 and x1[-7:] == "unfound":
+            x1 = x1[:-8]
         deflector = self.tempSettings[self.adTabs.currentIndex()]
-        deflector.find('Bx1').text = Bx1
+        deflector.find('x1').text = x1
 
-    def updateBx2(self):
-        Bx2 = self.AOList[self.Bx2Drawer.currentIndex()]
-        if len(Bx2) > 9 and Bx2[-7:] == "unfound":
-            Bx2 = Bx2[:-8]
+    def updatex2(self):
+        x2 = self.AOList[self.x2Drawer.currentIndex()]
+        if len(x2) > 9 and x2[-7:] == "unfound":
+            x2 = x2[:-8]
         deflector = self.tempSettings[self.adTabs.currentIndex()]
-        deflector.find('Bx2').text = Bx2
+        deflector.find('x2').text = x2
 
-    def updateBy1(self):
-        By1 = self.AOList[self.By1Drawer.currentIndex()]
-        if len(By1) > 9 and By1[-7:] == "unfound":
-            By1 = By1[:-8]
+    def updatey1(self):
+        y1 = self.AOList[self.y1Drawer.currentIndex()]
+        if len(y1) > 9 and y1[-7:] == "unfound":
+            y1 = y1[:-8]
         deflector = self.tempSettings[self.adTabs.currentIndex()]
-        deflector.find('By1').text = By1
+        deflector.find('y1').text = y1
 
-    def updateBy2(self):
-        By2 = self.AOList[self.By2Drawer.currentIndex()]
-        if len(By2) > 9 and By2[-7:] == "unfound":
-            By2 = By2[:-8]
+    def updatey2(self):
+        y2 = self.AOList[self.By2Drawer.currentIndex()]
+        if len(y2) > 9 and y2[-7:] == "unfound":
+            y2 = y2[:-8]
         deflector = self.tempSettings[self.adTabs.currentIndex()]
-        deflector.find('By2').text = By2
-
-    def updateBx3(self):
-        Bx3 = self.AOList[self.Bx3Drawer.currentIndex()]
-        if len(Bx3) > 9 and Bx3[-7:] == "unfound":
-            Bx3 = Bx3[:-8]
-        deflector = self.tempSettings[self.adTabs.currentIndex()]
-        deflector.find('Bx3').text = Bx3
-
-    def updateBx4(self):
-        Bx4 = self.AOList[self.Bx4Drawer.currentIndex()]
-        if len(Bx4) > 9 and Bx4[-7:] == "unfound":
-            Bx4 = Bx4[:-8]
-        deflector = self.tempSettings[self.adTabs.currentIndex()]
-        deflector.find('Bx4').text = Bx4
-
-    def updateBy3(self):
-        By3 = self.AOList[self.By3Drawer.currentIndex()]
-        if len(By3) > 9 and By3[-7:] == "unfound":
-            By3 = By3[:-8]
-        deflector = self.tempSettings[self.adTabs.currentIndex()]
-        deflector.find('By3').text = By3
-
-    def updateBy4(self):
-        By4 = self.AOList[self.By4Drawer.currentIndex()]
-        if len(By4) > 9 and By4[-7:] == "unfound":
-            By4 = By4[:-8]
-        deflector = self.tempSettings[self.adTabs.currentIndex()]
-        deflector.find('By4').text = By4
+        deflector.find('y2').text = y2
 
     def updateXOffset(self):
         x = self.xOffInput.text()
@@ -931,7 +797,7 @@ class popWindow(QWidget):
     def updateTile(self):
         t = self.tileInput.text()
         deflector = self.tempSettings[self.adTabs.currentIndex()]
-        deflector.find('tile').text = t
+        deflector.find('tilt').text = t
 
     def updateBx(self):
         # get the value from bx and update currentdata list and plot
@@ -946,21 +812,17 @@ class popWindow(QWidget):
                         # x times the ratio of 5(input)and real voltage then divide by slope and minus offset
         x = x * 4.99/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(
             self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('xOffset').text)
-        Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('Bx1').text, -round(x, 2))
-        if self.settings[self.tabs.currentIndex()].find('Bx2').text:
-            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('Bx2').text, round(x, 2))
+        Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('x1').text, -round(x, 2))
         if self.settings[self.tabs.currentIndex()].find('hasLower').text == True:
             if self.shiftMode.isChecked():
                 shiftRatio = float(
                     self.settings[self.tabs.currentIndex()].find('shift').text)
                 x = x * shiftRatio
-            elif self.tileMod.isChecked():
+            elif self.tileMode.isChecked():
                 tiledRatio = float(
-                    self.settings[self.tabs.currentIndex()].find('tile').text)
+                    self.settings[self.tabs.currentIndex()].find('tilt').text)
                 x = x * tiledRatio
-            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('Bx3').text, -round(x, 2))
-            if self.settings[self.tabs.currentIndex()].find('Bx4').text:
-                Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('Bx3').text, round(x, 2))
+            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('x2').text, -round(x, 2))
 
     def updateBy(self):
         v = self.By.value()
@@ -970,21 +832,17 @@ class popWindow(QWidget):
         print('update By for Deflector', self.tabs.currentIndex(), 'to', v)
         y = y * 4.99/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(
             self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('yOffset').text)
-        Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('By1').text, -round(y, 2))
-        if self.settings[self.tabs.currentIndex()].find('By2').text:
-            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('By2').text, round(y, 2))
+        Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('y1').text, -round(y, 2))
         if self.settings[self.tabs.currentIndex()].find('hasLower').text == True:
             if self.shiftMode.isChecked():
                 shiftRatio = float(
                     self.settings[self.tabs.currentIndex()].find('shift').text)
                 y = y * shiftRatio
-            elif self.tileMod.isChecked():
+            elif self.tileMode.isChecked():
                 tiledRatio = float(
-                    self.settings[self.tabs.currentIndex()].find('tile').text)
+                    self.settings[self.tabs.currentIndex()].find('tilt').text)
                 y = y * tiledRatio
-            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('By3').text, -round(y, 2))
-            if self.settings[self.tabs.currentIndex()].find('By4').text:
-                Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('By3').text, round(y, 2))
+            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('y2').text, -round(y, 2))
 
     def BxIncrementChange(self):
         # get the value from the spinner, turns into int then set single step of panX as it
@@ -1035,7 +893,7 @@ class popWindow(QWidget):
 
     def refreshAdtabs(self):
         if (self.adTabs.count() < len(self.tempSettings)):
-            while self.adtabs.count() != len(self.tempSettings):
+            while self.adTabs.count() != len(self.tempSettings):
                 w = QWidget()
                 self.adTabList.append(w)
                 self.adTabs.addTab(w, 'temp')
@@ -1119,10 +977,6 @@ def main():
     windowHandle = popWindow()
     return windowHandle
 
-
-def reload_hardware():
-    import hardware
-    importlib.reload(hardware)
 
 # the showPopUp program will show the instantiated window (which was either hidden or visible)
 

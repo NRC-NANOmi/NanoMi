@@ -6,16 +6,12 @@
         <yOffset>0.3</yOffset>
         <voltage>70</voltage>
         <slope>1</slope>
-        <Bx1>Bx2</Bx1>
-        <Bx2/>
-        <By1>Yin</By1>
-        <By2/>
+        <x1>Bx2</x1>
+        <y1>Yin</y1>
         <hasLower>False</hasLower>
-        <Bx3>Placeholder_AO0</Bx3>
-        <Bx4>Placeholder_AO0</Bx4>
-        <By3>Placeholder_AO1</By3>
-        <By4>Placeholder_AO1</By4>
         <shift>1</shift>
-        <tile>1</tile>
+        <tilt>1</tilt>
+        <x2></x2>
+        <y2></y2>
     </Deflector>
 </Settings>
