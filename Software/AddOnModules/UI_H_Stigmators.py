@@ -784,7 +784,7 @@ class popWindow(QWidget):
                 e = pg.QtGui.QGraphicsEllipseItem(-l, -r, 2*l, 2*r)
                 e.rotate(angle)
             elif x < 0 and y > 0:
-                angle = 45 + y/(abs(x)+y) * 45
+                angle = 90 - y/(abs(x)+y) * 45
                 print("angle is", angle)
                 # length of the box
                 l = max(abs(x), y)/(abs(x)+y) * max(abs(x), y)
