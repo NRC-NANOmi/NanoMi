@@ -539,15 +539,6 @@ class popWindow(QWidget):
         deflector = self.tempSettings[self.adTabs.currentIndex()]
         deflector.find('slope').text = s
 
-    def updateShift(self):
-        s = self.shiftInput.text()
-        deflector = self.tempSettings[self.adTabs.currentIndex()]
-        deflector.find('shift').text = s
-
-    def updateTile(self):
-        t = self.tileInput.text()
-        deflector = self.tempSettings[self.adTabs.currentIndex()]
-        deflector.find('tile').text = t
 
     def updateBx(self, index):
         # get the value from bx and update currentdata list and plot
