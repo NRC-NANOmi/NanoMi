@@ -491,7 +491,7 @@ class popWindow(QWidget):
         y = round(float(v), 2)
         y = y * 5/(int(self.settings[index].find('voltage').text)) / float(
             self.settings[index].find('slope').text) - float(self.settings[index].find('yOffset').text)
-        Hardware.IO.setAnalog(self.settings[index].find('By1').text, -round(y, 2))
+        Hardware.IO.setAnalog(self.settings[index].find('y1').text, -round(y, 2))
 
 
     def BxIncrementChange(self, index):
