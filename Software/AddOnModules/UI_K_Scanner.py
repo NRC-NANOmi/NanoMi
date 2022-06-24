@@ -185,17 +185,16 @@ class popWindow(QWidget):
         self.panY.setSingleStep(float(self.panYIncrement.currentText()))
 
     def updatePanX(self):
-        UI_U_DataSets.windowHandle.refreshDataSets()
         Hardware.IO.setAnalog('PanX', self.panX.value())
         self.updatePlot()
+        UI_U_DataSets.windowHandle.refreshDataSets()
 
     def updatePanY(self):
-        UI_U_DataSets.windowHandle.refreshDataSets()
         Hardware.IO.setAnalog('PanY', self.panY.value())
         self.updatePlot()
+        UI_U_DataSets.windowHandle.refreshDataSets()
 
     def valChanged(self):
-        UI_U_DataSets.windowHandle.refreshDataSets()
         self.updatePlot()
         Hardware.IO.setDigital("ChipSelect", True) #CS
         Hardware.IO.setDigital("SCLK", False)
@@ -245,6 +244,7 @@ class popWindow(QWidget):
         time.sleep(0.05)
         Hardware.IO.setDigital("ChipSelect", True) #CS
         time.sleep(0.05)
+        UI_U_DataSets.windowHandle.refreshDataSets()
 
 
         

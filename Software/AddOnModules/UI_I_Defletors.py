@@ -831,6 +831,7 @@ class popWindow(QWidget):
         self.updatePlot()
         # add real update from to pins
         print('update By for Deflector', self.tabs.currentIndex(), 'to', v)
+        y = round(float(v),2)
         y = y * 4.99/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(
             self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('yOffset').text)
         Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('y1').text, -round(y, 2))
