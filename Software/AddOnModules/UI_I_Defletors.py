@@ -157,6 +157,7 @@ class popWindow(QWidget):
         # def the window of the advance settings
         self.advancedWindows = QtWidgets.QWidget()
         self.advancedWindows.setGeometry(850, 50, windowWidth, windowHeight)
+        self.advancedWindows.setWindowTitle("Stigmators Advanced Setting")
         # def the tabs for advanced settings
         self.adTabs = QTabWidget()
         # set up layout for advanced settings

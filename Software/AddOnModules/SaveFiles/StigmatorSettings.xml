@@ -6,10 +6,8 @@
         <yOffset>0</yOffset>
         <voltage>100</voltage>
         <slope>1</slope>
-        <Bx1>Placeholder_AO0</Bx1>
-        <Bx2>Placeholder_AO0</Bx2>
-        <By1>Placeholder_AO0</By1>
-        <By2>Placeholder_AO0</By2>
+        <x1>Placeholder_AO0</x1>
+        <y1>Placeholder_AO0</y1>
     </New_Stigmator>
     <stigmator1>
         <colour>green</colour>
@@ -17,9 +15,7 @@
         <yOffset>0</yOffset>
         <voltage>70</voltage>
         <slope>1</slope>
-        <Bx1>Bx1</Bx1>
-        <Bx2>Bx1</Bx2>
-        <By1>Bx1</By1>
-        <By2>Bx1</By2>
+        <x1>Bx1</x1>
+        <y1>Bx1</y1>
     </stigmator1>
 </Settings>
