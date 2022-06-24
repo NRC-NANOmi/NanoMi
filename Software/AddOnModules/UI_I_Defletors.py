@@ -120,7 +120,7 @@ class popWindow(QWidget):
         self.noDeflectorLayout = QGridLayout()
         self.noDeflectorLabel = QLabel('No deflector found, please create one')
         self.noDeflectorLayout.addWidget(self.noDeflectorLabel, 0, 0)
-
+    
         # set up plot
         self.plotGroupBox = QGroupBox()
         self.plot = pg.PlotWidget()
