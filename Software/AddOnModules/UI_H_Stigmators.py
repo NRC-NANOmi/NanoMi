@@ -512,11 +512,11 @@ class popWindow(QWidget):
 
     def lambdaGenerator(self, index, function):
         return lambda: function(index)
-    
-    def cleanLayout(self):
-        for i in reversed(range(len(self.groupBoxs))):
-            self.groupBoxs[i].setParent(None)
-        self.advanceBtn.setParent(None)
+
+        
+
+    def loadTabs(self):
+        self.groupBoxCopy = self.groupBoxs.copy()
         self.groupBoxs.clear()
         self.boxLayouts.clear()
         self.xSpinBoxs.clear()
@@ -524,9 +524,6 @@ class popWindow(QWidget):
         self.ySpinBoxs.clear()
         self.yIncrements.clear()
         self.plots.clear()
-
-    def loadTabs(self):
-        self.cleanLayout()
         if len(self.settings) == 0:
             gb = QGroupBox()
             boxLayout = QHBoxLayout()
@@ -611,6 +608,8 @@ class popWindow(QWidget):
                 self.plots[i], i, 1, alignment=QtCore.Qt.AlignHCenter)
         self.mainGrid.addWidget(self.advanceBtn, len(
             self.settings), 1, QtCore.Qt.AlignRight)
+        for i in range(len(self.groupBoxCopy)):
+            self.groupBoxCopy[i].setParent(None)
     def loadAdtabs(self):
         self.adTabs.clear()
         self.adTabList.clear()
