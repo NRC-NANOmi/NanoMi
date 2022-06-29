@@ -1,3 +1,4 @@
+from audioop import reverse
 import sys  # import sys module for system-level functions
 import glob
 import os                         # allow us to access other files
@@ -52,6 +53,9 @@ class popWindow(QWidget):
         self.yIncrements = []
 
         self.plots = []
+
+        self.mainGrid = QGridLayout()
+        self.setLayout(self.mainGrid)
         # Get Analog output pins list from hardware module
         self.AOList = list(Hardware.IO.AoNames.keys())
         # insert an empty element as new deflector default
@@ -508,15 +512,21 @@ class popWindow(QWidget):
 
     def lambdaGenerator(self, index, function):
         return lambda: function(index)
-
-    def loadTabs(self):
+    
+    def cleanLayout(self):
+        for i in reversed(range(len(self.groupBoxs))):
+            self.groupBoxs[i].setParent(None)
+        self.advanceBtn.setParent(None)
         self.groupBoxs.clear()
         self.boxLayouts.clear()
         self.xSpinBoxs.clear()
         self.xIncrements.clear()
         self.ySpinBoxs.clear()
         self.yIncrements.clear()
-        self.mainGrid = QGridLayout() 
+        self.plots.clear()
+
+    def loadTabs(self):
+        self.cleanLayout()
         if len(self.settings) == 0:
             gb = QGroupBox()
             boxLayout = QHBoxLayout()
@@ -534,10 +544,11 @@ class popWindow(QWidget):
                 'color: ' + self.settings[i].find("colour").text)
             xLabel = QLabel("X", self)  # Add a label called X
             self.xSpinBoxs.append(QDoubleSpinBox())
-            self.xSpinBoxs[i].setMinimum(
-                -int(self.settings[i].find("voltage").text))
-            self.xSpinBoxs[i].setMaximum(
-                int(self.settings[i].find("voltage").text))
+            v = int(self.settings[i].find("voltage").text)
+            xOffset = float(self.settings[i].find("xOffset").text)
+            yOffset = float(self.settings[i].find("yOffset").text) 
+            self.xSpinBoxs[i].setMinimum(max(round((-v)*4.99/5 + xOffset*v/5, 2), -v))
+            self.xSpinBoxs[i].setMaximum(min(round((v)*4.99/5 + xOffset*v/5, 2), v))
             self.xSpinBoxs[i].setValue(0)
             self.xSpinBoxs[i].setSingleStep(0.01)
             self.xSpinBoxs[i].valueChanged.connect(
@@ -559,10 +570,8 @@ class popWindow(QWidget):
             yLabel = QLabel("Y", self)  # Add a label called Y
 
             self.ySpinBoxs.append(QDoubleSpinBox())
-            self.ySpinBoxs[i].setMinimum(
-                -int(self.settings[i].find("voltage").text))
-            self.ySpinBoxs[i].setMaximum(
-                int(self.settings[i].find("voltage").text))
+            self.ySpinBoxs[i].setMinimum(max(round((-v)*4.99/5 + yOffset*v/5, 2), -v))
+            self.ySpinBoxs[i].setMaximum(min(round((v)*4.99/5 + yOffset*v/5, 2), v))
             self.ySpinBoxs[i].setValue(0)
             self.ySpinBoxs[i].setSingleStep(0.01)
             self.ySpinBoxs[i].valueChanged.connect(
@@ -602,9 +611,6 @@ class popWindow(QWidget):
                 self.plots[i], i, 1, alignment=QtCore.Qt.AlignHCenter)
         self.mainGrid.addWidget(self.advanceBtn, len(
             self.settings), 1, QtCore.Qt.AlignRight)
-        if self.layout() == 0:
-            QWidget().setLayout(self.layout())
-        self.setLayout(self.mainGrid)
     def loadAdtabs(self):
         self.adTabs.clear()
         self.adTabList.clear()

@@ -456,28 +456,26 @@ class popWindow(QWidget):
         self.tabList[index].setLayout(self.deflectorLayout)
         # get data from the xml root using the index
         data = self.settings[index]
-        self.voltage = int(data.find('voltage').text)
+        v = int(data.find('voltage').text)
+        xOffset = float(data.find("xOffset").text)
+        yOffset = float(data.find("yOffset").text) 
         # if the last bx or by is greater than the current voltage, if we reset min and max will cause value change,
         # so we need to load the bx and by first, then set the minmax value
-        if abs(self.Bx.value()) > self.voltage or abs(self.By.value()) > self.voltage:
+        if abs(self.Bx.value()) > v or abs(self.By.value()) > v:
             self.Bx.setValue(self.currentData[index]['x'])
             self.By.setValue(self.currentData[index]['y'])
-            self.Bx.setMinimum(-self.voltage)
-            self.By.setMinimum(-self.voltage)
-            self.Bx.setMaximum(self.voltage)
-            self.By.setMaximum(self.voltage)
+            self.Bx.setMinimum(max(round((-v)*4.99/5 + xOffset*v/5, 2), -v))
+            self.By.setMinimum(max(round((-v)*4.99/5 + yOffset*v/5, 2), -v))
+            self.Bx.setMaximum(min(round((v)*4.99/5 + xOffset*v/5, 2), v))
+            self.By.setMaximum(min(round((v)*4.99/5 + yOffset*v/5, 2), v))
         # otherwise, set the minmax first then set real value
         else:
-            self.Bx.setMinimum(-self.voltage)
-            self.By.setMinimum(-self.voltage)
-            self.Bx.setMaximum(self.voltage)
-            self.By.setMaximum(self.voltage)
+            self.Bx.setMinimum(max(round((-v)*4.99/5 + xOffset*v/5, 2), -v))
+            self.By.setMinimum(max(round((-v)*4.99/5 + yOffset*v/5, 2), -v))
+            self.Bx.setMaximum(min(round((v)*4.99/5 + xOffset*v/5, 2), v))
+            self.By.setMaximum(min(round((v)*4.99/5 + yOffset*v/5, 2), v))
             self.Bx.setValue(self.currentData[index]['x'])
             self.By.setValue(self.currentData[index]['y'])
-
-        self.xOffset = float(data.find('xOffset').text)
-        self.yOffset = float(data.find('yOffset').text)
-        self.slope = float(data.find('slope').text)
         # set the increment index to 0 as default
         self.BxIncrement.setCurrentIndex(0)
         self.ByIncrement.setCurrentIndex(0)

@@ -2,8 +2,8 @@
 <Settings>
     <New_Stigmator>
         <colour>gray</colour>
-        <xOffset>0</xOffset>
-        <yOffset>0</yOffset>
+        <xOffset>0.4</xOffset>
+        <yOffset>-0.3</yOffset>
         <voltage>100</voltage>
         <slope>1</slope>
         <x1>Placeholder_AO0</x1>
