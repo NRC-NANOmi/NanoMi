@@ -39,4 +39,18 @@
         <setting module="HV Amplifier Deflector Amplifier Controller" name="Xin" value="0.04"/>
         <setting module="HV Amplifier Deflector Amplifier Controller" name="Yin" value="2.99"/>
     </set>
+    <set name="2022-06-28_1242">
+        <setting module="Stigmators" name="x" value="0.04" submod="New_Stigmator"/>
+        <setting module="Stigmators" name="y" value="0.04" submod="New_Stigmator"/>
+        <setting module="Stigmators" name="x" value="0.01" submod="stigmator1"/>
+        <setting module="Stigmators" name="y" value="0.01" submod="stigmator1"/>
+    </set>
+    <set name="2022-06-28_2316">
+        <setting module="Stigmators" name="x" value="0.04" submod="New_Stigmator"/>
+        <setting module="Stigmators" name="y" value="0.04" submod="New_Stigmator"/>
+        <setting module="Stigmators" name="x" value="0.01" submod="stigmator1"/>
+        <setting module="Stigmators" name="y" value="0.01" submod="stigmator1"/>
+        <setting module="Deflectors" name="x" value="0.07" submod="Deflector"/>
+        <setting module="Deflectors" name="y" value="0.05" submod="Deflector"/>
+    </set>
 </dataSets>

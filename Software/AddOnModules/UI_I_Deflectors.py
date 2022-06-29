@@ -4,7 +4,7 @@ import os                         # allow us to access other files
 # import the necessary aspects of PyQt5 for this user interface window
 from PyQt5.QtWidgets import QWidget, QPushButton, QApplication, QLabel, QMessageBox, QTabWidget, QGridLayout, QLineEdit, QListWidget, QTableWidget, QTableWidgetItem, QGroupBox, QDoubleSpinBox, QComboBox, QHBoxLayout
 from PyQt5 import QtCore, QtGui, QtWidgets
-from AddOnModules import Hardware
+from AddOnModules import Hardware, UI_U_DataSets
 import pyqtgraph as pg
 import datetime
 import importlib
@@ -120,7 +120,7 @@ class popWindow(QWidget):
         self.noDeflectorLayout = QGridLayout()
         self.noDeflectorLabel = QLabel('No deflector found, please create one')
         self.noDeflectorLayout.addWidget(self.noDeflectorLabel, 0, 0)
-    
+
         # set up plot
         self.plotGroupBox = QGroupBox()
         self.plot = pg.PlotWidget()
@@ -270,7 +270,8 @@ class popWindow(QWidget):
         self.x2Drawer.setCurrentIndex(0)
         self.x2Drawer.currentIndexChanged.connect(lambda: self.updatex2())
 
-        self.lowerPinBox = QHBoxLayout()  # box containing the first slider for controlling Bx1
+        # box containing the first slider for controlling Bx1
+        self.lowerPinBox = QHBoxLayout()
         self.lowerPinBox.addWidget(self.x2Label)
         self.lowerPinBox.addWidget(self.x2Drawer)
         self.lowerPinBox.addStretch()
@@ -288,7 +289,6 @@ class popWindow(QWidget):
 
         self.advancedLayout.addWidget(self.lowerPins, 4, 0)
         self.lowerPins.setChecked(False)
-
 
         # set up ui for shift and tiled ratio
         self.ratios = QGroupBox()
@@ -632,7 +632,7 @@ class popWindow(QWidget):
             return
         reply = QMessageBox.question(
             self.advancedWindows, 'Save', "Saving new advanced setting will reset all your deflectors' data, press Yes to confirm", QMessageBox.Yes, QMessageBox.No)
-        # reply = QMessageBox.Yes 
+        # reply = QMessageBox.Yes
         if reply == QMessageBox.Yes:
             xmlString = ET.tostring(self.tempSettings, 'utf-8', method='xml')
             # now decode it to an actual string
@@ -809,11 +809,12 @@ class popWindow(QWidget):
         print('update Bx for Deflector', self.tabs.currentIndex(), 'to', v)
         x = round(float(v), 2)
 
-            # x times the ratio of 5(input)and real voltage then divide by slope and minus offset
-                        # x times the ratio of 5(input)and real voltage then divide by slope and minus offset
+        # x times the ratio of 5(input)and real voltage then divide by slope and minus offset
+        # x times the ratio of 5(input)and real voltage then divide by slope and minus offset
         x = x * 4.99/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(
             self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('xOffset').text)
-        Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('x1').text, -round(x, 2))
+        Hardware.IO.setAnalog(
+            self.settings[self.tabs.currentIndex()].find('x1').text, -round(x, 2))
         if self.settings[self.tabs.currentIndex()].find('hasLower').text == True:
             if self.shiftMode.isChecked():
                 shiftRatio = float(
@@ -823,7 +824,9 @@ class popWindow(QWidget):
                 tiledRatio = float(
                     self.settings[self.tabs.currentIndex()].find('tilt').text)
                 x = x * tiledRatio
-            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('x2').text, -round(x, 2))
+            Hardware.IO.setAnalog(
+                self.settings[self.tabs.currentIndex()].find('x2').text, -round(x, 2))
+        UI_U_DataSets.windowHandle.refreshDataSets()
 
     def updateBy(self):
         v = self.By.value()
@@ -831,10 +834,11 @@ class popWindow(QWidget):
         self.updatePlot()
         # add real update from to pins
         print('update By for Deflector', self.tabs.currentIndex(), 'to', v)
-        y = round(float(v),2)
+        y = round(float(v), 2)
         y = y * 4.99/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(
             self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('yOffset').text)
-        Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('y1').text, -round(y, 2))
+        Hardware.IO.setAnalog(
+            self.settings[self.tabs.currentIndex()].find('y1').text, -round(y, 2))
         if self.settings[self.tabs.currentIndex()].find('hasLower').text == True:
             if self.shiftMode.isChecked():
                 shiftRatio = float(
@@ -844,7 +848,9 @@ class popWindow(QWidget):
                 tiledRatio = float(
                     self.settings[self.tabs.currentIndex()].find('tilt').text)
                 y = y * tiledRatio
-            Hardware.IO.setAnalog(self.settings[self.tabs.currentIndex()].find('y2').text, -round(y, 2))
+            Hardware.IO.setAnalog(
+                self.settings[self.tabs.currentIndex()].find('y2').text, -round(y, 2))
+        UI_U_DataSets.windowHandle.refreshDataSets()
 
     def BxIncrementChange(self):
         # get the value from the spinner, turns into int then set single step of panX as it
@@ -929,6 +935,7 @@ class popWindow(QWidget):
             self.tabs.tabBar().setTabTextColor(i, QtGui.QColor(color))
         self.plot.setXRange(-maxVoltage, maxVoltage)
         self.plot.setYRange(-maxVoltage, maxVoltage)
+
     def back(self):
         reply = QMessageBox.question(
             self.advancedWindows, 'Back', 'Go Back will lose all unsaved advance setting, press Yes to confirm', QMessageBox.Yes, QMessageBox.No)
@@ -954,15 +961,32 @@ class popWindow(QWidget):
         self.initUI()
 
     # function to be able to load data to the user interface from the DataSets module
-    def setValue(self, name, value):
-        pass
+    def setValue(self, dname, name, value):
+        for i in range(len(self.settings)):
+            if(self.settings[i].tag == dname):
+                self.currentData[i][name] = float(value)
+                index = self.tabs.currentIndex()
+                self.tabs.setCurrentIndex(i)
+                self.loadData(i)
+                if (i != index):
+                    self.tabs.setCurrentIndex(index)
+                    self.loadData(index)
+                return 0
+        return -1
 
     # function to get a value from the module
     def getValues(self):
-        pass
-
+        dic = {}
+        for i in range(len(self.currentData)):
+            dic[self.settings[i].tag] = {}
+            dic[self.settings[i].tag]['x'] = str(
+                round(self.currentData[i]['x'], 2))
+            dic[self.settings[i].tag]['y'] = str(
+                round(self.currentData[i]['y'], 2))
+        return dic
     # this function handles the closing of the pop-up window - it doesn't actually close, simply hides visibility.
     # this functionality allows for permanance of objects in the background
+
     def closeEvent(self, event):
         event.ignore()
         self.hide()
@@ -988,15 +1012,17 @@ def main():
 def showPopUp():
     windowHandle.show()
 
+
 def isnumber(x):
     if x:
         try:
             # only integers and float converts safely
             num = float(x)
             return True
-        except ValueError as e: # not convertable to float
+        except ValueError as e:  # not convertable to float
             return False
     return False
+
 
 if __name__ == '__main__':
     main()

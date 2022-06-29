@@ -5,7 +5,7 @@ import os                         # allow us to access other files
 from PyQt5.QtWidgets import QWidget, QPushButton, QApplication, QLabel, QMessageBox, QTabWidget, QGridLayout, QLineEdit, QListWidget, QTableWidget, QTableWidgetItem, QGroupBox, QDoubleSpinBox, QComboBox, QHBoxLayout
 from PyQt5 import QtCore, QtGui, QtWidgets
 from matplotlib.pyplot import angle_spectrum
-from AddOnModules import Hardware
+from AddOnModules import Hardware, UI_U_DataSets
 import pyqtgraph as pg
 import datetime
 import importlib
@@ -483,6 +483,7 @@ class popWindow(QWidget):
 
         Hardware.IO.setAnalog(
             self.settings[index].find('x1').text, -round(x, 2))
+        UI_U_DataSets.windowHandle.refreshDataSets()
 
     def updateBy(self, index):
         v = self.ySpinBoxs[index].value()
@@ -492,6 +493,7 @@ class popWindow(QWidget):
         y = y * 5/(int(self.settings[index].find('voltage').text)) / float(
             self.settings[index].find('slope').text) - float(self.settings[index].find('yOffset').text)
         Hardware.IO.setAnalog(self.settings[index].find('y1').text, -round(y, 2))
+        UI_U_DataSets.windowHandle.refreshDataSets()
 
 
     def BxIncrementChange(self, index):
@@ -704,12 +706,24 @@ class popWindow(QWidget):
         self.initUI()
 
     # function to be able to load data to the user interface from the DataSets module
-    def setValue(self, name, value):
-        pass
+    def setValue(self, sname, name, value):
+        for i in range(len(self.settings)):
+            if(self.settings[i].tag == sname):
+                if name == 'x':
+                    self.xSpinBoxs[i].setValue(float(value))
+                else:
+                    self.ySpinBoxs[i].setValue(float(value))
+                return 0
+        return -1
 
     # function to get a value from the module
     def getValues(self):
-        pass
+        dic = {}
+        for i in range(len(self.settings)):
+            dic[self.settings[i].tag] = {}
+            dic[self.settings[i].tag]['x'] = str(round(self.xSpinBoxs[i].value(),2))
+            dic[self.settings[i].tag]['y'] = str(round(self.xSpinBoxs[i].value(),2))
+        return dic
 
     # this function handles the closing of the pop-up window - it doesn't actually close, simply hides visibility.
     # this functionality allows for permanance of objects in the background
