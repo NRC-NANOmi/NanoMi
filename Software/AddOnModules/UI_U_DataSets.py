@@ -282,30 +282,59 @@ class popWindow(QWidget):
         for subMod in modules:
             #pull a dictionary holding all name-value pairs for this module
             varDictionary = subMod.windowHandle.getValues()
-            for varName in varDictionary:
-                # if the value isn't 0 or empty, then load it
-                if varDictionary[varName] != '0' and varDictionary[varName] != '' and varDictionary[varName] != '0.0' and varDictionary[varName] != '0.00':
-                    #find the sub-module name in short human-readable form
-                    subModName = ' '.join(subMod.__name__.split('_')[2:])
-                    #find the value of the variable
-                    varVal = varDictionary[varName]
+            print(varDictionary)
+            #find the sub-module name in short human-readable form
+            subModName = ' '.join(subMod.__name__.split('_')[2:])
+            print(subModName)
+            if subModName == 'Deflectors' or subModName == 'Stigmators':
+                for subName in varDictionary:
+                    for varName in varDictionary[subName]:
+                    # if the value isn't 0 or empty, then load it
+                        if varDictionary[subName][varName] != '0' and varDictionary[subName][varName] != '' and varDictionary[subName][varName] != '0.0' and varDictionary[subName][varName] != '0.00':
 
-                    #insert a new row in the table
-                    currentValues.insertRow(row)
+                            #find the value of the variable
+                            varVal = varDictionary[subName][varName]
 
-                    #set up the module, name and value cells
-                    module = QTableWidgetItem(subModName)
-                    module.setFlags(QtCore.Qt.ItemIsEnabled)
-                    name = QTableWidgetItem(varName)
-                    name.setFlags(QtCore.Qt.ItemIsEnabled)
-                    value = QTableWidgetItem(varVal)
-                    value.setFlags(QtCore.Qt.ItemIsEnabled)
+                            #insert a new row in the table
+                            currentValues.insertRow(row)
 
-                    #actually set the module, name and value cells into the table
-                    currentValues.setItem(row, 0, module)
-                    currentValues.setItem(row, 1, name)
-                    currentValues.setItem(row, 2, value)
-                    row = row + 1
+                            #set up the module, name and value cells
+                            module = QTableWidgetItem(subName)
+                            module.setFlags(QtCore.Qt.ItemIsEnabled)
+                            name = QTableWidgetItem(varName)
+                            name.setFlags(QtCore.Qt.ItemIsEnabled)
+                            value = QTableWidgetItem(varVal)
+                            value.setFlags(QtCore.Qt.ItemIsEnabled)
+
+                            #actually set the module, name and value cells into the table
+                            currentValues.setItem(row, 0, module)
+                            currentValues.setItem(row, 1, name)
+                            currentValues.setItem(row, 2, value)
+                            row = row + 1 
+            else:
+                for varName in varDictionary:
+                    # if the value isn't 0 or empty, then load it
+                    if varDictionary[varName] != '0' and varDictionary[varName] != '' and varDictionary[varName] != '0.0' and varDictionary[varName] != '0.00':
+
+                        #find the value of the variable
+                        varVal = varDictionary[varName]
+
+                        #insert a new row in the table
+                        currentValues.insertRow(row)
+
+                        #set up the module, name and value cells
+                        module = QTableWidgetItem(subModName)
+                        module.setFlags(QtCore.Qt.ItemIsEnabled)
+                        name = QTableWidgetItem(varName)
+                        name.setFlags(QtCore.Qt.ItemIsEnabled)
+                        value = QTableWidgetItem(varVal)
+                        value.setFlags(QtCore.Qt.ItemIsEnabled)
+
+                        #actually set the module, name and value cells into the table
+                        currentValues.setItem(row, 0, module)
+                        currentValues.setItem(row, 1, name)
+                        currentValues.setItem(row, 2, value)
+                        row = row + 1
                     
     #this function will update the data value display with a selected data set's values so users can see what they will be setting
     def showDataValues(self, index, display):
@@ -323,9 +352,11 @@ class popWindow(QWidget):
             
             #insert a new row in the table
             display.insertRow(row)
-            
+            modName = attributes['module']
             #set up the module, name and value cells
-            module = QTableWidgetItem(attributes['module'])
+            if modName == 'Deflectors' or modName == "Stigmators":
+                modName = attributes['submod']
+            module = QTableWidgetItem(modName)
             module.setFlags(QtCore.Qt.ItemIsEnabled)
             name = QTableWidgetItem(attributes['name'])
             name.setFlags(QtCore.Qt.ItemIsEnabled)
@@ -363,7 +394,10 @@ class popWindow(QWidget):
                     modName = attributes['module']
                     name = attributes['name']
                     value = attributes['value']
-                    returnValue = subModule.windowHandle.setValue(name, value)
+                    if modName == 'Deflectors' or modName == 'Stigmators':
+                       returnValue = subModule.windowHandle.setValue(attributes['submod'], name, value)
+                    else:
+                        returnValue = subModule.windowHandle.setValue(name, value)
                     if returnValue != 0:
                         fails = fails + 1
                         print('Failed loading variable ' + name + ' from module ' + modName + '.')
@@ -428,15 +462,25 @@ class popWindow(QWidget):
             print(subMod.__name__)
             #pull a dictionary holding all name-value pairs for this module
             varDictionary = subMod.windowHandle.getValues()
-            for varName in varDictionary:
-                #find the sub-module name in short human-readable form
-                subModName = ' '.join(subMod.__name__.split('_')[2:])
-                #find the value of the variable
-                varVal = varDictionary[varName]
-                #add all new required save variables one at a time
-                #check if variable value is 0
-                if varVal != '0' and varVal != '' and varVal != '0.0' and varVal != '0.00':
-                    ET.SubElement(newStruct, 'setting', {'module':subModName, 'name':varName, 'value':varVal})
+            #find the sub-module name in short human-readable form
+            subModName = ' '.join(subMod.__name__.split('_')[2:])
+            if subModName == "Deflectors" or subModName == "Stigmators":
+                for name in varDictionary:
+                    for varName in varDictionary[name]:
+                        #find the value of the variable
+                        varVal = varDictionary[name][varName]
+                        #add all new required save variables one at a time
+                        #check if variable value is 0
+                        if varVal != '0' and varVal != '' and varVal != '0.0' and varVal != '0.00':
+                            ET.SubElement(newStruct, 'setting', {'module':subModName, 'name':varName, 'value':varVal, 'submod': name}) 
+            else:
+                for varName in varDictionary:
+                    #find the value of the variable
+                    varVal = varDictionary[varName]
+                    #add all new required save variables one at a time
+                    #check if variable value is 0
+                    if varVal != '0' and varVal != '' and varVal != '0.0' and varVal != '0.00':
+                        ET.SubElement(newStruct, 'setting', {'module':subModName, 'name':varName, 'value':varVal})
         
         #format the entire xml file nicely so it is human readable and indented - encode it to a byte-string
         xmlString = ET.tostring(tree, 'utf-8', method='xml')
@@ -486,6 +530,7 @@ class popWindow(QWidget):
 
         attributes = data.attrib
         modName = attributes['module']
+        subName = attributes['submod']
         name = attributes['name']
         value = attributes['value']
 
@@ -495,7 +540,10 @@ class popWindow(QWidget):
                 #pull out this piece of data's attributes
             #if the module is a match for the subModule, load the data to it - module name matches don't have to be exact, because real module names can be super long and I don't want users to have to deal with that kinda stuff if they don't have to
             if modName ==  (' '.join(subModule.__name__.split('_')[2:])):
-                returnValue = subModule.windowHandle.setValue(name, value)
+                if modName == 'Deflectors' or modName == 'Stigmators':
+                    returnValue = subModule.windowHandle.setValue(subName, name, value)
+                else:
+                    returnValue = subModule.windowHandle.setValue(name, value)
                 if returnValue != 0:
                     fails = fails + 1
                     print('Failed loading variable ' + name + ' from module ' + modName + '.')

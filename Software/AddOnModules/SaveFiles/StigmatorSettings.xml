@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Settings>
+    <New_Stigmator>
+        <colour>gray</colour>
+        <xOffset>0.4</xOffset>
+        <yOffset>-0.3</yOffset>
+        <voltage>100</voltage>
+        <slope>1</slope>
+        <x1>Placeholder_AO0</x1>
+        <y1>Placeholder_AO0</y1>
+    </New_Stigmator>
+    <stigmator1>
+        <colour>green</colour>
+        <xOffset>0</xOffset>
+        <yOffset>0</yOffset>
+        <voltage>70</voltage>
+        <slope>1</slope>
+        <x1>Bx1</x1>
+        <y1>Bx1</y1>
+    </stigmator1>
+</Settings>
