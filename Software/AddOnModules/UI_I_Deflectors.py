@@ -464,16 +464,16 @@ class popWindow(QWidget):
         if abs(self.Bx.value()) > v or abs(self.By.value()) > v:
             self.Bx.setValue(self.currentData[index]['x'])
             self.By.setValue(self.currentData[index]['y'])
-            self.Bx.setMinimum(max(round((-v)*4.99/5 + xOffset*v/5, 2), -v))
-            self.By.setMinimum(max(round((-v)*4.99/5 + yOffset*v/5, 2), -v))
-            self.Bx.setMaximum(min(round((v)*4.99/5 + xOffset*v/5, 2), v))
-            self.By.setMaximum(min(round((v)*4.99/5 + yOffset*v/5, 2), v))
+            self.Bx.setMinimum(max(round(-v + xOffset*v/5, 2), -v))
+            self.By.setMinimum(max(round(-v + yOffset*v/5, 2), -v))
+            self.Bx.setMaximum(min(round(v + xOffset*v/5, 2), v))
+            self.By.setMaximum(min(round(v + yOffset*v/5, 2), v))
         # otherwise, set the minmax first then set real value
         else:
-            self.Bx.setMinimum(max(round((-v)*4.99/5 + xOffset*v/5, 2), -v))
-            self.By.setMinimum(max(round((-v)*4.99/5 + yOffset*v/5, 2), -v))
-            self.Bx.setMaximum(min(round((v)*4.99/5 + xOffset*v/5, 2), v))
-            self.By.setMaximum(min(round((v)*4.99/5 + yOffset*v/5, 2), v))
+            self.Bx.setMinimum(max(round(-v + xOffset*v/5, 2), -v))
+            self.By.setMinimum(max(round(-v + yOffset*v/5, 2), -v))
+            self.Bx.setMaximum(min(round(v + xOffset*v/5, 2), v))
+            self.By.setMaximum(min(round(v + yOffset*v/5, 2), v))
             self.Bx.setValue(self.currentData[index]['x'])
             self.By.setValue(self.currentData[index]['y'])
         # set the increment index to 0 as default
@@ -809,11 +809,11 @@ class popWindow(QWidget):
 
         # x times the ratio of 5(input)and real voltage then divide by slope and minus offset
         # x times the ratio of 5(input)and real voltage then divide by slope and minus offset
-        x = x * 4.99/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(
+        x = x * 5/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(
             self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('xOffset').text)
         Hardware.IO.setAnalog(
-            self.settings[self.tabs.currentIndex()].find('x1').text, -round(x, 2))
-        if self.settings[self.tabs.currentIndex()].find('hasLower').text == True:
+            self.settings[self.tabs.currentIndex()].find('x1').text, -x)
+        if self.settings[self.tabs.currentIndex()].find('hasLower').text == "True":
             if self.shiftMode.isChecked():
                 shiftRatio = float(
                     self.settings[self.tabs.currentIndex()].find('shift').text)
@@ -823,7 +823,7 @@ class popWindow(QWidget):
                     self.settings[self.tabs.currentIndex()].find('tilt').text)
                 x = x * tiledRatio
             Hardware.IO.setAnalog(
-                self.settings[self.tabs.currentIndex()].find('x2').text, -round(x, 2))
+                self.settings[self.tabs.currentIndex()].find('x2').text, -x)
         UI_U_DataSets.windowHandle.refreshDataSets()
 
     def updateBy(self):
@@ -833,11 +833,11 @@ class popWindow(QWidget):
         # add real update from to pins
         print('update By for Deflector', self.tabs.currentIndex(), 'to', v)
         y = round(float(v), 2)
-        y = y * 4.99/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(
+        y = y * 5/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(
             self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('yOffset').text)
         Hardware.IO.setAnalog(
-            self.settings[self.tabs.currentIndex()].find('y1').text, -round(y, 2))
-        if self.settings[self.tabs.currentIndex()].find('hasLower').text == True:
+            self.settings[self.tabs.currentIndex()].find('y1').text, -y)
+        if self.settings[self.tabs.currentIndex()].find('hasLower').text == "True":
             if self.shiftMode.isChecked():
                 shiftRatio = float(
                     self.settings[self.tabs.currentIndex()].find('shift').text)
@@ -847,7 +847,7 @@ class popWindow(QWidget):
                     self.settings[self.tabs.currentIndex()].find('tilt').text)
                 y = y * tiledRatio
             Hardware.IO.setAnalog(
-                self.settings[self.tabs.currentIndex()].find('y2').text, -round(y, 2))
+                self.settings[self.tabs.currentIndex()].find('y2').text, -y)
         UI_U_DataSets.windowHandle.refreshDataSets()
 
     def BxIncrementChange(self):

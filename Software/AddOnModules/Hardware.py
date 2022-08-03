@@ -610,6 +610,9 @@ class IoStruct:
             
             #start update timer
             struct.updateTimer.start(1)
+            #intial value is -5, set all AO into 0
+            for i in struct.AoNames:
+                struct.setAnalog(i,0)
         
         return struct
         
@@ -761,6 +764,7 @@ class IoStruct:
 
     #function to set an analog output value
     def setAnalog(struct, name, strValue):
+        print("set",name, 'to', strValue)
         value = None
         try:
             value = float(strValue)
@@ -781,12 +785,14 @@ class IoStruct:
             try:
                 boardIndex = struct.AoBoard[globalChannelIndex]
                 localBoardChannel = struct.AoChannel[globalChannelIndex]
+                print("output to", boardIndex, localBoardChannel)
             except:
                 print('Did not set analog output because internal dictionaries were not set up properly')
                 return -2
 
-            # this function writes output to device×
-            AIOUSB.DACDirect(boardIndex, localBoardChannel, int(float((value + offset) * 65536.0 / span)))
+            # this function writes output to devicround(float((value + offset) * 65536.0 / span))e×
+            print("Value written = ", str(round(float((value + offset) * 65536.0 / span))))
+            AIOUSB.DACDirect(boardIndex, localBoardChannel, round(float((value + offset) * 65535.0 / span)))
             return 0
         except:
             if not strValue == '':

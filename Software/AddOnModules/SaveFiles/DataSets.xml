@@ -40,17 +40,26 @@
         <setting module="HV Amplifier Deflector Amplifier Controller" name="Yin" value="2.99"/>
     </set>
     <set name="2022-06-28_1242">
-        <setting module="Stigmators" name="x" value="0.04" submod="New_Stigmator"/>
-        <setting module="Stigmators" name="y" value="0.04" submod="New_Stigmator"/>
-        <setting module="Stigmators" name="x" value="0.01" submod="stigmator1"/>
-        <setting module="Stigmators" name="y" value="0.01" submod="stigmator1"/>
+        <setting module="Stigmators" name="x" submod="New_Stigmator" value="0.04"/>
+        <setting module="Stigmators" name="y" submod="New_Stigmator" value="0.04"/>
+        <setting module="Stigmators" name="x" submod="stigmator1" value="0.01"/>
+        <setting module="Stigmators" name="y" submod="stigmator1" value="0.01"/>
     </set>
     <set name="2022-06-28_2316">
-        <setting module="Stigmators" name="x" value="0.04" submod="New_Stigmator"/>
-        <setting module="Stigmators" name="y" value="0.04" submod="New_Stigmator"/>
-        <setting module="Stigmators" name="x" value="0.01" submod="stigmator1"/>
-        <setting module="Stigmators" name="y" value="0.01" submod="stigmator1"/>
-        <setting module="Deflectors" name="x" value="0.07" submod="Deflector"/>
-        <setting module="Deflectors" name="y" value="0.05" submod="Deflector"/>
+        <setting module="Stigmators" name="x" submod="New_Stigmator" value="0.04"/>
+        <setting module="Stigmators" name="y" submod="New_Stigmator" value="0.04"/>
+        <setting module="Stigmators" name="x" submod="stigmator1" value="0.01"/>
+        <setting module="Stigmators" name="y" submod="stigmator1" value="0.01"/>
+        <setting module="Deflectors" name="x" submod="Deflector" value="0.07"/>
+        <setting module="Deflectors" name="y" submod="Deflector" value="0.05"/>
+    </set>
+    <set name="2022-07-28_1516">
+        <setting module="Stigmators" name="x" submod="Stigmator" value="-18.0"/>
+        <setting module="Stigmators" name="y" submod="Stigmator" value="-18.0"/>
+        <setting module="Deflectors" name="x" submod="Deflector" value="-54.8"/>
+        <setting module="Deflectors" name="y" submod="Deflector" value="45.8"/>
+        <setting module="Scanner" name="panX" value="2.5"/>
+        <setting module="Scanner" name="panY" value="2.4"/>
+        <setting module="Scanner" name="zoom" value="120"/>
     </set>
 </dataSets>

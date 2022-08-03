@@ -2,16 +2,30 @@
 <Settings>
     <Deflector>
         <colour>cyan</colour>
-        <xOffset>-0.22</xOffset>
-        <yOffset>0.3</yOffset>
+        <xOffset>0</xOffset>
+        <yOffset>0</yOffset>
         <voltage>70</voltage>
         <slope>1</slope>
-        <x1>Bx2</x1>
-        <y1>Yin</y1>
-        <hasLower>False</hasLower>
+        <x1>DAUx</x1>
+        <y1>DAUy</y1>
+        <hasLower>True</hasLower>
         <shift>1</shift>
         <tilt>1</tilt>
+        <x2>DALx</x2>
+        <y2>DALy</y2>
+    </Deflector>
+    <DeflectorB>
+        <colour>magenta</colour>
+        <xOffset>0</xOffset>
+        <yOffset>0</yOffset>
+        <voltage>70</voltage>
+        <slope>1</slope>
+        <x1>PanX</x1>
+        <y1>PanY</y1>
+        <hasLower/>
         <x2/>
         <y2/>
-    </Deflector>
+        <shift/>
+        <tilt/>
+    </DeflectorB>
 </Settings>
