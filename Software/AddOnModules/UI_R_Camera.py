@@ -116,7 +116,7 @@ class popWindow(QWidget):
         mainGrid = QGridLayout()
         self.setLayout(mainGrid)
         
-        btnStreamEnabler = QPushButton('Enabe Camera Stream')
+        btnStreamEnabler = QPushButton('Enable Camera Stream')
         btnStreamEnabler.clicked.connect(self.enableVideoStream)
         mainGrid.addWidget(btnStreamEnabler, 0, 0)
 
@@ -148,7 +148,7 @@ class popWindow(QWidget):
             subprocess.Popen(['pkill', '-f', 'gphoto2'])
             time.sleep(2)
 
-        fileName = 'image/'+datetime.datetime.now().strftime('%Y-%m-%d_%H%M')
+        fileName = 'image/'+datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S')
         capProcess = subprocess.run(['gphoto2', '--capture-image-and-download', '--filename', fileName], input=b'y\n')
         #resuming the capture the movie
         subprocess.Popen(['./AddOnModules/StartCanonM50'])

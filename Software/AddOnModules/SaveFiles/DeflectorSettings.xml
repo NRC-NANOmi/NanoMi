@@ -20,8 +20,8 @@
         <yOffset>0</yOffset>
         <voltage>70</voltage>
         <slope>1</slope>
-        <x1>PanX</x1>
-        <y1>PanY</y1>
+        <x1>DBUx</x1>
+        <y1>DBUy</y1>
         <hasLower/>
         <x2/>
         <y2/>
