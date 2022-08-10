@@ -124,6 +124,7 @@ class popWindow(QWidget):
         # set up plot
         self.plotGroupBox = QGroupBox()
         self.plot = pg.PlotWidget()
+        self.plot.getPlotItem().mouseDragEvent = self.mouseDragEvent
         # X and Y range, will be updated to the max voltage when loading deflectors
         self.plot.setXRange(-10, 10)
         self.plot.setYRange(-10, 10)
@@ -949,10 +950,70 @@ class popWindow(QWidget):
     def updatePlot(self):
         self.plot.clear()
         for i in self.currentData:
-            print(i['colour'])
-            self.plot.plot([i['x']], [i['y']],
+            i['plot'] = self.plot.plot([i['x']], [i['y']],
                            symbolBrush=QtGui.QColor(i['colour']), symbol='o')
+    def mouseDragEvent(self, ev):
+        if ev.button() != QtCore.Qt.LeftButton:
+            ev.ignore()
+            return
 
+        if ev.isStart():
+            # We are already one step into the drag.
+            # Find the point(s) at the mouse cursor when the button was first 
+            # pressed:
+            pos = ev.buttonDownScenePos()
+            local_pos = self.plot.getPlotItem().getViewBox().mapSceneToView(pos)
+            dragPoint = self.currentData[self.tabs.currentIndex()]['plot']
+            new_pts = dragPoint.scatter.pointsAt(local_pos)
+            if len(new_pts) == 1:
+                # Store the drag point and the index of the point for future reference.
+                self.dragPoint = new_pts[0]
+                self.dragIndex = dragPoint.scatter.points().tolist().index(new_pts[0])
+                self.dragOffset = new_pts[0].pos() - local_pos
+                ev.accept()
+            if len(new_pts) == 0:
+                ev.ignore()
+                return
+            # self.dragPoint = pts[0]
+            # ind = pts[0].data()[0]
+            # self.dragOffset = self.data['pos'][ind] - pos
+        elif ev.isFinish():
+            self.dragPoint = None
+            self.dragIndex = -1
+            return
+        else:
+            if self.dragPoint is None:
+                ev.ignore()
+                return
+        # We are dragging a point. Find the local position of the event.
+        local_pos = self.plot.getPlotItem().getViewBox().mapSceneToView(ev.scenePos())
+
+        # Update the point in the PlotDataItem using get/set data.
+        # If we had more than one plotdataitem we would need to search/store which item
+        # is has a point being moved. For this example we know it is the plot_item_control object.
+        # Be sure to add in the initial drag offset to each coordinate to account for the initial mismatch.
+        x = local_pos.x() + self.dragOffset.x()
+        y = local_pos.y() + self.dragOffset.y()
+        voltage = int(self.settings[self.tabs.currentIndex()].find('voltage').text)
+        if x < -voltage:
+            x = -voltage
+        elif x > voltage:
+            x = voltage
+        self.currentData[self.tabs.currentIndex()]['x'] = x
+        self.Bx.setValue(self.currentData[self.tabs.currentIndex()]['x'])
+        
+        if y < -voltage:
+            y = -voltage
+        elif y > voltage:
+            y = voltage
+        self.currentData[self.tabs.currentIndex()]['y'] = y
+        self.By.setValue(self.currentData[self.tabs.currentIndex()]['y'])
+        self.updatePlot()
+
+        # ind = self.dragPoint.data()[0]
+        # self.data['pos'][ind] = ev.pos() + self.dragOffset
+        # self.updateGraph()
+        ev.accept()
     # function to handle initialization - mainly calls a subfunction to create the user interface
     def __init__(self):
         super().__init__()
