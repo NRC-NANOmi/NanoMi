@@ -60,13 +60,13 @@ class popWindow(QWidget):
         self.Bx.setMinimum(-10)
         self.Bx.setMaximum(10)
         self.Bx.setValue(0)
-        self.Bx.setSingleStep(0.01)
+        self.Bx.setSingleStep(5)
         self.Bx.valueChanged.connect(lambda: self.updateBx())
 
         self.BxIncrement = QComboBox()
         self.BxIncrement.addItems(
             ['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5'])
-        self.BxIncrement.setCurrentIndex(0)
+        self.BxIncrement.setCurrentIndex(8)
         self.BxIncrement.currentIndexChanged.connect(self.BxIncrementChange)
 
         self.vbox = QHBoxLayout()
@@ -81,13 +81,13 @@ class popWindow(QWidget):
         self.By.setMinimum(-10)
         self.By.setMaximum(10)
         self.By.setValue(0)
-        self.By.setSingleStep(0.01)
+        self.By.setSingleStep(5)
         self.By.valueChanged.connect(lambda: self.updateBy())
 
         self.ByIncrement = QComboBox()
         self.ByIncrement.addItems(
             ['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5'])
-        self.ByIncrement.setCurrentIndex(0)
+        self.ByIncrement.setCurrentIndex(8)
         self.ByIncrement.currentIndexChanged.connect(self.ByIncrementChange)
 
         self.vbox.addWidget(self.label6)
@@ -158,7 +158,7 @@ class popWindow(QWidget):
         # def the window of the advance settings
         self.advancedWindows = QtWidgets.QWidget()
         self.advancedWindows.setGeometry(850, 50, windowWidth, windowHeight)
-        self.advancedWindows.setWindowTitle("Stigmators Advanced Setting")
+        self.advancedWindows.setWindowTitle("Deflectors Advanced Setting")
         # def the tabs for advanced settings
         self.adTabs = QTabWidget()
         # set up layout for advanced settings
@@ -477,9 +477,6 @@ class popWindow(QWidget):
             self.By.setMaximum(min(round(v + yOffset*v/5, 2), v))
             self.Bx.setValue(self.currentData[index]['x'])
             self.By.setValue(self.currentData[index]['y'])
-        # set the increment index to 0 as default
-        self.BxIncrement.setCurrentIndex(0)
-        self.ByIncrement.setCurrentIndex(0)
         # check the setting has lower plate or not, if not disable toggle buttons
         if data.find('hasLower').text == 'True':
             self.SnT.setDisabled(False)
