@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "nanomi-optics"
+version = "1.0.0"
+description = "NanoMi optics diagram and optmization software."
+authors = [
+    "Garrett Cook <garrett.cook@shaw.ca>",
+    "Jasmine Mishra <jasmine.victoria.mishra@gmail.com>",
+    "Jose Pena Revelo <penarevelo@gmail.com>",
+    "Lucas Towers <luctowers@gmail.com>"
+]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.11"
+numpy = "^1.22.4"
+scipy = "^1.8.1"
+matplotlib = "^3.5.2"
+pyinstaller = "^5.3"
+
+[tool.poetry.dev-dependencies]
+flake8 = "^4.0.1"
+pytest = "^7.1.2"
+pyinstaller = "^5.3"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

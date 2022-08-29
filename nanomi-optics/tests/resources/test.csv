@@ -1,0 +1,14 @@
+Lenses,Focal Length,UR,Magnification,Active
+C1,1,4,7,True
+C2,2,5,8,False
+C3,3,6,9,True
+
+
+Lenses,Focal Length,Magnification,Active
+Objective,1,4,True
+Intermediate,2,5,False
+Projective,3,6,True
+
+
+Condensor Aperature,Magnification
+1,2
