@@ -60,13 +60,13 @@ class popWindow(QWidget):
         self.Bx.setMinimum(-10)
         self.Bx.setMaximum(10)
         self.Bx.setValue(0)
-        self.Bx.setSingleStep(0.01)
+        self.Bx.setSingleStep(5)
         self.Bx.valueChanged.connect(lambda: self.updateBx())
 
         self.BxIncrement = QComboBox()
         self.BxIncrement.addItems(
             ['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5'])
-        self.BxIncrement.setCurrentIndex(0)
+        self.BxIncrement.setCurrentIndex(8)
         self.BxIncrement.currentIndexChanged.connect(self.BxIncrementChange)
 
         self.vbox = QHBoxLayout()
@@ -81,13 +81,13 @@ class popWindow(QWidget):
         self.By.setMinimum(-10)
         self.By.setMaximum(10)
         self.By.setValue(0)
-        self.By.setSingleStep(0.01)
+        self.By.setSingleStep(5)
         self.By.valueChanged.connect(lambda: self.updateBy())
 
         self.ByIncrement = QComboBox()
         self.ByIncrement.addItems(
             ['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5'])
-        self.ByIncrement.setCurrentIndex(0)
+        self.ByIncrement.setCurrentIndex(8)
         self.ByIncrement.currentIndexChanged.connect(self.ByIncrementChange)
 
         self.vbox.addWidget(self.label6)
@@ -124,6 +124,7 @@ class popWindow(QWidget):
         # set up plot
         self.plotGroupBox = QGroupBox()
         self.plot = pg.PlotWidget()
+        self.plot.getPlotItem().mouseDragEvent = self.mouseDragEvent
         # X and Y range, will be updated to the max voltage when loading deflectors
         self.plot.setXRange(-10, 10)
         self.plot.setYRange(-10, 10)
@@ -157,7 +158,7 @@ class popWindow(QWidget):
         # def the window of the advance settings
         self.advancedWindows = QtWidgets.QWidget()
         self.advancedWindows.setGeometry(850, 50, windowWidth, windowHeight)
-        self.advancedWindows.setWindowTitle("Stigmators Advanced Setting")
+        self.advancedWindows.setWindowTitle("Deflectors Advanced Setting")
         # def the tabs for advanced settings
         self.adTabs = QTabWidget()
         # set up layout for advanced settings
@@ -464,21 +465,18 @@ class popWindow(QWidget):
         if abs(self.Bx.value()) > v or abs(self.By.value()) > v:
             self.Bx.setValue(self.currentData[index]['x'])
             self.By.setValue(self.currentData[index]['y'])
-            self.Bx.setMinimum(max(round((-v)*4.99/5 + xOffset*v/5, 2), -v))
-            self.By.setMinimum(max(round((-v)*4.99/5 + yOffset*v/5, 2), -v))
-            self.Bx.setMaximum(min(round((v)*4.99/5 + xOffset*v/5, 2), v))
-            self.By.setMaximum(min(round((v)*4.99/5 + yOffset*v/5, 2), v))
+            self.Bx.setMinimum(max(round(-v + xOffset*v/5, 2), -v))
+            self.By.setMinimum(max(round(-v + yOffset*v/5, 2), -v))
+            self.Bx.setMaximum(min(round(v + xOffset*v/5, 2), v))
+            self.By.setMaximum(min(round(v + yOffset*v/5, 2), v))
         # otherwise, set the minmax first then set real value
         else:
-            self.Bx.setMinimum(max(round((-v)*4.99/5 + xOffset*v/5, 2), -v))
-            self.By.setMinimum(max(round((-v)*4.99/5 + yOffset*v/5, 2), -v))
-            self.Bx.setMaximum(min(round((v)*4.99/5 + xOffset*v/5, 2), v))
-            self.By.setMaximum(min(round((v)*4.99/5 + yOffset*v/5, 2), v))
+            self.Bx.setMinimum(max(round(-v + xOffset*v/5, 2), -v))
+            self.By.setMinimum(max(round(-v + yOffset*v/5, 2), -v))
+            self.Bx.setMaximum(min(round(v + xOffset*v/5, 2), v))
+            self.By.setMaximum(min(round(v + yOffset*v/5, 2), v))
             self.Bx.setValue(self.currentData[index]['x'])
             self.By.setValue(self.currentData[index]['y'])
-        # set the increment index to 0 as default
-        self.BxIncrement.setCurrentIndex(0)
-        self.ByIncrement.setCurrentIndex(0)
         # check the setting has lower plate or not, if not disable toggle buttons
         if data.find('hasLower').text == 'True':
             self.SnT.setDisabled(False)
@@ -809,11 +807,11 @@ class popWindow(QWidget):
 
         # x times the ratio of 5(input)and real voltage then divide by slope and minus offset
         # x times the ratio of 5(input)and real voltage then divide by slope and minus offset
-        x = x * 4.99/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(
+        x = x * 5/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(
             self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('xOffset').text)
         Hardware.IO.setAnalog(
-            self.settings[self.tabs.currentIndex()].find('x1').text, -round(x, 2))
-        if self.settings[self.tabs.currentIndex()].find('hasLower').text == True:
+            self.settings[self.tabs.currentIndex()].find('x1').text, -x)
+        if self.settings[self.tabs.currentIndex()].find('hasLower').text == "True":
             if self.shiftMode.isChecked():
                 shiftRatio = float(
                     self.settings[self.tabs.currentIndex()].find('shift').text)
@@ -823,7 +821,7 @@ class popWindow(QWidget):
                     self.settings[self.tabs.currentIndex()].find('tilt').text)
                 x = x * tiledRatio
             Hardware.IO.setAnalog(
-                self.settings[self.tabs.currentIndex()].find('x2').text, -round(x, 2))
+                self.settings[self.tabs.currentIndex()].find('x2').text, -x)
         UI_U_DataSets.windowHandle.refreshDataSets()
 
     def updateBy(self):
@@ -833,11 +831,11 @@ class popWindow(QWidget):
         # add real update from to pins
         print('update By for Deflector', self.tabs.currentIndex(), 'to', v)
         y = round(float(v), 2)
-        y = y * 4.99/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(
+        y = y * 5/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(
             self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('yOffset').text)
         Hardware.IO.setAnalog(
-            self.settings[self.tabs.currentIndex()].find('y1').text, -round(y, 2))
-        if self.settings[self.tabs.currentIndex()].find('hasLower').text == True:
+            self.settings[self.tabs.currentIndex()].find('y1').text, -y)
+        if self.settings[self.tabs.currentIndex()].find('hasLower').text == "True":
             if self.shiftMode.isChecked():
                 shiftRatio = float(
                     self.settings[self.tabs.currentIndex()].find('shift').text)
@@ -847,7 +845,7 @@ class popWindow(QWidget):
                     self.settings[self.tabs.currentIndex()].find('tilt').text)
                 y = y * tiledRatio
             Hardware.IO.setAnalog(
-                self.settings[self.tabs.currentIndex()].find('y2').text, -round(y, 2))
+                self.settings[self.tabs.currentIndex()].find('y2').text, -y)
         UI_U_DataSets.windowHandle.refreshDataSets()
 
     def BxIncrementChange(self):
@@ -949,10 +947,70 @@ class popWindow(QWidget):
     def updatePlot(self):
         self.plot.clear()
         for i in self.currentData:
-            print(i['colour'])
-            self.plot.plot([i['x']], [i['y']],
+            i['plot'] = self.plot.plot([i['x']], [i['y']],
                            symbolBrush=QtGui.QColor(i['colour']), symbol='o')
+    def mouseDragEvent(self, ev):
+        if ev.button() != QtCore.Qt.LeftButton:
+            ev.ignore()
+            return
 
+        if ev.isStart():
+            # We are already one step into the drag.
+            # Find the point(s) at the mouse cursor when the button was first 
+            # pressed:
+            pos = ev.buttonDownScenePos()
+            local_pos = self.plot.getPlotItem().getViewBox().mapSceneToView(pos)
+            dragPoint = self.currentData[self.tabs.currentIndex()]['plot']
+            new_pts = dragPoint.scatter.pointsAt(local_pos)
+            if len(new_pts) == 1:
+                # Store the drag point and the index of the point for future reference.
+                self.dragPoint = new_pts[0]
+                self.dragIndex = dragPoint.scatter.points().tolist().index(new_pts[0])
+                self.dragOffset = new_pts[0].pos() - local_pos
+                ev.accept()
+            if len(new_pts) == 0:
+                ev.ignore()
+                return
+            # self.dragPoint = pts[0]
+            # ind = pts[0].data()[0]
+            # self.dragOffset = self.data['pos'][ind] - pos
+        elif ev.isFinish():
+            self.dragPoint = None
+            self.dragIndex = -1
+            return
+        else:
+            if self.dragPoint is None:
+                ev.ignore()
+                return
+        # We are dragging a point. Find the local position of the event.
+        local_pos = self.plot.getPlotItem().getViewBox().mapSceneToView(ev.scenePos())
+
+        # Update the point in the PlotDataItem using get/set data.
+        # If we had more than one plotdataitem we would need to search/store which item
+        # is has a point being moved. For this example we know it is the plot_item_control object.
+        # Be sure to add in the initial drag offset to each coordinate to account for the initial mismatch.
+        x = local_pos.x() + self.dragOffset.x()
+        y = local_pos.y() + self.dragOffset.y()
+        voltage = int(self.settings[self.tabs.currentIndex()].find('voltage').text)
+        if x < -voltage:
+            x = -voltage
+        elif x > voltage:
+            x = voltage
+        self.currentData[self.tabs.currentIndex()]['x'] = x
+        self.Bx.setValue(self.currentData[self.tabs.currentIndex()]['x'])
+        
+        if y < -voltage:
+            y = -voltage
+        elif y > voltage:
+            y = voltage
+        self.currentData[self.tabs.currentIndex()]['y'] = y
+        self.By.setValue(self.currentData[self.tabs.currentIndex()]['y'])
+        self.updatePlot()
+
+        # ind = self.dragPoint.data()[0]
+        # self.data['pos'][ind] = ev.pos() + self.dragOffset
+        # self.updateGraph()
+        ev.accept()
     # function to handle initialization - mainly calls a subfunction to create the user interface
     def __init__(self):
         super().__init__()

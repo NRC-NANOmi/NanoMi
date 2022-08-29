@@ -486,7 +486,7 @@ class popWindow(QWidget):
             self.settings[index].find('slope').text) - float(self.settings[index].find('xOffset').text)
 
         Hardware.IO.setAnalog(
-            self.settings[index].find('x1').text, -round(x, 2))
+            self.settings[index].find('x1').text, -x)
         UI_U_DataSets.windowHandle.refreshDataSets()
 
     def updateBy(self, index):
@@ -496,7 +496,7 @@ class popWindow(QWidget):
         y = round(float(v), 2)
         y = y * 5/(int(self.settings[index].find('voltage').text)) / float(
             self.settings[index].find('slope').text) - float(self.settings[index].find('yOffset').text)
-        Hardware.IO.setAnalog(self.settings[index].find('y1').text, -round(y, 2))
+        Hardware.IO.setAnalog(self.settings[index].find('y1').text, -y)
         UI_U_DataSets.windowHandle.refreshDataSets()
 
 
@@ -544,8 +544,8 @@ class popWindow(QWidget):
             v = int(self.settings[i].find("voltage").text)
             xOffset = float(self.settings[i].find("xOffset").text)
             yOffset = float(self.settings[i].find("yOffset").text) 
-            self.xSpinBoxs[i].setMinimum(max(round((-v)*4.99/5 + xOffset*v/5, 2), -v))
-            self.xSpinBoxs[i].setMaximum(min(round((v)*4.99/5 + xOffset*v/5, 2), v))
+            self.xSpinBoxs[i].setMinimum(max(round(-v + xOffset*v/5, 2), -v))
+            self.xSpinBoxs[i].setMaximum(min(round(v+ xOffset*v/5, 2), v))
             self.xSpinBoxs[i].setValue(0)
             self.xSpinBoxs[i].setSingleStep(0.01)
             self.xSpinBoxs[i].valueChanged.connect(
@@ -567,8 +567,8 @@ class popWindow(QWidget):
             yLabel = QLabel("Y", self)  # Add a label called Y
 
             self.ySpinBoxs.append(QDoubleSpinBox())
-            self.ySpinBoxs[i].setMinimum(max(round((-v)*4.99/5 + yOffset*v/5, 2), -v))
-            self.ySpinBoxs[i].setMaximum(min(round((v)*4.99/5 + yOffset*v/5, 2), v))
+            self.ySpinBoxs[i].setMinimum(max(round(-v+ yOffset*v/5, 2), -v))
+            self.ySpinBoxs[i].setMaximum(min(round(v + yOffset*v/5, 2), v))
             self.ySpinBoxs[i].setValue(0)
             self.ySpinBoxs[i].setSingleStep(0.01)
             self.ySpinBoxs[i].valueChanged.connect(

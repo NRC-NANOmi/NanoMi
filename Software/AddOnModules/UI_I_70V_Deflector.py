@@ -423,8 +423,8 @@ class popWindow(QWidget):
         DataSets.windowHandle.refreshDataSets()
         value = self.Bx.value()
         halfVal = round(value/2,2)
-        Hardware.IO.setAnalog('Bx2',halfVal)
-        Hardware.IO.setAnalog('Bx1',-halfVal)
+        Hardware.IO.setAnalog('Bx2',str(halfVal))
+        Hardware.IO.setAnalog('Bx1',str(-halfVal))
         self.updatePlot()
 
     def BxIncrementChange(self):
