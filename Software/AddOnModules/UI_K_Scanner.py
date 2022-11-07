@@ -23,7 +23,7 @@ Notes:              Set up the initial module for creating the user interface.
 import sys                              #import sys module for system-level functions
 
 #import the necessary aspects of PyQt5 for this user interface window
-from PyQt5.QtWidgets import QWidget, QPushButton, QApplication, QLabel, QMessageBox, QTabWidget, QGridLayout, QLineEdit, QSlider, QSpinBox, QComboBox, QDoubleSpinBox
+from PyQt5.QtWidgets import QWidget, QPushButton, QApplication, QLabel, QMessageBox, QTabWidget, QGridLayout, QLineEdit, QSlider, QSpinBox, QComboBox, QDoubleSpinBox, QRadioButton
 from PyQt5 import QtCore, QtGui, QtGui
 #import hardware
 import importlib
@@ -73,7 +73,7 @@ class popWindow(QWidget):
         #setting up for panX
         self.panX = QDoubleSpinBox()
         #setting value bound
-        self.panX.setMinimum(0)
+        self.panX.setMinimum(-5)
         self.panX.setMaximum(5)
         #set initial value
         self.panX.setValue(0)
@@ -100,7 +100,7 @@ class popWindow(QWidget):
 
         #setting up for panX
         self.panY = QDoubleSpinBox()
-        self.panY.setMinimum(0)
+        self.panY.setMinimum(-5)
         self.panY.setMaximum(5)
         self.panY.setValue(0)
         self.panY.setSingleStep(0.01)
@@ -119,7 +119,7 @@ class popWindow(QWidget):
         
         #Setting up for zoom
         self.zoom = QSpinBox()
-        self.zoom.setMinimum(8)
+        self.zoom.setMinimum(0)
         self.zoom.setMaximum(255)
         self.zoom.setValue(127)
         self.zoom.setSingleStep(1)
@@ -138,13 +138,26 @@ class popWindow(QWidget):
         mainGrid.addWidget(self.zoomIncrement, 1, 1, alignment=QtCore.Qt.AlignHCenter)
 
         self.plot = pg.PlotWidget()
-        self.plot.setXRange(0,5)
-        self.plot.setYRange(0,5)
+        self.plot.setXRange(-5,5)
+        self.plot.setYRange(-5,5)
         self.plot.setFixedSize(300,300)
         self.plot.setMouseEnabled(x=False,y=False)
         mainGrid.addWidget(self.plot, 4, 0, 4, 4)
         self.updatePlot()
 
+
+        self.lowMag = QRadioButton()
+        self.lowMag.setText("Low Magnification")
+        self.lowMag.toggled.connect(self.changeMagnification)
+        self.lowMag.setChecked(True)
+        mainGrid.addWidget(self.lowMag, 9, 0)
+        self.updatePlot()
+
+        self.highMag = QRadioButton()
+        self.highMag.setText("High Magnification")
+        self.highMag.setChecked(False)
+        mainGrid.addWidget(self.highMag, 9, 2)
+        self.updatePlot()
 
 
         self.data = {
@@ -170,7 +183,8 @@ class popWindow(QWidget):
         self.plot.addItem(square_item)
 
 
-
+    def changeMagnification(self, mag):
+        Hardware.IO.setDigital("MagChange", not(self.lowMag.isChecked()))
 
     def zoomIncrementChange(self):
         #get the value from the spinner, turns into int then set single step of zoom as it

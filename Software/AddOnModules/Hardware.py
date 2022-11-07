@@ -169,9 +169,9 @@ class popWindow(QWidget):
         #name the window
         self.setWindowTitle('Hardware Functions')
         
-        self.AoTable.itemChanged.connect(lambda: self.triggerSave)
-        self.AiTable.itemChanged.connect(lambda: self.triggerSave)
-        self.DxTable.itemChanged.connect(lambda: self.triggerSave)
+        self.AoTable.itemChanged.connect(lambda: self.triggerSave())
+        self.AiTable.itemChanged.connect(lambda: self.triggerSave())
+        self.DxTable.itemChanged.connect(lambda: self.triggerSave())
     
     #scans for hardware, either for the first time automatically or on a button press from the hardware module
     def rescanHardware(self):
@@ -354,6 +354,7 @@ class popWindow(QWidget):
     
     #linked to whenever a value is changed in the hardware module interface; asks for saving on exit
     def triggerSave(self):
+        print('Save triggered...')
         self.doSave = True
     
     #creates a new analog output in the hardware table
@@ -442,6 +443,8 @@ def main():
 def showPopUp():
     windowHandle.show()
     windowHandle.doSave = False
+    #windowHandle.doSave = True
+
 
 if __name__ == '__main__':
     main()
@@ -665,23 +668,23 @@ class IoStruct:
                         except KeyError:
                             fails.append(boardSerial)
                             continue
-                        
+
                         #if dealing with analog outputs:
                         if entries[0] == 'AO':
                             #instantiate a list of potential matches - need to link the board index and channel value to a specific global channel index, which we then set the name to.
                             #all this is because we can't have multiple-valued dictionaries
                             possibles = []
                             #search through board indexes, come up with a list of potential values
-                            for gChannel, bIndex in struct.AoBoard.items():
+                            for gChannel, bIndex in struct.AoBoard.copy().items():
                                 if bIndex == boardIndex:
                                     possibles.append(gChannel)
                             #search through channel indexes, compare against previous potentials - should only be one match uniquely
-                            for gChannel, chIndex in struct.AoChannel.items():
+                            for gChannel, chIndex in struct.AoChannel.copy().items():
                                 if chIndex == channel and gChannel in possibles:
                                     globalChannel = gChannel
                                     break
                             #set the name at the determined global channel - this will allow simple linkage later
-                            for dictionaryName, gChannel in struct.AoNames.items():
+                            for dictionaryName, gChannel in struct.AoNames.copy().items():
                                 if gChannel == globalChannel:
                                     struct.AoNames[name] = struct.AoNames.pop(dictionaryName)
                                     #break
@@ -691,23 +694,23 @@ class IoStruct:
                             windowHandle.AoTable.setItem(row, 0, QTableWidgetItem(name))
                             windowHandle.AoTable.setItem(row, 1, QTableWidgetItem(str(boardSerial)))
                             windowHandle.AoTable.setItem(row, 2, QTableWidgetItem(str(channel)))
-                            
+
                         #if dealing with analog inputs
                         elif entries[0] == 'AI':
                             #instantiate a list of potential matches - need to link the board index and channel value to a specific global channel index, which we then set the name to.
                             #all this is because we can't have multiple-valued dictionaries?
                             possibles = []
                             #search through board indexes, come up with a list of potential values
-                            for gChannel, bIndex in struct.AiBoard.items():
+                            for gChannel, bIndex in struct.AiBoard.copy().items():
                                 if bIndex == boardIndex:
                                     possibles.append(gChannel)
                             #search through channel indexes, compare against previous potentials - should only be one match uniquely
-                            for gChannel, chIndex in struct.AiChannel.items():
+                            for gChannel, chIndex in struct.AiChannel.copy().items():
                                 if chIndex == channel and gChannel in possibles:
                                     globalChannel = gChannel
                                     break
                             #set the name at the determined global channel - this will allow simple linkage later
-                            for dictionaryName, gChannel in struct.AiNames.items():
+                            for dictionaryName, gChannel in struct.AiNames.copy().items():
                                 if gChannel == globalChannel:
                                     struct.AiNames[name] = struct.AiNames.pop(dictionaryName)
                                     break
@@ -718,24 +721,24 @@ class IoStruct:
                             windowHandle.AiTable.setItem(row, 0, QTableWidgetItem(name))
                             windowHandle.AiTable.setItem(row, 1, QTableWidgetItem(str(boardSerial)))
                             windowHandle.AiTable.setItem(row, 2, QTableWidgetItem(str(channel)))
-                            
+
                         #if dealing with digital outputs
                         elif entries[0] == 'Dx':
                             #instantiate a list of potential matches - need to link the board index and channel value to a specific global channel index, which we then set the name to.
                             #all this is because we can't have multiple-valued dictionaries?
                             possibles = []
                             #search through board indexes, come up with a list of potential values
-                            for gChannel, bIndex in struct.DxBoard.items():
+                            for gChannel, bIndex in struct.DxBoard.copy().items():
                                 if bIndex == boardIndex:
                                     possibles.append(gChannel)
                             #search through channel indexes, compare against previous potentials - should only be one match uniquely
-                            for gChannel, chIndex in struct.DxChannel.items():
+                            for gChannel, chIndex in struct.DxChannel.copy().items():
                                 if chIndex == channel and gChannel in possibles:
                                     globalChannel = gChannel
                                     break
                             #set the name at the determined global channel - this will allow simple linkage later
                             #struct.DxNames[globalChannel] = name
-                            for dictionaryName, gChannel in struct.DxNames.items():
+                            for dictionaryName, gChannel in struct.DxNames.copy().items():
                                 if gChannel == globalChannel:
                                     struct.DxNames[name] = struct.DxNames.pop(dictionaryName)
                                     break
@@ -750,8 +753,9 @@ class IoStruct:
 
                         else:
                             print('Could not load IO Assignment for type ', entries[0])
-        except:
+        except Exception as e:
             print('Could not load IO Assignments file.')
+            print(e)
         
         windowHandle.rowSave = False
         
