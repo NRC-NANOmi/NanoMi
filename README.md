@@ -1,5 +1,4 @@
-
-<br />
+<a id="readme-top"></a>
 <div align="center">
 
   <h1 align="center">NanoMi</h1>
@@ -118,6 +117,7 @@ _The digital IO for NanoMi is built with AccessIO AIOUSB, so before install the 
   4.  Copying the .rules files into /etc/udev/rules.d makes a script be run anytime an AccesIO USB hardware device is found, and automatically loads the firmware onto it for you.
 
   5. Ensure that the 10-acces_usb.rules file points to the correct location for fxload! A computer restart may be required if it's not and you modify it. Proper location should be something like /usr/sbin/fxload ?
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ### Naomi Control Software Installation
 
@@ -161,6 +161,7 @@ _Below is the instrution of Naomi Control Software Installation_
   User can also rescan the hardware by clicking the rescan for hardware button. The software will rescan the connection boards and reread the IO assignment file and load pins again.
 
   After making any changes please press the save changes button before using any of the changed pins, then all the current IO assignment will be stored in IoAssignments.txt. The previous version of the the assignment will be saved as IoAssignments_date_time.txt as backup.
+  <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 - ### Deflector Control
   ![deflectorControl](figures/deflector.png)
@@ -180,6 +181,7 @@ _Below is the instrution of Naomi Control Software Installation_
     The Advanced button leads to advanced setting of the deflectors. Inside the advanced setting, you can create a new deflector by pressing the add button. The x1/x2/y1/y2 are drop down menu which contains all the names of analog outputs that you assigned in hardware module. Make sure to click save if you made any changes. All the settings are store in a xml file called DeflectorSettings.xml, if you have any special need, you can directly change the setting in the xml file as well.
 
     ![advancedSetting](figures/advancedSetting.png)
+    <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 - ### Stigmator Control
  
@@ -197,6 +199,7 @@ _Below is the instrution of Naomi Control Software Installation_
     As same as deflector, the stigmator also has an advanced button that leads to advanced settings, the set up of stigmators is almost the same as deflector, and all the settings are also stored in a xml file that called StigmatorSettings.xml.
 
     ![stigmatorSetting](figures/stigmatorSetting.png)
+    <p align="right">(<a href="#readme-top">back to top</a>)</p>
     
 - ### Data Set
 
