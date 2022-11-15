@@ -22,7 +22,7 @@
 
 
 <!-- TABLE OF CONTENTS -->
-<details>
+<!-- <details> -->
   <summary>Table of Contents</summary>
   <ol>
     <li>
@@ -52,7 +52,7 @@
     <li><a href="#license">License</a></li>
     <li><a href="#contact-info">Contact Info</a></li>
   </ol>
-</details>
+<!-- </details> -->
 
 
 
