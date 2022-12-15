@@ -44,6 +44,8 @@ import datetime
 import importlib
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
+import zmq
+import json
 
 buttonName = 'Data Sets'                #name of the button on the main window that links to this code
 windowHandle = None                     #a handle to the window on a global scope
@@ -278,6 +280,7 @@ class popWindow(QWidget):
         global currentValues, modules
         currentValues.setRowCount(0)
         row = 0
+        zmqData = {}
         #sift through all modules, entering the variables in the 'data' structure in each module
         for subMod in modules:
             #pull a dictionary holding all name-value pairs for this module
@@ -285,6 +288,7 @@ class popWindow(QWidget):
             print(varDictionary)
             #find the sub-module name in short human-readable form
             subModName = ' '.join(subMod.__name__.split('_')[2:])
+            zmqData[subModName] = varDictionary
             print(subModName)
             if subModName == 'Deflectors' or subModName == 'Stigmators':
                 for subName in varDictionary:
@@ -335,6 +339,8 @@ class popWindow(QWidget):
                         currentValues.setItem(row, 1, name)
                         currentValues.setItem(row, 2, value)
                         row = row + 1
+        # send the update thru zmq
+        return json.dumps(zmqData)
                     
     #this function will update the data value display with a selected data set's values so users can see what they will be setting
     def showDataValues(self, index, display):

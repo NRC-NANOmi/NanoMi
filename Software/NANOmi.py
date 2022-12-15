@@ -46,6 +46,10 @@ import os           #import os module to get paths in operating system native wa
 from PyQt5.QtWidgets import QWidget, QPushButton, QApplication, QLabel, QMessageBox, QVBoxLayout
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+import threading
+import zmq
+import json
+from AddOnModules import UI_U_DataSets
 
 AddOns = []
 
@@ -58,8 +62,65 @@ class MainWindow(QWidget):
         super().__init__()
         self.diADC = None
         self.diDAC = None
-        
+        self.zmqServer = threading.Thread(name='zmqServer',target=self.zmqHost)
         self.initUI()
+
+
+    
+    def zmqHost(self):
+        global AddOns
+        context = zmq.Context()
+        socket = context.socket(zmq.REP)
+        socket.bind("tcp://*:8888")
+        while self.zmqOn:
+            request = json.loads(socket.recv_json())
+            if request['request'] == 'get':
+                socket.send_json(UI_U_DataSets.windowHandle.refreshDataSets())
+            elif request['request'] == 'set':
+                response = ''
+                data = request['data']
+                for module in data:
+                    found = False
+                    for mod in AddOns:
+                        if (' '.join(mod.__name__.split('_')[2:])) == module:
+                            found = True
+                            if module == 'Deflectors' or module == 'Stigmators':
+                                for submod in data[module]:
+                                    for var in data[module][submod]:
+                                        returnValue = mod.windowHandle.setValue(submod, var, data[module][submod][var])
+                                        if returnValue != 0:
+                                            response += 'Failed loading variable ' + var + 'of '+ submod + ' from module ' + module + '.\n'
+                            else:
+                                for var in data[module]:
+                                    returnValue = mod.windowHandle.setValue(var, data[module][var])
+                                    if returnValue != 0:
+                                        response += 'Failed loading variable ' + var + ' from module ' + module + '.\n'
+                            break
+                    if not found:
+                        response += 'Did not find module' + module +'.\n'
+                if response == '':
+                    response = 'All data successfully loaded.'
+                res = json.dumps({'response': response})
+                socket.send_json(res)
+            else:
+                socket.send('No request Recieved'.encode())
+        socket.close()
+
+    def startZmq(self):
+        self.zmqOn = True
+        self.zmqServer.start()
+
+    def stopZmq(self):
+        self.zmqOn = False
+        self.zmqServer.join(0)
+        self.zmqServer = threading.Thread(name='zmqServer',target=self.zmqHost)
+    
+    def zmqtoggle(self, checked):
+        if checked:
+            self.startZmq()
+        else:
+            self.stopZmq()
+
 
     #function to create the user interface, and load in external modules for equipment control
     def initUI(self):
@@ -160,7 +221,11 @@ class MainWindow(QWidget):
                     vBox.addWidget(btn)
             else:
                 print('There was an error loading the module for: ' + module.buttonName)
-        
+        self.zmqButton = QPushButton("ZMQ Server", self)
+        self.zmqButton.setCheckable(True)
+        self.zmqButton.toggled.connect(lambda: self.zmqtoggle(self.zmqButton.isChecked()))
+        vBox.addWidget(self.zmqButton)
+        self.zmqOn = False
         #add the hardware button at the end, but it needs to be loaded first so other modules can reference it.
         vBox.addWidget(hw)
         
@@ -181,6 +246,8 @@ class MainWindow(QWidget):
             #if shutting down, close all spawned child windows as well via the "shutdown" method in each popup
             for w in QApplication.topLevelWidgets():
                 w.close()
+            if self.zmqOn:
+                self.stopZmq()
             event.accept()
         else:
             event.ignore()

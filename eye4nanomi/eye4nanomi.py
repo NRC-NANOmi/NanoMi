@@ -26,6 +26,12 @@ from subprocess import Popen, PIPE, run
 # PR SCripting Server must be activated in PR Viewer on the same host
 pr = PRScriptingInterface()
 
+from PIL import Image
+import shutil
+import zmq
+import json
+import csv
+
 # TODO:
 # - use gphoto2 api for live and single acquisition
 #
@@ -39,31 +45,19 @@ LOGLEVEL= { 'CRITICAL': logging.CRITICAL,
             'DEBUG': logging.DEBUG }
 
 log = logging.getLogger()
-        
+
 class CameraDialog(QtWidgets.QWidget):
-    
-    dtypes = { 'uint8': np.uint8,
-               'int8': np.int8,
-               'uint16': np.uint16,
-               'int16': np.int16,
-               'uint32': np.uint32,
-               'int32': np.int32 }
-    
+
+
     def __init__(self, live, single):
         super().__init__()
         # this is the file path for monitored file handels
         self.live_name, self.live_path = live
         self.single_name, self.single_path = single
-        # dtype of ndarray finally copied to repository
-        self.dtype = list(self.dtypes.keys())[0]
-        # expose/repetition time for image acquistion
-        # (at the moment it is not claer if exposure time is meaningful here)
-        self.tacq = 500
-        log.info('Image acquistion via GPhoto2 Vers. %s', __version__)
-        log.info('Name and path (Live): %s %s', *live)
-        log.info('Name and path (Acquire): %s %s', *single)
+        self.isoSettings = ['Auto', '100', '125', '160', '200', '250', '320', '400', '500', '640', '800', '1000', '1250', '1600', '2000', '2500', '3200', '4000', '5000', '6400', '8000', '10000', '12800', '16000', '20000', '25000']
+        self.shutterspeedSettings = ['bulb', '30', '25', '20', '15', '13', '10.3', '8', '6.3', '5', '4', '3.2', '2.5', '1.6', '1.3','1','0.8','0.6','0.5','0.4','0.3','1/4','1/5','1/6','1/8','1/10','1/13','1/15','1/20','1/25','1/30','1/40','1/50','1/60','1/80','1/100','1/125','1/160','1/200','1/250','1/320','1/400','1/500','1/640','1/800','1/1000','1/1250','1/1600','1/2000','1/2500','1/3200','1/4000']
         self.setup_ui()
-        self.update_ui()
+        self.camera_init()
         self.connect_ui()
         self.repo = Repository()
         if self.repo.connect():
@@ -81,55 +75,66 @@ class CameraDialog(QtWidgets.QWidget):
         self.live_view = None
         self.single_view = None
         self.live_thread = threading.Thread(name="live_thread", target=self.stream)
-        
+        context = zmq.Context()
+        self.socket = context.socket(zmq.REQ)
+        self.socket.connect("tcp://localhost:8888")
+
     def setup_ui(self):
         layout = QtWidgets.QGridLayout()
-        self.tacq_sb = QtWidgets.QSpinBox()
-        # adjust range and stepsize for exposure/repetition time here
-        self.tacq_sb.setRange(100, 1000)
-        self.tacq_sb.setSingleStep(100)
-        self.tacq_sb.setSuffix(' ms')
-        self.dtype_cb = QtWidgets.QComboBox()
-        self.dtype_cb.addItems(list(self.dtypes.keys()))
+        self.isoBox = QtWidgets.QComboBox()
+        self.isoBox.addItems(self.isoSettings)
+        self.shutterspeedBox = QtWidgets.QComboBox()
+        self.shutterspeedBox.addItems(self.shutterspeedSettings)
+        self.shutterspeedBox.setCurrentIndex(33)
+        self.imageCount = QtWidgets.QSpinBox()
+        self.imageCount.setRange(1, 100)
+        self.imageCount.setSingleStep(1)
         self.live_pb = QtWidgets.QPushButton('Live')
         self.live_pb.setCheckable(True)
         self.single_pb = QtWidgets.QPushButton('Acquire')
         self.single_pb.setCheckable(True)
-        layout.addWidget(QtWidgets.QLabel('T(acq):'),0,0)
-        layout.addWidget(self.tacq_sb,0,1)
-        layout.addWidget(QtWidgets.QLabel('DType:'),0,2)
-        layout.addWidget(self.dtype_cb,0,3)
+
+        layout.addWidget(QtWidgets.QLabel('ISO'),0,0)
+        layout.addWidget(self.isoBox,0,1)
+        layout.addWidget(QtWidgets.QLabel('Shutter Speed'),0,2)
+        layout.addWidget(self.shutterspeedBox,0,3)
+        layout.addWidget(QtWidgets.QLabel('#Image'), 0, 4)
+        layout.addWidget(self.imageCount, 0, 5)
         layout.addWidget(self.live_pb,1,0,1,2)
-        layout.addWidget(self.single_pb,1,2,1,2)
+        layout.addWidget(self.single_pb,1,4,1,2)
         self.setLayout(layout)
 
-    def update_ui(self):
-        with BlockedSignals(self.tacq_sb) as tacq_sb,\
-             BlockedSignals(self.dtype_cb) as dtype_cb:
-            tacq_sb.setValue(self.tacq)
-            idx = dtype_cb.findText(self.dtype)
-            if idx>=0:
-                dtype_cb.setCurrentIndex(idx)
 
-    def set_tacq(self, value=None):
-        self.tacq = self.tacq_sb.value()
-
-    def set_dtype(self, value=None):
-        self.dtype = self.dtype_cb.currentText()
-                
     def connect_ui(self):
-        self.tacq_sb.valueChanged.connect(self.set_tacq)
-        self.dtype_cb.currentIndexChanged.connect(self.set_dtype)
         self.live_pb.toggled.connect(self.on_toggle_live)
         self.single_pb.toggled.connect(self.on_toggle_single)
-        
+        self.isoBox.currentIndexChanged.connect(self.update_iso)
+        self.shutterspeedBox.currentIndexChanged.connect(self.update_shutter_speed)
+
+    def camera_init(self):
+        self.camera = gp.Camera()
+        self.camera.init()
+        self.config = self.camera.get_config()
+        OK, self.shutterspeed = gp.gp_widget_get_child_by_name(self.config, 'shutterspeed')
+        OK, self.iso = gp.gp_widget_get_child_by_name(self.config, 'iso')
+        self.update_iso()
+        self.update_shutter_speed()
+
+    def update_shutter_speed(self):
+        self.shutterspeed.set_value(self.shutterspeedSettings[self.shutterspeedBox.currentIndex()])
+        self.camera.set_config(self.config)
+        print("shutterspeed is updated to", self.shutterspeed.get_value())
+
+    def update_iso(self):
+        self.iso.set_value(self.isoSettings[self.isoBox.currentIndex()])
+        self.camera.set_config(self.config)
+        print("iso is updated to", self.iso.get_value())
+
     def copy_data(self, name, fpath):
         # adapt to actual format of image data from gphoto2
         # img: ndarray  meta: {'key': value, ...}
         print(fpath)
         img, meta = load_from_file(fpath)
-        # use dtype as selected in combobox for output (optional)
-        img = img.astype(self.dtypes[self.dtype])
         dtype = img.dtype
         shape = img.shape
         # checkout shared memeory object by name
@@ -137,7 +142,7 @@ class CameraDialog(QtWidgets.QWidget):
         # copy data to shared memory
         np.copyto(nda, img)
         # submit the update repository
-        self.repo.commit(nda, meta) 
+        self.repo.commit(nda, meta)
 
     @QtCore.pyqtSlot(bool)
     def on_toggle_live(self, checked):
@@ -153,16 +158,13 @@ class CameraDialog(QtWidgets.QWidget):
                 self.live_thread.start()
 
     def stream(self):
-        camera = gp.Camera()
-        camera.init()
         self.live_view = pr.display_image(self.live_name)
         while self.live:
-            capture = camera.capture_preview()
+            capture = self.camera.capture_preview()
             filedata = capture.get_data_and_size()
             data = memoryview(filedata)
             self.copy_data(self.live_name, io.BytesIO(data))
-        camera.exit()
-        
+
     def stop_live(self):
         self.live = False
         self.live_thread.join(0)
@@ -172,32 +174,104 @@ class CameraDialog(QtWidgets.QWidget):
     @QtCore.pyqtSlot(bool)
     def on_toggle_single(self, checked):
         if not checked:
-            with BlockedSignals(self.single_pb): 
+            with BlockedSignals(self.single_pb):
                 self.single_pb.setChecked(True)
         else:
             self.single = True
             if self.live:
                 self.stop_live()
                 self.hold_live = True
-            self.take_single()
+            if self.imageCount.value() == 1:
+                self.take_single()
+            else:
+                self.take_multiple(self.imageCount.value())
 
-    @QtCore.pyqtSlot()        
+    @QtCore.pyqtSlot()
     def take_single(self):
-        fileName = datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S')+'.jpg'
-        run(['gphoto2', '--capture-image-and-download', '--filename='+fileName], input=b'y\n')
-        self.copy_data(self.single_name, fileName)
+        time = datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S')
+        target = datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S')+'.jpg'
+        file_path = self.camera.capture(gp.GP_CAPTURE_IMAGE)
+        camera_file = self.camera.file_get(
+            file_path.folder, file_path.name, gp.GP_FILE_TYPE_NORMAL)
+        camera_file.save(target)
+        self.copy_data(self.single_name, target)
         pr.display_image(self.single_name)
-        with BlockedSignals(self.single_pb): 
-            self.single_pb.setChecked(False)     
+        self.save_settings(time)
+        with BlockedSignals(self.single_pb):
+            self.single_pb.setChecked(False)
+        self.single = False
+        if self.hold_live:
+            self.hold_live = False
+            self.start_live()
+
+    def take_multiple(self, n):
+        folderName = datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S')
+        os.mkdir(folderName)
+        for i in range(n):
+            file_path = self.camera.capture(gp.GP_CAPTURE_IMAGE)
+            target = os.path.join(folderName, file_path.name)
+            print(target)
+            camera_file = self.camera.file_get(
+                file_path.folder, file_path.name, gp.GP_FILE_TYPE_NORMAL)
+            camera_file.save(target)
+        self.stack_image(folderName)
+        shutil.rmtree(folderName)
+        self.copy_data(self.single_name, folderName+'.npz')
+        pr.display_image(self.single_name)
+        self.save_settings(folderName)
+        with BlockedSignals(self.single_pb):
+            self.single_pb.setChecked(False)
         self.single = False
         if self.hold_live:
             self.hold_live = False
             self.start_live()
 
 
-if __name__ == '__main__':
+    def stack_image(self, directory):
+        data = []
+        for filename in os.listdir(directory):
+            f = os.path.join(directory, filename)
+            img = Image.open(f).convert('L')
+            data.append(np.asarray(img))
+        data = np.asarray(data)
+        meta = [{'repo_id': '', 'type': 'Stack', 'ref_size': data[0].shape, 'filename': directory+'.npz'}]
+        data_model = [{'type': 'Stack'}]
+        kwargs = {}
+        kwargs['data'] = data
+        kwargs['meta'] = meta
+        kwargs['data_model'] = data_model
+        np.savez(directory, **kwargs)
     
-    parser = ArgumentParser(description='PR Interface for GPhoto2') 
+    def recieve_settings(self):
+        self.socket.send_json(json.dumps({'request':'get'}))
+        data = self.socket.recv_json()
+        return data
+    
+    def save_settings(self, filename):
+        data = self.recieve_settings()
+        dataDict = json.loads(data)
+        write = []
+        write.append(["Module", "SubModule","Variable Name", "Value"])
+        for module in dataDict:
+            if module == 'Stigmators' or module == 'Deflectors':
+                for subModule in dataDict[module]:
+                    for variable in dataDict[module][subModule]:
+                        val = dataDict[module][subModule][variable]
+                        write.append([module, subModule, variable, val])
+            else:
+                for variable in dataDict[module]:
+                    val = dataDict[module][variable]
+                    write.append([module, 'N/A', variable, val])
+        with open(filename+'.csv', 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerows(write)
+
+
+
+
+if __name__ == '__main__':
+
+    parser = ArgumentParser(description='PR Interface for GPhoto2')
     parser.add_argument('--single', action="store", type=str, nargs=2, default=('Single','single.jpg'),
                         help='repository name and path for single acquisition data')
     parser.add_argument('--live', action="store", type=str, nargs=2, default=('Live', 'live.jpg'),
@@ -210,20 +284,20 @@ if __name__ == '__main__':
 
     fmt = logging.Formatter('%(asctime)s %(levelname)s %(process)d#%(thread)d %(module)s:%(lineno)d %(message)s')
     std = logging.StreamHandler()
-    
+
     log.setLevel(LOGLEVEL[args.loglevel])
-    
+
     if not args.quite:
         std.setFormatter(fmt)
         log.addHandler(std)
-        
+
     if args.logfile is not None:
         hdl = logging.FileHandler()
         hdl.setFormatter(fmt)
         log.addHandler(hdl)
 
     app  =  QtWidgets.QApplication(sys.argv)
-    
+
     dialog = CameraDialog(live=args.live, single=args.single)
     dialog.show()
 
