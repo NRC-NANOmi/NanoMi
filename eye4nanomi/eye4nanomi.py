@@ -121,14 +121,26 @@ class CameraDialog(QtWidgets.QWidget):
         self.update_shutter_speed()
 
     def update_shutter_speed(self):
+        if self.live:
+            self.stop_live()
+            self.hold_live = True
         self.shutterspeed.set_value(self.shutterspeedSettings[self.shutterspeedBox.currentIndex()])
         self.camera.set_config(self.config)
         print("shutterspeed is updated to", self.shutterspeed.get_value())
+        if self.hold_live:
+            self.hold_live = False
+            self.start_live()
 
     def update_iso(self):
+        if self.live:
+            self.stop_live()
+            self.hold_live = True
         self.iso.set_value(self.isoSettings[self.isoBox.currentIndex()])
         self.camera.set_config(self.config)
         print("iso is updated to", self.iso.get_value())
+        if self.hold_live:
+            self.hold_live = False
+            self.start_live()
 
     def copy_data(self, name, fpath):
         # adapt to actual format of image data from gphoto2
