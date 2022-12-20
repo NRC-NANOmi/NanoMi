@@ -57,7 +57,6 @@ class CameraDialog(QtWidgets.QWidget):
         self.isoSettings = ['Auto', '100', '125', '160', '200', '250', '320', '400', '500', '640', '800', '1000', '1250', '1600', '2000', '2500', '3200', '4000', '5000', '6400', '8000', '10000', '12800', '16000', '20000', '25000']
         self.shutterspeedSettings = ['bulb', '30', '25', '20', '15', '13', '10.3', '8', '6.3', '5', '4', '3.2', '2.5', '1.6', '1.3','1','0.8','0.6','0.5','0.4','0.3','1/4','1/5','1/6','1/8','1/10','1/13','1/15','1/20','1/25','1/30','1/40','1/50','1/60','1/80','1/100','1/125','1/160','1/200','1/250','1/320','1/400','1/500','1/640','1/800','1/1000','1/1250','1/1600','1/2000','1/2500','1/3200','1/4000']
         self.setup_ui()
-        self.camera_init()
         self.connect_ui()
         self.repo = Repository()
         if self.repo.connect():
@@ -75,6 +74,7 @@ class CameraDialog(QtWidgets.QWidget):
         self.live_view = None
         self.single_view = None
         self.live_thread = threading.Thread(name="live_thread", target=self.stream)
+        self.camera_init()
         context = zmq.Context()
         self.socket = context.socket(zmq.REQ)
         self.socket.connect("tcp://localhost:8888")
@@ -124,6 +124,7 @@ class CameraDialog(QtWidgets.QWidget):
         if self.live:
             self.stop_live()
             self.hold_live = True
+            time.sleep(1)
         self.shutterspeed.set_value(self.shutterspeedSettings[self.shutterspeedBox.currentIndex()])
         self.camera.set_config(self.config)
         print("shutterspeed is updated to", self.shutterspeed.get_value())
@@ -135,6 +136,7 @@ class CameraDialog(QtWidgets.QWidget):
         if self.live:
             self.stop_live()
             self.hold_live = True
+            time.sleep(1)
         self.iso.set_value(self.isoSettings[self.isoBox.currentIndex()])
         self.camera.set_config(self.config)
         print("iso is updated to", self.iso.get_value())
