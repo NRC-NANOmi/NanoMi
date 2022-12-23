@@ -2,8 +2,9 @@ import sys  # import sys module for system-level functions
 import glob
 import os                         # allow us to access other files
 # import the necessary aspects of PyQt5 for this user interface window
-from PyQt5.QtWidgets import QWidget, QPushButton, QApplication, QLabel, QMessageBox, QTabWidget, QGridLayout, QLineEdit, QListWidget, QTableWidget, QTableWidgetItem, QGroupBox, QDoubleSpinBox, QComboBox, QHBoxLayout
+from PyQt5.QtWidgets import QWidget, QPushButton, QApplication, QLabel, QMessageBox, QTabWidget, QGridLayout, QLineEdit, QListWidget, QTableWidget, QTableWidgetItem, QGroupBox, QDoubleSpinBox, QComboBox, QHBoxLayout, QCheckBox
 from PyQt5 import QtCore, QtGui, QtWidgets
+import threading
 from AddOnModules import Hardware, UI_U_DataSets
 import pyqtgraph as pg
 import datetime
@@ -11,6 +12,7 @@ import importlib
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 import copy
+import time
 
 # name of the button on the main window that links to this code
 buttonName = 'Deflectors'
@@ -68,11 +70,13 @@ class popWindow(QWidget):
             ['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5'])
         self.BxIncrement.setCurrentIndex(8)
         self.BxIncrement.currentIndexChanged.connect(self.BxIncrementChange)
-
+        self.wobbleX = QCheckBox('wobble')
+        self.wobbleX.stateChanged.connect(self.wobbleXtoggle)
         self.vbox = QHBoxLayout()
         self.vbox.addWidget(self.xLabel)
         self.vbox.addWidget(self.Bx)
         self.vbox.addWidget(self.BxIncrement)
+        self.vbox.addWidget(self.wobbleX)
         self.vbox.addStretch()
 
         self.label6 = QLabel("Y", self)  # Add a label called Y
@@ -89,14 +93,46 @@ class popWindow(QWidget):
             ['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5'])
         self.ByIncrement.setCurrentIndex(8)
         self.ByIncrement.currentIndexChanged.connect(self.ByIncrementChange)
-
+        self.wobbleY = QCheckBox('wobble')
+        self.wobbleY.stateChanged.connect(self.wobbleYtoggle)
         self.vbox.addWidget(self.label6)
         self.vbox.addWidget(self.By)
         self.vbox.addWidget(self.ByIncrement)
-        # self.groupBox6.setLayout(self.vbox6)
+        self.vbox.addWidget(self.wobbleY)
         self.XnY.setLayout(self.vbox)
 
         self.deflectorLayout.addWidget(self.XnY, 0, 0)  # First slider for Bx1
+
+        #set up ui for the wobbling mode
+        self.wob = QGroupBox()
+        self.feqLable = QLabel("Wobble Frequency:", self)
+        self.feq = QDoubleSpinBox()
+        self.feq.setMinimum(0.5)
+        self.feq.setMaximum(10)
+        self.feq.setSingleStep(0.1)
+        self.feq.setSuffix("Hz")
+        self.feq.setValue(0)
+        self.feq.valueChanged.connect(self.updateFrequency)
+
+        self.perLable = QLabel("Wobble Percentage:", self)
+        self.percentage = QDoubleSpinBox()
+        self.percentage.setMinimum(1)
+        self.percentage.setMaximum(50)
+        self.percentage.setSingleStep(1)
+        self.percentage.setSuffix("%")
+        self.percentage.setValue(10)
+        self.percentage.valueChanged.connect(self.updatePercentage)
+        
+
+
+        self.wobBox = QHBoxLayout()
+        self.wobBox.addWidget(self.feqLable)
+        self.wobBox.addWidget(self.feq)
+        self.wobBox.addStretch()
+        self.wobBox.addWidget(self.perLable)
+        self.wobBox.addWidget(self.percentage)
+        self.wob.setLayout(self.wobBox)
+        self.deflectorLayout.addWidget(self.wob, 1,0)
 
         # set up ui for shift mode and tile mode toggle buttons
         self.SnT = QGroupBox()
@@ -114,7 +150,7 @@ class popWindow(QWidget):
         self.SnTBox.addWidget(self.tileMode)
         self.SnT.setLayout(self.SnTBox)
 
-        self.deflectorLayout.addWidget(self.SnT, 1, 0)
+        self.deflectorLayout.addWidget(self.SnT, 2, 0)
 
         # Empty layout for when no deflector founded in xml config file
         self.noDeflectorLayout = QGridLayout()
@@ -129,7 +165,7 @@ class popWindow(QWidget):
         self.plot.setXRange(-10, 10)
         self.plot.setYRange(-10, 10)
         # plot size
-        self.plot.setFixedSize(400, 400)
+        self.plot.setFixedSize(500, 500)
         # disable mouse draging/zooming
         self.plot.setMouseEnabled(x=False, y=False)
         self.vboxPlot = QHBoxLayout()
@@ -346,6 +382,97 @@ class popWindow(QWidget):
             lambda: self.loadAdvancedData(self.adTabs.currentIndex()))
         self.updatePlot()
 
+    def updateFrequency(self):
+        self.currentData[self.tabs.currentIndex()]['frequency'] = self.feq.value()
+
+    def updatePercentage(self):
+        self.currentData[self.tabs.currentIndex()]['percentage'] = self.percentage.value()
+    
+    def wobbleXtoggle(self):
+        if self.wobbleX.isChecked():
+            self.wobbleXOn = True
+            self.wobbleXThread = threading.Thread(name='wobbleX', target=lambda:self.wobble(self.Bx, lambda: self.wobbleXOn))
+            self.xPreWobble = self.Bx.value()
+            self.xPreWobbleIndex = self.tabs.currentIndex()
+            self.wobbleXThread.start()
+        else:
+            self.wobbleXOn = False
+            self.wobbleXThread.join(0)
+            if self.tabs.currentIndex() == self.xPreWobbleIndex:
+                self.Bx.setValue(self.xPreWobble)
+            else:
+                # get the value from bx and update currentdata list and plot
+                self.currentData[self.xPreWobbleIndex]['x'] = self.xPreWobble
+                self.updatePlot()
+                # add real update from to pins
+                print('update Bx for Deflector', self.xPreWobbleIndex, 'to', self.xPreWobble)
+                x = round(float(self.xPreWobble), 2)
+
+                # x times the ratio of 5(input)and real voltage then divide by slope and minus offset
+                # x times the ratio of 5(input)and real voltage then divide by slope and minus offset
+                x = x * 5/(int(self.settings[self.xPreWobbleIndex].find('voltage').text)) / float(
+                    self.settings[self.xPreWobbleIndex].find('slope').text) - float(self.settings[self.xPreWobbleIndex].find('xOffset').text)
+                Hardware.IO.setAnalog(
+                    self.settings[self.xPreWobbleIndex].find('x1').text, -x)
+                if self.settings[self.xPreWobbleIndex].find('hasLower').text == "True":
+                    if self.shiftMode.isChecked():
+                        shiftRatio = float(
+                            self.settings[self.xPreWobbleIndex].find('shift').text)
+                        x = x * shiftRatio
+                    elif self.tileMode.isChecked():
+                        tiledRatio = float(
+                            self.settings[self.xPreWobbleIndex].find('tilt').text)
+                        x = x * tiledRatio
+                    Hardware.IO.setAnalog(
+                        self.settings[self.xPreWobbleIndex].find('x2').text, -x)
+                UI_U_DataSets.windowHandle.refreshDataSets()
+
+    def wobbleYtoggle(self):
+        if self.wobbleY.isChecked():
+            self.wobbleYOn = True
+            self.wobbleYThread = threading.Thread(name='wobbleY', target=lambda:self.wobble(self.By, lambda: self.wobbleYOn))
+            self.yPreWobble = self.By.value()
+            self.yPreWobbleIndex = self.tabs.currentIndex()
+            self.wobbleYThread.start()
+        else:
+            self.wobbleYOn = False
+            self.wobbleYThread.join(0)
+            if self.tabs.currentIndex() == self.yPreWobbleIndex:
+                self.By.setValue(self.yPreWobble)
+            else:
+                self.currentData[self.yPreWobbleIndex]['y'] = self.yPreWobble
+                self.updatePlot()
+                # add real update from to pins
+                print('update By for Deflector', self.yPreWobbleIndex, 'to', self.yPreWobble)
+                y = round(float(self.yPreWobble), 2)
+                y = y * 5/(int(self.settings[self.yPreWobbleIndex].find('voltage').text)) / float(
+                    self.settings[self.yPreWobbleIndex].find('slope').text) - float(self.settings[self.yPreWobbleIndex].find('yOffset').text)
+                Hardware.IO.setAnalog(
+                    self.settings[self.yPreWobbleIndex].find('y1').text, -y)
+                if self.settings[self.yPreWobbleIndex].find('hasLower').text == "True":
+                    if self.shiftMode.isChecked():
+                        shiftRatio = float(
+                            self.settings[self.yPreWobbleIndex].find('shift').text)
+                        y = y * shiftRatio
+                    elif self.tileMode.isChecked():
+                        tiledRatio = float(
+                            self.settings[self.yPreWobbleIndex].find('tilt').text)
+                        y = y * tiledRatio
+                    Hardware.IO.setAnalog(
+                        self.settings[self.yPreWobbleIndex].find('y2').text, -y)
+                UI_U_DataSets.windowHandle.refreshDataSets()
+
+    def wobble(self, box, signal):
+        data = self.settings[self.tabs.currentIndex()]
+        v = int(data.find('voltage').text)
+        current = box.value() 
+        while signal():
+            box.setValue(round(min(v,current + self.percentage.value()/100*v),2))
+            time.sleep(1/self.feq.value())
+            if signal():
+                box.setValue(round(max(-v,current - self.percentage.value()/100*v),2))
+                time.sleep(1/self.feq.value())
+
     '''
     Function that response to when the shift mode button is clicked
     '''
@@ -459,7 +586,11 @@ class popWindow(QWidget):
         data = self.settings[index]
         v = int(data.find('voltage').text)
         xOffset = float(data.find("xOffset").text)
-        yOffset = float(data.find("yOffset").text) 
+        yOffset = float(data.find("yOffset").text)
+        if self.wobbleX.isChecked():
+            self.wobbleX.setChecked(False)
+        if self.wobbleY.isChecked():
+            self.wobbleY.setChecked(False)
         # if the last bx or by is greater than the current voltage, if we reset min and max will cause value change,
         # so we need to load the bx and by first, then set the minmax value
         if abs(self.Bx.value()) > v or abs(self.By.value()) > v:
@@ -477,6 +608,8 @@ class popWindow(QWidget):
             self.By.setMaximum(min(round(v + yOffset*v/5, 2), v))
             self.Bx.setValue(self.currentData[index]['x'])
             self.By.setValue(self.currentData[index]['y'])
+        self.feq.setValue(self.currentData[index]['frequency'])
+        self.percentage.setValue(self.currentData[index]['percentage'])
         # check the setting has lower plate or not, if not disable toggle buttons
         if data.find('hasLower').text == 'True':
             self.SnT.setDisabled(False)
@@ -876,7 +1009,7 @@ class popWindow(QWidget):
                 self.settings[i].find('voltage').text))
             w = QWidget()
             self.currentData.append(
-                {'x': 0, 'y': 0, 'colour': color, 'mode': None})
+                {'x': 0, 'y': 0, 'colour': color, 'mode': None, 'frequency': 0.5, 'percentage': 10})
             self.tabList.append(w)
             self.tabs.addTab(w, name)
             self.tabs.tabBar().setTabTextColor(i, QtGui.QColor(color))
