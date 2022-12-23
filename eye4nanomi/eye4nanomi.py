@@ -183,6 +183,7 @@ class CameraDialog(QtWidgets.QWidget):
         self.live = False
         self.live_thread.join(0)
         self.live_thread = threading.Thread(name="live_thread", target=self.stream)
+        time.sleep(1)
 
 
     @QtCore.pyqtSlot(bool)
