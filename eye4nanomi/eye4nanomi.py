@@ -31,10 +31,7 @@ import shutil
 import zmq
 import json
 import csv
-
-# TODO:
-# - use gphoto2 api for live and single acquisition
-#
+import signal
 
 __version__ = '0.2'
 
@@ -124,10 +121,13 @@ class CameraDialog(QtWidgets.QWidget):
         if self.live:
             self.stop_live()
             self.hold_live = True
-            time.sleep(1)
-        self.shutterspeed.set_value(self.shutterspeedSettings[self.shutterspeedBox.currentIndex()])
-        self.camera.set_config(self.config)
-        print("shutterspeed is updated to", self.shutterspeed.get_value())
+        try:
+            self.shutterspeed.set_value(self.shutterspeedSettings[self.shutterspeedBox.currentIndex()])
+            self.camera.set_config(self.config)
+            print("shutterspeed is updated to", self.shutterspeed.get_value())
+        except:
+            print("Failed to change shutter speed, there was IO process in camera, please retry")
+            QtWidgets.QMessageBox.question(self,'I/O in progress', 'Failed to change shutter speed, there was IO process in camera, please retry', QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.Ok)
         if self.hold_live:
             self.hold_live = False
             self.start_live()
@@ -136,10 +136,13 @@ class CameraDialog(QtWidgets.QWidget):
         if self.live:
             self.stop_live()
             self.hold_live = True
-            time.sleep(1)
-        self.iso.set_value(self.isoSettings[self.isoBox.currentIndex()])
-        self.camera.set_config(self.config)
-        print("iso is updated to", self.iso.get_value())
+        try:
+            self.iso.set_value(self.isoSettings[self.isoBox.currentIndex()])
+            self.camera.set_config(self.config)
+            print("iso is updated to", self.iso.get_value())
+        except:
+            print("Failed to change ISO, there was IO process in camera, please retry")
+            QtWidgets.QMessageBox.question(self,'I/O in progress', 'Failed to change ISO, there was IO process in camera, please retry', QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.Ok)
         if self.hold_live:
             self.hold_live = False
             self.start_live()
@@ -170,6 +173,7 @@ class CameraDialog(QtWidgets.QWidget):
             self.live = True
             if not self.live_thread.is_alive():
                 self.live_thread.start()
+
 
     def stream(self):
         self.live_view = pr.display_image(self.live_name)
@@ -205,13 +209,17 @@ class CameraDialog(QtWidgets.QWidget):
     def take_single(self):
         time = datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S')
         target = datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S')+'.jpg'
-        file_path = self.camera.capture(gp.GP_CAPTURE_IMAGE)
-        camera_file = self.camera.file_get(
-            file_path.folder, file_path.name, gp.GP_FILE_TYPE_NORMAL)
-        camera_file.save(target)
-        self.copy_data(self.single_name, target)
-        pr.display_image(self.single_name)
-        self.save_settings(time)
+        try:
+            file_path = self.camera.capture(gp.GP_CAPTURE_IMAGE)
+            camera_file = self.camera.file_get(
+                file_path.folder, file_path.name, gp.GP_FILE_TYPE_NORMAL)
+            camera_file.save(target)
+            self.copy_data(self.single_name, target)
+            pr.display_image(self.single_name)
+            self.save_settings(time)
+        except:
+            print("Failed to take a picture, there was IO process in camera, please retry")
+            QtWidgets.QMessageBox.question(self,'I/O in progress', 'Failed to take a picture, there was IO process in camera, please retry', QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.Ok)
         with BlockedSignals(self.single_pb):
             self.single_pb.setChecked(False)
         self.single = False
@@ -263,7 +271,14 @@ class CameraDialog(QtWidgets.QWidget):
         return data
     
     def save_settings(self, filename):
-        data = self.recieve_settings()
+        signal.signal(signal.SIGALRM, signal_handler)
+        signal.alarm(15)   # Ten seconds
+        try:
+            data = self.recieve_settings()
+        except:
+            QtWidgets.QMessageBox.question(self,'Time Out', 'Time out when recieve microscope settings, please check NanoMi control software see if ZMQ server is enabled', QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.Ok)
+            print("Time out when recieve microscope settings, please check NanoMi control software see if ZMQ server is enabled!")
+            return -1
         dataDict = json.loads(data)
         write = []
         write.append(["Module", "SubModule","Variable Name", "Value"])
@@ -280,8 +295,21 @@ class CameraDialog(QtWidgets.QWidget):
         with open(filename+'.csv', 'w', newline='') as file:
             writer = csv.writer(file)
             writer.writerows(write)
+    def closeEvent(self,event):
+        #generate a popup message box asking the user if they REALLY meant to shut down the software
+        #note that unless they've saved variable presets etc, they would lose a lot of data if they accidentally shut down the program
+        reply = QtWidgets.QMessageBox.question(self,'Closing?', 'Are you sure you want to shut down the program?', QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
 
+        #respond according to the user reply
+        if reply == QtWidgets.QMessageBox.Yes:
+            if self.live:
+                self.stop_live()
+            event.accept()
+        else:
+            event.ignore()
 
+def signal_handler(signum, frame):
+    raise Exception("Timed out!")
 
 
 if __name__ == '__main__':
