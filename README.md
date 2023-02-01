@@ -32,7 +32,7 @@
       <a href="#getting-started">Getting Started</a>
       <ul>
         <li><a href="#acessio-aiousb">AcessIO AIOUSB</a></li>
-        <li><a href="#naomi-control-software-installation">Naomi Control Software Installation</a></li>
+        <li><a href="#nanomi-control-software-installation">Nanomi Control Software Installation</a></li>
       </ul>
     </li>
     <li>
@@ -119,9 +119,9 @@ _The digital IO for NanoMi is built with AccessIO AIOUSB, so before install the 
   5. Ensure that the 10-acces_usb.rules file points to the correct location for fxload! A computer restart may be required if it's not and you modify it. Proper location should be something like /usr/sbin/fxload ?
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-### Naomi Control Software Installation
+### Nanomi Control Software Installation
 
-_Below is the instrution of Naomi Control Software Installation_
+_Below is the instrution of Nanomi Control Software Installation_
 
 1. Clone the repo
    ```sh
