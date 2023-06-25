@@ -3,7 +3,7 @@ import sys  # import sys module for system-level functions
 import glob
 import os                         # allow us to access other files
 # import the necessary aspects of PyQt5 for this user interface window
-from PyQt5.QtWidgets import QWidget, QPushButton, QApplication, QLabel, QMessageBox, QTabWidget, QGridLayout, QLineEdit, QListWidget, QTableWidget, QTableWidgetItem, QGroupBox, QDoubleSpinBox, QComboBox, QHBoxLayout
+from PyQt5.QtWidgets import QWidget, QPushButton, QApplication, QLabel, QMessageBox, QTabWidget, QGridLayout, QLineEdit, QListWidget, QTableWidget, QTableWidgetItem, QGroupBox, QDoubleSpinBox, QComboBox, QHBoxLayout, QGraphicsEllipseItem
 from PyQt5 import QtCore, QtGui, QtWidgets
 from matplotlib.pyplot import angle_spectrum
 from AddOnModules import Hardware, UI_U_DataSets
@@ -661,45 +661,45 @@ class popWindow(QWidget):
                 # length of the box
                 l = max(x, y)/(x+y) * max(x, y)
                 print("Length is", l)
-                e = pg.QtGui.QGraphicsEllipseItem(-l, -r, 2*l, 2*r)
-                e.rotate(angle)
+                e = QGraphicsEllipseItem(-l, -r, 2*l, 2*r)
+                e.setRotation(angle)
             elif y == 0 and x > 0:
-                e = pg.QtGui.QGraphicsEllipseItem(-x, -r, 2*x, 2*r)
+                e = QGraphicsEllipseItem(-x, -r, 2*x, 2*r)
             elif x == 0 and y > 0:
-                e = pg.QtGui.QGraphicsEllipseItem(-y, -r, 2*y, 2*r)
-                e.rotate(45)
+                e = QGraphicsEllipseItem(-y, -r, 2*y, 2*r)
+                e.setRotation(45)
             elif y == 0 and x < 0:
-                e = pg.QtGui.QGraphicsEllipseItem(-x, -r, 2*x, 2*r)
-                e.rotate(90)
+                e = QGraphicsEllipseItem(-x, -r, 2*x, 2*r)
+                e.setRotation(90)
             elif x == 0 and y < 0:
-                e = pg.QtGui.QGraphicsEllipseItem(-y, -r, 2*y, 2*r)
-                e.rotate(135)
+                e = QGraphicsEllipseItem(-y, -r, 2*y, 2*r)
+                e.setRotation(135)
             elif x == 0 and y == 0:
-                e = pg.QtGui.QGraphicsEllipseItem(-r, -r, 2*r, 2*r)
+                e = QGraphicsEllipseItem(-r, -r, 2*r, 2*r)
             elif x > 0 and y < 0:
                 angle = 360 - abs(y)/(x+abs(y)) * 45
                 print("angle is", angle)
                 # length of the box
                 l = max(x, abs(y))/(x+abs(y)) * max(x, abs(y))
                 print("Length is", l)
-                e = pg.QtGui.QGraphicsEllipseItem(-l, -r, 2*l, 2*r)
-                e.rotate(angle)
+                e = QGraphicsEllipseItem(-l, -r, 2*l, 2*r)
+                e.setRotation(angle)
             elif x < 0 and y > 0:
                 angle = 90 - y/(abs(x)+y) * 45
                 print("angle is", angle)
                 # length of the box
                 l = max(abs(x), y)/(abs(x)+y) * max(abs(x), y)
                 print("Length is", l)
-                e = pg.QtGui.QGraphicsEllipseItem(-l, -r, 2*l, 2*r)
-                e.rotate(angle)
+                e = QGraphicsEllipseItem(-l, -r, 2*l, 2*r)
+                e.setRotation(angle)
             elif x < 0 and y < 0:
                 angle = 270 + abs(y)/(abs(x)+abs(y)) * 45
                 print("angle is", angle)
                 # length of the box
                 l = max(abs(x), abs(y))/(abs(x)+abs(y)) * max(abs(x), abs(y))
                 print("Length is", l)
-                e = pg.QtGui.QGraphicsEllipseItem(-l, -r, 2*l, 2*r)
-                e.rotate(angle)
+                e = QGraphicsEllipseItem(-l, -r, 2*l, 2*r)
+                e.setRotation(angle)
             e.setPen(QtGui.QColor(self.settings[i].find('colour').text))
             self.plots[i].clear()
             self.plots[i].addItem(e)
