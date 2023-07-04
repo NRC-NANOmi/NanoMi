@@ -32,6 +32,7 @@ import zmq
 import json
 import csv
 import signal
+import concurrent.futures
 
 __version__ = '0.2'
 
@@ -125,7 +126,7 @@ class CameraDialog(QtWidgets.QWidget):
             self.shutterspeed.set_value(self.shutterspeedSettings[self.shutterspeedBox.currentIndex()])
             self.camera.set_config(self.config)
             print("shutterspeed is updated to", self.shutterspeed.get_value())
-        except:
+        except Exception:
             print("Failed to change shutter speed, there was IO process in camera, please retry")
             QtWidgets.QMessageBox.question(self,'I/O in progress', 'Failed to change shutter speed, there was IO process in camera, please retry', QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.Ok)
         if self.hold_live:
@@ -140,7 +141,7 @@ class CameraDialog(QtWidgets.QWidget):
             self.iso.set_value(self.isoSettings[self.isoBox.currentIndex()])
             self.camera.set_config(self.config)
             print("iso is updated to", self.iso.get_value())
-        except:
+        except Exception:
             print("Failed to change ISO, there was IO process in camera, please retry")
             QtWidgets.QMessageBox.question(self,'I/O in progress', 'Failed to change ISO, there was IO process in camera, please retry', QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.Ok)
         if self.hold_live:
@@ -265,17 +266,22 @@ class CameraDialog(QtWidgets.QWidget):
         kwargs['data_model'] = data_model
         np.savez(directory, **kwargs)
     
-    def recieve_settings(self):
+    def receive_settings(self):
         self.socket.send_json(json.dumps({'request':'get'}))
-        data = self.socket.recv_json()
+        # Set a receive timeout (in milliseconds)
+        self.socket.setsockopt(zmq.RCVTIMEO, 15000) 
+        try:
+            data = self.socket.recv_json()
+            return data
+        except zmq.error.Again:
+            raise TimeoutError()
+
         return data
     
     def save_settings(self, filename):
-        signal.signal(signal.SIGALRM, signal_handler)
-        signal.alarm(15)   # Ten seconds
         try:
-            data = self.recieve_settings()
-        except:
+            data = self.receive_settings()
+        except TimeoutError:
             QtWidgets.QMessageBox.question(self,'Time Out', 'Time out when recieve microscope settings, please check NanoMi control software see if ZMQ server is enabled', QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.Ok)
             print("Time out when recieve microscope settings, please check NanoMi control software see if ZMQ server is enabled!")
             return -1
@@ -308,8 +314,8 @@ class CameraDialog(QtWidgets.QWidget):
         else:
             event.ignore()
 
-def signal_handler(signum, frame):
-    raise Exception("Timed out!")
+# def signal_handler(signum, frame):
+#     raise Exception("Timed out!")
 
 
 if __name__ == '__main__':
