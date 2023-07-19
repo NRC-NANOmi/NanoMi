@@ -9,8 +9,10 @@
         <x1>DAUx</x1>
         <y1>DAUy</y1>
         <hasLower>True</hasLower>
-        <shift>1</shift>
-        <tilt>1</tilt>
+        <shiftX>1.0</shiftX>
+        <shiftY>1.0</shiftY>
+        <tiltX>1</tiltX>
+        <tiltY>1</tiltY>
         <x2>DALx</x2>
         <y2>DALy</y2>
     </Deflector>
@@ -25,7 +27,9 @@
         <hasLower/>
         <x2/>
         <y2/>
-        <shift/>
-        <tilt/>
+        <shiftX/>
+        <shiftY/>
+        <tiltX/>
+        <tiltY/>
     </DeflectorB>
 </Settings>
