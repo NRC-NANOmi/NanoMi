@@ -134,6 +134,67 @@ class popWindow(QWidget):
         self.wob.setLayout(self.wobBox)
         self.deflectorLayout.addWidget(self.wob, 1,0)
 
+        # set up ui for the lower plate control
+        self.lowerControl = QGroupBox("Lower Plate Control")
+        self.lowerControl.setCheckable(True)
+        self.lowerControl.clicked.connect(lambda: self.controlLower())
+        self.x2Label = QLabel("X2", self)  # Add a label called X
+
+        self.Bx2 = QDoubleSpinBox()
+        self.Bx2.setMinimum(-10)
+        self.Bx2.setMaximum(10)
+        self.Bx2.setValue(0)
+        self.Bx2.setSingleStep(5)
+        self.Bx2.valueChanged.connect(lambda: self.updateBx2())
+
+        self.Bx2Increment = QComboBox()
+        self.Bx2Increment.addItems(
+            ['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5'])
+        self.Bx2Increment.setCurrentIndex(8)
+        self.Bx2Increment.currentIndexChanged.connect(self.Bx2IncrementChange)
+        self.XnY2 = QHBoxLayout()
+        self.XnY2.addWidget(self.x2Label)
+        self.XnY2.addWidget(self.Bx2)
+        self.XnY2.addWidget(self.Bx2Increment)
+        self.XnY2.addStretch()
+
+        self.y2Label = QLabel("Y2", self)  # Add a label called Y
+
+        self.By2 = QDoubleSpinBox()
+        self.By2.setMinimum(-10)
+        self.By2.setMaximum(10)
+        self.By2.setValue(0)
+        self.By2.setSingleStep(5)
+        self.By2.valueChanged.connect(lambda: self.updateBy2())
+
+        self.By2Increment = QComboBox()
+        self.By2Increment.addItems(
+            ['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5'])
+        self.By2Increment.setCurrentIndex(8)
+        self.By2Increment.currentIndexChanged.connect(self.By2IncrementChange)
+        self.XnY2.addWidget(self.y2Label)
+        self.XnY2.addWidget(self.By2)
+        self.XnY2.addWidget(self.By2Increment)
+        self.lowerControlLayout = QGridLayout()
+        self.lowerControlLayout.addLayout(self.XnY2, 0, 0)
+
+        #two buttons for save ratio
+        self.save2shift = QPushButton("Save to Shift")
+        self.save2shift.clicked.connect(lambda: self.saveToShift())
+        self.save2tilt = QPushButton("Save To Tilt")
+        self.save2tilt.clicked.connect(lambda: self.saveToTilt())
+        self.saveRatioLayout = QHBoxLayout()
+        self.saveRatioLayout.addWidget(self.save2shift)
+        self.saveRatioLayout.addStretch()
+        self.saveRatioLayout.addWidget(self.save2tilt)
+
+        self.lowerControlLayout.addLayout(self.saveRatioLayout, 1, 0)
+        self.lowerControl.setLayout(self.lowerControlLayout)
+        self.lowerControl.setCheckable(True)
+
+
+        self.deflectorLayout.addWidget(self.lowerControl, 2, 0)
+        
         # set up ui for shift mode and tile mode toggle buttons
         self.SnT = QGroupBox()
         self.shiftMode = QPushButton('Shift Mode')
@@ -150,7 +211,7 @@ class popWindow(QWidget):
         self.SnTBox.addWidget(self.tileMode)
         self.SnT.setLayout(self.SnTBox)
 
-        self.deflectorLayout.addWidget(self.SnT, 2, 0)
+        self.deflectorLayout.addWidget(self.SnT, 3, 0)
 
         # Empty layout for when no deflector founded in xml config file
         self.noDeflectorLayout = QGridLayout()
@@ -329,21 +390,42 @@ class popWindow(QWidget):
 
         # set up ui for shift and tiled ratio
         self.ratios = QGroupBox()
-        self.shiftLable = QLabel("Shift ratio:")
-        self.shiftInput = QLineEdit()
-        self.shiftInput.textChanged.connect(lambda: self.updateShift())
+        self.shiftXLabel = QLabel("Shift X ratio:")
+        self.shiftXInput = QLineEdit()
+        self.shiftXInput.textChanged.connect(lambda: self.updateShiftX())
 
-        self.ratiosBox = QHBoxLayout()
-        self.ratiosBox.addWidget(self.shiftLable)
-        self.ratiosBox.addWidget(self.shiftInput)
-        self.ratiosBox.addStretch()
+        self.shiftBox = QHBoxLayout()
+        self.shiftBox.addWidget(self.shiftXLabel)
+        self.shiftBox.addWidget(self.shiftXInput)
+        self.shiftBox.addStretch()
 
-        self.tileLabel = QLabel("Tilt ratio: ")  # Add a label for tile ratio
-        self.tileInput = QLineEdit()
-        self.tileInput.textChanged.connect(lambda: self.updateTile())
+        self.shiftYLabel = QLabel("Shift Y ratio:")
+        self.shiftYInput = QLineEdit()
+        self.shiftYInput.textChanged.connect(lambda: self.updateShiftY())
 
-        self.ratiosBox.addWidget(self.tileLabel)
-        self.ratiosBox.addWidget(self.tileInput)
+        self.shiftBox.addWidget(self.shiftYLabel)
+        self.shiftBox.addWidget(self.shiftYInput)
+
+        self.tiltXLabel = QLabel("Tilt X ratio: ")  
+        self.tiltXInput = QLineEdit()
+        self.tiltXInput.textChanged.connect(lambda: self.updateTiltX())
+
+        self.tiltBox = QHBoxLayout()
+        self.tiltBox.addWidget(self.tiltXLabel)
+        self.tiltBox.addWidget(self.tiltXInput)
+        self.tiltBox.addStretch()
+
+        self.tiltYLabel = QLabel("Tilt Y ratio: ")  
+        self.tiltYInput = QLineEdit()
+        self.tiltYInput.textChanged.connect(lambda: self.updateTiltY())
+
+        self.tiltBox.addWidget(self.tiltYLabel)
+        self.tiltBox.addWidget(self.tiltYInput)
+
+        self.ratiosBox = QGridLayout()
+        self.ratiosBox.addLayout(self.shiftBox, 0, 0)
+        self.ratiosBox.addLayout(self.tiltBox, 1, 0)
+        
         self.ratios.setLayout(self.ratiosBox)
 
         self.advancedLayout.addWidget(self.ratios, 5, 0)
@@ -527,6 +609,20 @@ class popWindow(QWidget):
             deflector.find('hasLower').text = 'True'
             self.ratios.setDisabled(False)
 
+    def controlLower(self):
+        checked = self.lowerControl.isChecked()
+        self.currentData[self.tabs.currentIndex()]['lowerControl'] = checked
+        if not checked:
+            self.Bx2.setValue(self.Bx.value())
+            self.By2.setValue(self.By.value())
+            self.SnT.setDisabled(False)
+        else:
+            if self.tileMode.isChecked():
+                self.tileMode.setChecked(False)
+            if self.shiftMode.isChecked():
+                self.shiftMode.setChecked(False)
+            self.currentData[self.tabs.currentIndex()]['mode'] = None
+            self.SnT.setDisabled(True)
     '''
     Function that response to when the advanced button is clicked
     '''
@@ -571,6 +667,8 @@ class popWindow(QWidget):
         if(l != 0):
             self.loadAdtabs()
 
+    
+
     '''
     Function that load data into tab.
     index = the index of deflector you want to load
@@ -593,27 +691,42 @@ class popWindow(QWidget):
             self.wobbleY.setChecked(False)
         # if the last bx or by is greater than the current voltage, if we reset min and max will cause value change,
         # so we need to load the bx and by first, then set the minmax value
-        if abs(self.Bx.value()) > v or abs(self.By.value()) > v:
-            self.Bx.setValue(self.currentData[index]['x'])
-            self.By.setValue(self.currentData[index]['y'])
-            self.Bx.setMinimum(max(round(-v + xOffset*v/5, 2), -v))
-            self.By.setMinimum(max(round(-v + yOffset*v/5, 2), -v))
-            self.Bx.setMaximum(min(round(v + xOffset*v/5, 2), v))
-            self.By.setMaximum(min(round(v + yOffset*v/5, 2), v))
-        # otherwise, set the minmax first then set real value
-        else:
-            self.Bx.setMinimum(max(round(-v + xOffset*v/5, 2), -v))
-            self.By.setMinimum(max(round(-v + yOffset*v/5, 2), -v))
-            self.Bx.setMaximum(min(round(v + xOffset*v/5, 2), v))
-            self.By.setMaximum(min(round(v + yOffset*v/5, 2), v))
-            self.Bx.setValue(self.currentData[index]['x'])
-            self.By.setValue(self.currentData[index]['y'])
+        x = self.currentData[index]['x']
+        y = self.currentData[index]['y']
+        x2 = self.currentData[index]['x2']
+        y2 = self.currentData[index]['y2']
+        print(x,y,x2,y2)
+        self.Bx.valueChanged.disconnect()
+        self.By.valueChanged.disconnect()
+        self.Bx2.valueChanged.disconnect()
+        self.By2.valueChanged.disconnect()
+        self.Bx.setMinimum(max(round(-v + xOffset*v/5, 2), -v))
+        self.By.setMinimum(max(round(-v + yOffset*v/5, 2), -v))
+        self.Bx.setMaximum(min(round(v + xOffset*v/5, 2), v))
+        self.By.setMaximum(min(round(v + yOffset*v/5, 2), v))
+        self.Bx.setValue(x)
+        self.By.setValue(y)
+        self.Bx2.setMinimum(max(round(-v + xOffset*v/5, 2), -v))
+        self.By2.setMinimum(max(round(-v + yOffset*v/5, 2), -v))
+        self.Bx2.setMaximum(min(round(v + xOffset*v/5, 2), v))
+        self.By2.setMaximum(min(round(v + yOffset*v/5, 2), v))
+        self.Bx2.setValue(x2)
+        self.By2.setValue(y2)
         self.feq.setValue(self.currentData[index]['frequency'])
         self.percentage.setValue(self.currentData[index]['percentage'])
         # check the setting has lower plate or not, if not disable toggle buttons
         if data.find('hasLower').text == 'True':
-            self.SnT.setDisabled(False)
+            self.lowerControl.setCheckable(True)
+            self.lowerControl.setDisabled(False)
+            if self.currentData[index]['lowerControl']:
+                self.lowerControl.setChecked(True)
+                self.SnT.setDisabled(True)
+            else:
+                self.lowerControl.setChecked(False)
+                self.SnT.setDisabled(False) 
         else:
+            self.lowerControl.setCheckable(False)
+            self.lowerControl.setDisabled(True)
             self.SnT.setDisabled(True)
         # from the current value check the current mode and load it
         if self.currentData[index]['mode'] == 'shift':
@@ -625,6 +738,12 @@ class popWindow(QWidget):
         else:
             self.shiftMode.setChecked(False)
             self.tileMode.setChecked(False)
+        
+        self.Bx.valueChanged.connect(lambda: self.updateBx())
+        self.By.valueChanged.connect(lambda: self.updateBy())
+        self.Bx2.valueChanged.connect(lambda: self.updateBx2())
+        self.By2.valueChanged.connect(lambda: self.updateBy2())
+
 
     '''
     Function that load data into advanced setting tab.
@@ -645,8 +764,10 @@ class popWindow(QWidget):
         self.yOffInput.setText(data.find('yOffset').text)
         self.voltageInput.setText(data.find('voltage').text)
         self.slopeInput.setText(data.find('slope').text)
-        self.shiftInput.setText(data.find('shift').text)
-        self.tileInput.setText(data.find('tilt').text)
+        self.shiftXInput.setText(data.find('shiftX').text)
+        self.tiltXInput.setText(data.find('tiltX').text)
+        self.shiftYInput.setText(data.find('shiftY').text)
+        self.tiltYInput.setText(data.find('tiltY').text)
         # if doesn't have pin, use the empty which index 0
         if not data.find('x1').text:
             self.x1Drawer.setCurrentIndex(0)
@@ -719,8 +840,10 @@ class popWindow(QWidget):
         ET.SubElement(newElement, 'hasLower')
         ET.SubElement(newElement, 'x2')
         ET.SubElement(newElement, 'y2')
-        ET.SubElement(newElement, 'shift')
-        ET.SubElement(newElement, 'tilt')
+        ET.SubElement(newElement, 'shiftX')
+        ET.SubElement(newElement, 'shiftY')
+        ET.SubElement(newElement, 'tiltX')
+        ET.SubElement(newElement, 'tiltY')
         # if len is 1, means the xml was empty, then didn;t load adtabs before, so call loadAdtabs
         if len(self.tempSettings) == 1:
             self.loadAdtabs()
@@ -750,6 +873,10 @@ class popWindow(QWidget):
         self.x2Drawer.setCurrentIndex(0)
         self.y1Drawer.setCurrentIndex(0)
         self.y2Drawer.setCurrentIndex(0)
+        self.tiltXInput.clear()
+        self.tiltYInput.clear()
+        self.shiftXInput.clear()
+        self.shiftYInput.clear()
 
     '''
     Function that save advanced settings and write it into xml
@@ -763,24 +890,28 @@ class popWindow(QWidget):
             self.advancedWindows, 'Save', "Saving new advanced setting will reset all your deflectors' data, press Yes to confirm", QMessageBox.Yes, QMessageBox.No)
         # reply = QMessageBox.Yes
         if reply == QMessageBox.Yes:
-            xmlString = ET.tostring(self.tempSettings, 'utf-8', method='xml')
-            # now decode it to an actual string
-            xmlString = xmlString.decode()
-            # remove all newlines because new additions don't have newlines
-            xmlString = xmlString.replace('\n', '')
-            # remove all double-spaces (aka portions of tabs) because new additions don't have spaces
-            xmlString = xmlString.replace('  ', '')
-            # use minidom (instead of elementTree) to parse in the string back into xml
-            domTree = minidom.parseString(xmlString)
-            # write to file
-            with open(os.getcwd() + '/AddOnModules/SaveFiles/DeflectorSettings.xml', 'w') as pid:
-                domTree.writexml(pid, encoding='utf-8',
-                                 indent='', addindent='    ', newl='\n')
-
-            self.settings = copy.deepcopy(self.tempSettings)
+            self.saveToXML()
             self.refreshTabs()
             self.tabs.setCurrentIndex(self.tabs.currentIndex())
             self.loadData(self.tabs.currentIndex())
+
+    def saveToXML(self):
+        xmlString = ET.tostring(self.tempSettings, 'utf-8', method='xml')
+        # now decode it to an actual string
+        xmlString = xmlString.decode()
+        # remove all newlines because new additions don't have newlines
+        xmlString = xmlString.replace('\n', '')
+        # remove all double-spaces (aka portions of tabs) because new additions don't have spaces
+        xmlString = xmlString.replace('  ', '')
+        # use minidom (instead of elementTree) to parse in the string back into xml
+        domTree = minidom.parseString(xmlString)
+        # write to file
+        with open(os.getcwd() + '/AddOnModules/SaveFiles/DeflectorSettings.xml', 'w') as pid:
+            domTree.writexml(pid, encoding='utf-8',
+                                 indent='', addindent='    ', newl='\n')
+
+        self.settings = copy.deepcopy(self.tempSettings)
+
     '''
     Function that check is there any illegal input before saving
     '''
@@ -796,13 +927,14 @@ class popWindow(QWidget):
             voltage = self.tempSettings[i].find('voltage').text
             xOffset = self.tempSettings[i].find('xOffset').text
             yOffset = self.tempSettings[i].find('yOffset').text
-            shift = self.tempSettings[i].find('shift').text
-            print(shift)
-            tilt = self.tempSettings[i].find('tilt').text
+            shiftX = self.tempSettings[i].find('shiftX').text
+            tiltX = self.tempSettings[i].find('tiltX').text
+            shiftY = self.tempSettings[i].find('shiftY').text
+            tiltY = self.tempSettings[i].find('tiltY').text
             hasLower = self.tempSettings[i].find('hasLower').text
             if len(name) > 20:
-                reply = QMessageBox.question(self.advancedWindows, 'Illegal Name',
-                                             "The name of deflector can't longer than 20 characters, please change the illegal names", QMessageBox.Ok, QMessageBox.Ok)
+                reply = QMessageBox.question(self.advancedWindows, 'Invalid Name',
+                                             "The name of deflector can't longer than 20 characters, please change the Invalid names", QMessageBox.Ok, QMessageBox.Ok)
                 return 0
             if name in nameList:
                 reply = QMessageBox.question(self.advancedWindows, 'Duplicate Names',
@@ -811,8 +943,8 @@ class popWindow(QWidget):
             else:
                 nameList.append(name)
             if ' ' in name:
-                reply = QMessageBox.question(self.advancedWindows, 'Illegal Name',
-                                             "The name of deflector can't have space, please change the illegal names", QMessageBox.Ok, QMessageBox.Ok)
+                reply = QMessageBox.question(self.advancedWindows, 'Invalid Name',
+                                             "The name of deflector can't have space, please change the Invalid names", QMessageBox.Ok, QMessageBox.Ok)
                 return 0
             if color == None or color == '':
                 reply = QMessageBox.question(
@@ -825,34 +957,42 @@ class popWindow(QWidget):
             else:
                 colorList.append(color)
             if not isnumber(slope):
-                reply = QMessageBox.question(self.advancedWindows, 'Illegal Slope Input',
+                reply = QMessageBox.question(self.advancedWindows, 'Invalid Slope Input',
                                              "Slope should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
                 return 0
             if float(slope) > 2:
-                reply = QMessageBox.question(self.advancedWindows, 'Illegal Slope Input',
+                reply = QMessageBox.question(self.advancedWindows, 'Invalid Slope Input',
                                              "Slope shouldn't be greater than 2, please check your input", QMessageBox.Ok, QMessageBox.Ok)
                 return 0
             if not voltage or not isnumber(voltage):
-                reply = QMessageBox.question(self.advancedWindows, 'Illegal Voltage Input',
+                reply = QMessageBox.question(self.advancedWindows, 'Invalid Voltage Input',
                                              "Voltage should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
                 return 0
             if not xOffset or not isnumber(xOffset):
-                reply = QMessageBox.question(self.advancedWindows, 'Illegal X offset Input',
+                reply = QMessageBox.question(self.advancedWindows, 'Invalid X offset Input',
                                              "X Offset should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
                 return 0
             if not yOffset or not isnumber(yOffset):
-                reply = QMessageBox.question(self.advancedWindows, 'Illegal Y offset Input',
+                reply = QMessageBox.question(self.advancedWindows, 'Invalid Y offset Input',
                                              "Y Offset should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
                 return 0
-
-            if shift and not isnumber(shift):
-                reply = QMessageBox.question(self.advancedWindows, 'Illegal shift Input',
-                                             "Shift ratio should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
-                return 0
-            if tilt and not isnumber(tilt):
-                reply = QMessageBox.question(self.advancedWindows, 'Illegal tilt Input',
-                                             "Tile ratio should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
-                return 0
+            if hasLower == True:
+                if shiftX and not isnumber(shiftX):
+                    reply = QMessageBox.question(self.advancedWindows, 'Invalid shift Input',
+                                                "Shift X ratio should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
+                    return 0
+                if tiltX and not isnumber(tiltX):
+                    reply = QMessageBox.question(self.advancedWindows, 'Invalid tilt Input',
+                                                "Tilt X ratio should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
+                    return 0
+                if shiftY and not isnumber(shiftY):
+                    reply = QMessageBox.question(self.advancedWindows, 'Invalid shift Input',
+                                                "Shift Y ratio should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
+                    return 0
+                if tiltY and not isnumber(tiltY):
+                    reply = QMessageBox.question(self.advancedWindows, 'Invalid tilt Input',
+                                                "Tilt Y ratio should be a number, please check your input", QMessageBox.Ok, QMessageBox.Ok)
+                    return 0
 
         return 1
     # ****************************************************************************************************************
@@ -919,16 +1059,61 @@ class popWindow(QWidget):
         deflector = self.tempSettings[self.adTabs.currentIndex()]
         deflector.find('slope').text = s
 
-    def updateShift(self):
-        s = self.shiftInput.text()
+    def updateShiftX(self):
+        s = self.shiftXInput.text()
         deflector = self.tempSettings[self.adTabs.currentIndex()]
-        deflector.find('shift').text = s
+        deflector.find('shiftX').text = s
 
-    def updateTile(self):
-        t = self.tileInput.text()
+    def updateShiftY(self):
+        s = self.shiftYInput.text()
         deflector = self.tempSettings[self.adTabs.currentIndex()]
-        deflector.find('tilt').text = t
+        deflector.find('shiftY').text = s
+        
+    def updateTiltX(self):
+        t = self.tiltXInput.text()
+        deflector = self.tempSettings[self.adTabs.currentIndex()]
+        deflector.find('tiltX').text = t
+    
+    def updateTiltY(self):
+        t = self.tiltYInput.text()
+        deflector = self.tempSettings[self.adTabs.currentIndex()]
+        deflector.find('tiltY').text = t
 
+    def saveToTilt(self):
+        if self.Bx.value() == 0:
+            reply = QMessageBox.question(self.advancedWindows, 'Zero Bx',
+                                             "The ratio can not be save since Bx is 0", QMessageBox.Ok, QMessageBox.Ok)
+            return -1
+        if self.By.value() == 0:
+            reply = QMessageBox.question(self.advancedWindows, 'Zero By',
+                                             "The ratio can not be save since By is 0", QMessageBox.Ok, QMessageBox.Ok) 
+            return -1    
+        x = round(self.Bx2.value()/self.Bx.value(), 2)
+        y = round(self.By2.value()/self.By.value(), 2)
+
+        self.tempSettings[self.tabs.currentIndex()].find("tiltX").text = str(x)
+        self.tempSettings[self.tabs.currentIndex()].find("tiltY").text = str(y)
+        self.saveToXML()
+        if self.adTabs.currentIndex() == self.tabs.currentIndex():
+            self.loadAdvancedData(self.adTabs.currentIndex())
+    
+    def saveToShift(self):
+        if self.Bx.value() == 0:
+            reply = QMessageBox.question(self.advancedWindows, 'Zero Bx',
+                                             "The ratio can not be save since Bx is 0", QMessageBox.Ok, QMessageBox.Ok)
+            return -1
+        if self.By.value() == 0:
+            reply = QMessageBox.question(self.advancedWindows, 'Zero By',
+                                             "The ratio can not be save since By is 0", QMessageBox.Ok, QMessageBox.Ok) 
+            return -1       
+        x = round(self.Bx2.value()/self.Bx.value(), 2)
+        y = round(self.By2.value()/self.By.value(), 2)
+
+        self.tempSettings[self.tabs.currentIndex()].find("shiftX").text = str(x)
+        self.tempSettings[self.tabs.currentIndex()].find("shiftY").text = str(y)
+        self.saveToXML()
+        if self.adTabs.currentIndex() == self.tabs.currentIndex():
+            self.loadAdvancedData(self.adTabs.currentIndex())
     def updateBx(self):
         # get the value from bx and update currentdata list and plot
         v = self.Bx.value()
@@ -945,16 +1130,16 @@ class popWindow(QWidget):
         Hardware.IO.setAnalog(
             self.settings[self.tabs.currentIndex()].find('x1').text, -x)
         if self.settings[self.tabs.currentIndex()].find('hasLower').text == "True":
-            if self.shiftMode.isChecked():
-                shiftRatio = float(
-                    self.settings[self.tabs.currentIndex()].find('shift').text)
-                x = x * shiftRatio
-            elif self.tileMode.isChecked():
-                tiledRatio = float(
-                    self.settings[self.tabs.currentIndex()].find('tilt').text)
-                x = x * tiledRatio
-            Hardware.IO.setAnalog(
-                self.settings[self.tabs.currentIndex()].find('x2').text, -x)
+            if not self.currentData[self.tabs.currentIndex()]['lowerControl']:
+                if self.shiftMode.isChecked():
+                    shiftRatio = float(
+                        self.settings[self.tabs.currentIndex()].find('shiftX').text)
+                    v = v * shiftRatio
+                elif self.tileMode.isChecked():
+                    tiledRatio = float(
+                        self.settings[self.tabs.currentIndex()].find('tiltX').text)
+                    v = v * tiledRatio
+                self.Bx2.setValue(v)
         UI_U_DataSets.windowHandle.refreshDataSets()
 
     def updateBy(self):
@@ -969,16 +1154,42 @@ class popWindow(QWidget):
         Hardware.IO.setAnalog(
             self.settings[self.tabs.currentIndex()].find('y1').text, -y)
         if self.settings[self.tabs.currentIndex()].find('hasLower').text == "True":
-            if self.shiftMode.isChecked():
-                shiftRatio = float(
-                    self.settings[self.tabs.currentIndex()].find('shift').text)
-                y = y * shiftRatio
-            elif self.tileMode.isChecked():
-                tiledRatio = float(
-                    self.settings[self.tabs.currentIndex()].find('tilt').text)
-                y = y * tiledRatio
-            Hardware.IO.setAnalog(
-                self.settings[self.tabs.currentIndex()].find('y2').text, -y)
+            if not self.currentData[self.tabs.currentIndex()]['lowerControl']:
+                if self.shiftMode.isChecked():
+                    shiftRatio = float(
+                        self.settings[self.tabs.currentIndex()].find('shiftY').text)
+                    v = v * shiftRatio
+                elif self.tileMode.isChecked():
+                    tiledRatio = float(
+                        self.settings[self.tabs.currentIndex()].find('tiltY').text)
+                    v = v * tiledRatio
+                self.By2.setValue(v)
+        UI_U_DataSets.windowHandle.refreshDataSets()
+
+    def updateBx2(self):
+        # get the value from bx and update currentdata list and plot
+        v = self.Bx2.value()
+        self.currentData[self.tabs.currentIndex()]['x2'] = v
+        # add real update from to pins
+        print('update Bx2 for Deflector', self.tabs.currentIndex(), 'to', v)
+        x = round(float(v), 2)
+        # x times the ratio of 5(input)and real voltage then divide by slope and minus offset
+        x = x * 5/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(
+            self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('xOffset').text)
+        Hardware.IO.setAnalog(
+            self.settings[self.tabs.currentIndex()].find('x2').text, -x)
+        UI_U_DataSets.windowHandle.refreshDataSets()
+
+    def updateBy2(self):
+        v = self.By2.value()
+        self.currentData[self.tabs.currentIndex()]['y2'] = v
+        # add real update from to pins
+        print('update By2 for Deflector', self.tabs.currentIndex(), 'to', v)
+        y = round(float(v), 2)
+        y = y * 5/(int(self.settings[self.tabs.currentIndex()].find('voltage').text)) / float(
+            self.settings[self.tabs.currentIndex()].find('slope').text) - float(self.settings[self.tabs.currentIndex()].find('yOffset').text)
+        Hardware.IO.setAnalog(
+            self.settings[self.tabs.currentIndex()].find('y2').text, -y)
         UI_U_DataSets.windowHandle.refreshDataSets()
 
     def BxIncrementChange(self):
@@ -988,6 +1199,14 @@ class popWindow(QWidget):
     def ByIncrementChange(self):
         # get the value from the spinner, turns into int then set single step of panY as it
         self.By.setSingleStep(float(self.ByIncrement.currentText()))
+
+    def Bx2IncrementChange(self):
+        # get the value from the spinner, turns into int then set single step of panX as it
+        self.Bx2.setSingleStep(float(self.Bx2Increment.currentText()))
+
+    def By2IncrementChange(self):
+        # get the value from the spinner, turns into int then set single step of panY as it
+        self.By2.setSingleStep(float(self.By2Increment.currentText()))
 
     def loadTabs(self):
         self.currentData.clear()
@@ -1009,7 +1228,7 @@ class popWindow(QWidget):
                 self.settings[i].find('voltage').text))
             w = QWidget()
             self.currentData.append(
-                {'x': 0, 'y': 0, 'colour': color, 'mode': None, 'frequency': 0.5, 'percentage': 10})
+                {'x': 0, 'y': 0, 'x2': 0, 'y2':0, 'lowerControl': False,'colour': color, 'mode': None, 'frequency': 0.5, 'percentage': 10})
             self.tabList.append(w)
             self.tabs.addTab(w, name)
             self.tabs.tabBar().setTabTextColor(i, QtGui.QColor(color))
@@ -1059,7 +1278,7 @@ class popWindow(QWidget):
             maxVoltage = max(maxVoltage, int(
                 self.settings[i].find('voltage').text))
             self.currentData.append(
-                {'x': 0, 'y': 0, 'colour': color, 'mode': None})
+                {'x': 0, 'y': 0, 'x2': 0, 'y2':0, 'lowerControl': False,'colour': color, 'mode': None, 'frequency': 0.5, 'percentage': 10})
             self.tabs.setTabText(i, name)
             self.tabs.tabBar().setTabTextColor(i, QtGui.QColor(color))
         self.plot.setXRange(-maxVoltage, maxVoltage)

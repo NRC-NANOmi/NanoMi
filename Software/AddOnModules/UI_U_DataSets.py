@@ -285,11 +285,9 @@ class popWindow(QWidget):
         for subMod in modules:
             #pull a dictionary holding all name-value pairs for this module
             varDictionary = subMod.windowHandle.getValues()
-            print(varDictionary)
             #find the sub-module name in short human-readable form
             subModName = ' '.join(subMod.__name__.split('_')[2:])
             zmqData[subModName] = varDictionary
-            print(subModName)
             if subModName == 'Deflectors' or subModName == 'Stigmators':
                 for subName in varDictionary:
                     for varName in varDictionary[subName]:
