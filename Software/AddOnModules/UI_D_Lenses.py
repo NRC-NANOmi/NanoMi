@@ -1,4 +1,5 @@
 import numpy as np
+from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5 import *
 from PyQt5.QtCore import *
@@ -7,7 +8,9 @@ from matplotlib.patches import Rectangle
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg 
 from AddOnModules.OpticalModules.engine.lens import Lens
 from AddOnModules.OpticalModules.engine.optimization import optimize_focal_length
+from AddOnModules import Hardware, UI_U_DataSets
 import sys
+import sympy as sp
 
 LAMBDA_ELECTRON = 0.0112e-6
 
@@ -17,16 +20,19 @@ LENS_BORE = 25.4*0.1/2
 CA_DIAMETER = 0.01
 
 # stores info for the anode
-ANODE = [39.1, 30, 1.5, [0.5, 0, 0.3], 'Anode']
+ANODE = [39.1, 31.75, 31.75, 1.5, [0.5, 0, 0.3], 'Anode', 25.4*0.1/2]
 
 # stores info for the sample
-SAMPLE = [528.9, 1.5, -1, [1, 0.7, 0], 'Sample']
+# SAMPLE = [528.9, 1.5, -1, [1, 0.7, 0], 'Sample']
+SAMPLE = [528.9, 11.6, 52.2, 1.5 , [1, 0.7, 0], 'Sample']
 
 # stores info for the scintillator
-SCINTILLATOR = [972.7, 1.5, 1, [0.3, 0.75, 0.75], 'Scintillator']
+# SCINTILLATOR = [972.7, 1.5, 1, [0.3, 0.75, 0.75], 'Scintillator']
+SCINTILLATOR = [972.7, 52.2, 11.6, 1.5, [0.3, 0.75, 0.75], 'Scintillator', 25.4*0.1/2]
 
 # stores info for the condensor aperature
-CONDENSOR_APERATURE = [192.4, 1.5, 1, [0, 0, 0], 'Cond. Apert']
+# CONDENSOR_APERATURE = [192.4, 1.5, 1, [0, 0, 0], 'Cond. Apert']
+CONDENSOR_APERATURE = [192.4, 52.2, 11.6, 1.5, [0, 0, 0], 'Cond. Apert']
 
 # add color of each ray in same order as rays
 # red, green, blue, gold
@@ -53,17 +59,27 @@ RAYS = [
 
 
 # stores info for the lower lenses
+# LOWER_LENSES = [
+#     [551.6, 1.5, -1, [0.3, 0.75, 0.75], 'Objective'],
+#     [706.4, 1.5, 1, [0.3, 0.75, 0.75], 'Intermediate'],
+#     [826.9, 1.5, 1, [0.3, 0.75, 0.75], 'Projective']
+# ]
 LOWER_LENSES = [
-    [551.6, 1.5, -1, [0.3, 0.75, 0.75], 'Objective'],
-    [706.4, 1.5, 1, [0.3, 0.75, 0.75], 'Intermediate'],
-    [826.9, 1.5, 1, [0.3, 0.75, 0.75], 'Projective']
+    [551.6, 11.6, 52.2, 1.5, [0.3, 0.75, 0.75], 'Objective', 25.4*0.1/2],
+    [706.4, 52.2, 11.6, 1.5, [0.3, 0.75, 0.75], 'Intermediate', 25.4*0.1/2],
+    [826.9, 52.2, 11.6, 1.5, [0.3, 0.75, 0.75], 'Projective', 25.4*0.1/2]
 ]
 
 # stores info for the upper lenses
+# UPPER_LENSES = [
+#     [257.03, 63.5, 1.5, [0.3, 0.9, 0.65], 'C1'],
+#     [349, 1.5, 1, [0.3, 0.75, 0.75], 'C2'],
+#     [517, 1.5, 1, [0.3, 0.75, 0.75], 'C3']
+# ]
 UPPER_LENSES = [
-    [257.03, 63.5, 1.5, [0.3, 0.9, 0.65], 'C1'],
-    [349, 1.5, 1, [0.3, 0.75, 0.75], 'C2'],
-    [517, 1.5, 1, [0.3, 0.75, 0.75], 'C3']
+    [257.03, 31.75, 31.75, 1.5, [0.3, 0.9, 0.65], 'C1', 25.4*0.1/2],
+    [349, 52.2, 11.6, 1.5, [0.3, 0.75, 0.75], 'C2', 25.4*0.1/2],
+    [517, 52.2, 11.6, 1.5, [0.3, 0.75, 0.75], 'C3', 25.4*0.1/2]
 ]
 buttonName = 'Lens'
 windowHandle = None  # a handle to the window on a global scope
@@ -112,7 +128,6 @@ class popWindow(QWidget):
         self.cf_l = [19.67, 6.498, 6]
 
         # list for active lenses
-        self.active_lu = [True, True, True]
         self.active_ll = [True, True, True]
 
         # sample rays variables and initialization for lower lenses
@@ -123,16 +138,19 @@ class popWindow(QWidget):
         self.update_l_rays()
 
         # draws anode
-        self.symmetrical_box(*ANODE)
-
+        # self.symmetrical_box(*ANODE)
+        self.len_box(*ANODE)
         # draws sample
-        self.sample_aperature_box(*SAMPLE)
+        # self.sample_aperature_box(*SAMPLE)
+        self.len_box(*SAMPLE)
 
         # draws condensor aperature
-        self.sample_aperature_box(*CONDENSOR_APERATURE)
+        # self.sample_aperature_box(*CONDENSOR_APERATURE)
+        self.len_box(*CONDENSOR_APERATURE)
 
         # draws scintillator
-        self.asymmetrical_box(*SCINTILLATOR)
+        # self.asymmetrical_box(*SCINTILLATOR)
+        self.len_box(*SCINTILLATOR)
 
         # draw red dashed line on x-axis
         self.axis.axhline(0, 0, 1, color='red', linestyle='--')
@@ -151,11 +169,12 @@ class popWindow(QWidget):
         # and setup magnification plots
         for i, row in enumerate(UPPER_LENSES):
             # draw C1 lens
-            if i == 0:
-                self.symmetrical_box(*row)
-            # draw C2, C3 lens
-            else:
-                self.asymmetrical_box(*row)
+            # if i == 0:
+            #     self.symmetrical_box(*row)
+            # # draw C2, C3 lens
+            # else:
+            #     self.asymmetrical_box(*row)
+            self.len_box(*row)
             # set up magnification plot
             self.mag_u_plot.append(
                 self.axis.text(
@@ -172,7 +191,8 @@ class popWindow(QWidget):
         # and set up crossover points
         for i, row in enumerate(LOWER_LENSES):
             # draw lens
-            self.asymmetrical_box(*row)
+            # self.asymmetrical_box(*row)
+            self.len_box(*row)
             # set up magnification plot
             self.mag_l_plot.append(
                 self.axis.text(
@@ -237,9 +257,19 @@ class popWindow(QWidget):
     # ****************************************************************************************************************
     # Controls Block
     # ****************************************************************************************************************
-        self.sliders = []
-        self.spinboxs = []
+        # self.groupBoxs = []
 
+        # self.boxLayouts = []
+
+        # self.voltageSpinBoxs = []
+        # self.excitationSpinBoxs = []
+        # self.focalLengthSpinBoxs = []
+
+        # self.voltageIncrements = []
+        # self.excitationIncrements= []
+        # self.focalLengthIncrements= []
+        self.sliders =[]
+        self.spinboxs = []
         self.spin2sliderRatio = 1
         self.spinBoxStep = 1
         self.cRange = [6,300]
@@ -311,6 +341,40 @@ class popWindow(QWidget):
         self.c3_spinbox.setValue(value/self.spin2sliderRatio)
         self.update_u_lenses()
 
+    def len_box(self, x, l, r, h, colour, name, bore=None):
+        """ draws box represents lens in diagram
+
+        Args:
+            x (float): box location
+            l (float): box left side distance to centre of the mid electeode
+            r (float): box right side distance to centre of the mid electeode
+            h (float): box height
+            colour (list): RGB colors
+            name (str): lens name
+        """
+        # x = location of centre point of box along x-axis
+        # w = width, h = height, colour = color
+
+        # rectangle box
+        self.axis.add_patch(
+            Rectangle(
+                (x-l, -h), l+r, h*2, edgecolor=colour,
+                facecolor='none', lw=1
+            )
+        )
+        if bore != None:
+            # top lens bore (horizontal line)
+            self.axis.hlines(bore, x-l, x+r, colors=colour)
+            # bottom lens bore (horizontal line)
+            self.axis.hlines(-bore, x-l, x+r, colors=colour)
+        # electrode location in lens
+        self.axis.vlines(x, -h, h, colors=colour, linestyles='--')
+
+        self.axis.text(
+            x, -h+0.05, name, fontsize=8,
+            rotation='vertical', ha='center'
+        )
+        return 
 
     def symmetrical_box(self, x, w, h, colour, name):
         """ draws symmetrical box in diagram
@@ -456,21 +520,20 @@ class popWindow(QWidget):
         """creates upper lenses that will be part of the ray paths"""
         self.mag_upper = []
         upper_lenses_obj = []
-        active_index = [x for x, act in enumerate(self.active_lu) if act]
         # creates a lens object for all active lenses
         # and set ups crossover points plots
-        for counter, index in enumerate(active_index):
+        for index in range(len(UPPER_LENSES)):
             upper_lenses_obj.append(
                 Lens(
                     UPPER_LENSES[index][0],
                     self.cf_u[index],
-                    None if counter == 0 else
-                    upper_lenses_obj[counter - 1],
+                    None if index == 0 else
+                    upper_lenses_obj[index - 1],
                     3
                 )
             )
             self.crossover_points_c[index].set_data(
-                upper_lenses_obj[counter].crossover_point_location()
+                upper_lenses_obj[index].crossover_point_location()
             )
             self.crossover_points_c[index].set_visible(True)
         # initialize ray path last lens
@@ -483,13 +546,6 @@ class popWindow(QWidget):
                     1
                 )
             )
-
-        # hide all inactive crossover points
-        inactive_index = [
-            x for x, act in enumerate(self.active_lu) if not act
-        ]
-        for index in inactive_index:
-            self.crossover_points_c[index].set_visible(False)
 
         # plot ray path
         self.display_ray_path(
@@ -518,22 +574,21 @@ class popWindow(QWidget):
         """creates lower lenses that will be part of the ray paths"""
         self.mag_lower = []
         lower_lenses_obj = []
-        active_index = [x for x, act in enumerate(self.active_ll) if act]
         sample = Lens(SAMPLE[0], None, None, None)
         # creates a lens object for all active lenses
         # and set ups crossover points plots
-        for counter, index in enumerate(active_index):
+        for index in range(len(LOWER_LENSES)):
             lower_lenses_obj.append(
                 Lens(
                     LOWER_LENSES[index][0],
                     self.cf_l[index],
-                    sample if counter == 0 else
-                    lower_lenses_obj[counter - 1],
-                    3 if index != 2 else 2
+                    sample if index == 0 else
+                    lower_lenses_obj[index - 1],
+                    3
                 )
             )
             self.crossover_points_b[index].set_data(
-                lower_lenses_obj[counter].crossover_point_location()
+                lower_lenses_obj[index].crossover_point_location()
             )
             self.crossover_points_b[index].set_visible(True)
 
@@ -543,17 +598,10 @@ class popWindow(QWidget):
                 Lens(
                     SCINTILLATOR[0],
                     0,
-                    lower_lenses_obj[counter],
+                    lower_lenses_obj[index],
                     1
                 )
             )
-
-        # hide all inactive crossover points
-        inactive_index = [
-            x for x, act in enumerate(self.active_ll) if not act
-        ]
-        for index in inactive_index:
-            self.crossover_points_b[index].set_visible(False)
 
         # plot ray path
         self.display_ray_path(
@@ -590,6 +638,17 @@ class popWindow(QWidget):
         self.axis.autoscale_view()
         self.canvas.draw()
 
+    def excitationToFocalLength(self, formula, x):
+        expr = sp.sympify(formula)
+        result = expr.subs('x', 2.0)
+        return round(result, 2)
+    
+    def focalLengthToExcitation(self, formula, y):
+        expr = sp.sympify(formula)
+        eq = sp.Eq(expr, y)
+        print(eq)
+        ans = sp.solve(eq, 'x', n=1, simplify=False, rational=False)
+        return round(ans[0], 2)
     def __init__(self):
         super().__init__()
         self.initUI()
