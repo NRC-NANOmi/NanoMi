@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import *
@@ -11,51 +12,52 @@ from AddOnModules.OpticalModules.engine.optimization import optimize_focal_lengt
 from AddOnModules import Hardware, UI_U_DataSets
 import sys
 import sympy as sp
+import xml.etree.ElementTree as ET
 
 LAMBDA_ELECTRON = 0.0112e-6
 
-LENS_BORE = 25.4*0.1/2
+# LENS_BORE = 25.4*0.1/2
 
-# diameter of condensor aperature
-CA_DIAMETER = 0.01
+# # diameter of condensor aperature
+# CA_DIAMETER = 0.01
 
-# stores info for the anode
-ANODE = [39.1, 31.75, 31.75, 1.5, [0.5, 0, 0.3], 'Anode', 25.4*0.1/2]
+# # stores info for the anode
+# ANODE = [39.1, 31.75, 31.75, 1.5, [0.5, 0, 0.3], 'Anode', 25.4*0.1/2]
 
-# stores info for the sample
-# SAMPLE = [528.9, 1.5, -1, [1, 0.7, 0], 'Sample']
-SAMPLE = [528.9, 11.6, 52.2, 1.5 , [1, 0.7, 0], 'Sample']
+# # stores info for the sample
+# # SAMPLE = [528.9, 1.5, -1, [1, 0.7, 0], 'Sample']
+# SAMPLE = [528.9, 11.6, 52.2, 1.5 , [1, 0.7, 0], 'Sample']
 
-# stores info for the scintillator
-# SCINTILLATOR = [972.7, 1.5, 1, [0.3, 0.75, 0.75], 'Scintillator']
-SCINTILLATOR = [972.7, 52.2, 11.6, 1.5, [0.3, 0.75, 0.75], 'Scintillator', 25.4*0.1/2]
+# # stores info for the scintillator
+# # SCINTILLATOR = [972.7, 1.5, 1, [0.3, 0.75, 0.75], 'Scintillator']
+# SCINTILLATOR = [972.7, 52.2, 11.6, 1.5, [0.3, 0.75, 0.75], 'Scintillator', 25.4*0.1/2]
 
-# stores info for the condensor aperature
-# CONDENSOR_APERATURE = [192.4, 1.5, 1, [0, 0, 0], 'Cond. Apert']
-CONDENSOR_APERATURE = [192.4, 52.2, 11.6, 1.5, [0, 0, 0], 'Cond. Apert']
+# # stores info for the condensor aperature
+# # CONDENSOR_APERATURE = [192.4, 1.5, 1, [0, 0, 0], 'Cond. Apert']
+# CONDENSOR_APERATURE = [192.4, 52.2, 11.6, 1.5, [0, 0, 0], 'Cond. Apert']
 
-# add color of each ray in same order as rays
-# red, green, blue, gold
+# # add color of each ray in same order as rays
+# # red, green, blue, gold
 RAY_COLORS = [[1.0, 0, 0], [0.0, 1.0, 0], [0.0, 0.2, 1.0], [0.7, 0.4, 0]]
 
-# pin condenser aperture angle limited as per location and diameter
-RAYS = [
-    np.array(
-        [[1.5e-2], [(CA_DIAMETER/2 - 1.5e-2) / CONDENSOR_APERATURE[0]]]
-    ),
-    # 2nd ray, at r = 0, angle limited by CA
-    np.array(
-        [[0], [(CA_DIAMETER/2) / CONDENSOR_APERATURE[0]]]
-    ),
-    # 3rd ray, at r = tip edge, parallel to opt. axis
-    np.array(
-        [[1.5e-2], [0]]
-    ),
-    # 4th ray, at -rG, angle up to +CA edge CRAZY BEAM
-    np.array(
-        [[-1*1.5e-2], [(CA_DIAMETER/2 + 1.5e-2) / CONDENSOR_APERATURE[0]]]
-    )
-]
+# # pin condenser aperture angle limited as per location and diameter
+# RAYS = [
+#     np.array(
+#         [[1.5e-2], [(CA_DIAMETER/2 - 1.5e-2) / CONDENSOR_APERATURE[0]]]
+#     ),
+#     # 2nd ray, at r = 0, angle limited by CA
+#     np.array(
+#         [[0], [(CA_DIAMETER/2) / CONDENSOR_APERATURE[0]]]
+#     ),
+#     # 3rd ray, at r = tip edge, parallel to opt. axis
+#     np.array(
+#         [[1.5e-2], [0]]
+#     ),
+#     # 4th ray, at -rG, angle up to +CA edge CRAZY BEAM
+#     np.array(
+#         [[-1*1.5e-2], [(CA_DIAMETER/2 + 1.5e-2) / CONDENSOR_APERATURE[0]]]
+#     )
+# ]
 
 
 # stores info for the lower lenses
@@ -64,23 +66,22 @@ RAYS = [
 #     [706.4, 1.5, 1, [0.3, 0.75, 0.75], 'Intermediate'],
 #     [826.9, 1.5, 1, [0.3, 0.75, 0.75], 'Projective']
 # ]
-LOWER_LENSES = [
-    [551.6, 11.6, 52.2, 1.5, [0.3, 0.75, 0.75], 'Objective', 25.4*0.1/2],
-    [706.4, 52.2, 11.6, 1.5, [0.3, 0.75, 0.75], 'Intermediate', 25.4*0.1/2],
-    [826.9, 52.2, 11.6, 1.5, [0.3, 0.75, 0.75], 'Projective', 25.4*0.1/2]
-]
-
+# LOWER_LENSES = [
+#     [551.6, 11.6, 52.2, 1.5, [0.3, 0.75, 0.75], 'Objective', 25.4*0.1/2],
+#     [706.4, 52.2, 11.6, 1.5, [0.3, 0.75, 0.75], 'Intermediate', 25.4*0.1/2],
+#     [826.9, 52.2, 11.6, 1.5, [0.3, 0.75, 0.75], 'Projective', 25.4*0.1/2]
+# ]
 # stores info for the upper lenses
 # UPPER_LENSES = [
 #     [257.03, 63.5, 1.5, [0.3, 0.9, 0.65], 'C1'],
 #     [349, 1.5, 1, [0.3, 0.75, 0.75], 'C2'],
 #     [517, 1.5, 1, [0.3, 0.75, 0.75], 'C3']
 # ]
-UPPER_LENSES = [
-    [257.03, 31.75, 31.75, 1.5, [0.3, 0.9, 0.65], 'C1', 25.4*0.1/2],
-    [349, 52.2, 11.6, 1.5, [0.3, 0.75, 0.75], 'C2', 25.4*0.1/2],
-    [517, 52.2, 11.6, 1.5, [0.3, 0.75, 0.75], 'C3', 25.4*0.1/2]
-]
+# UPPER_LENSES = [
+#     [257.03, 31.75, 31.75, 1.5, [0.3, 0.9, 0.65], 'C1', 25.4*0.1/2],
+#     [349, 52.2, 11.6, 1.5, [0.3, 0.75, 0.75], 'C2', 25.4*0.1/2],
+#     [517, 52.2, 11.6, 1.5, [0.3, 0.75, 0.75], 'C3', 25.4*0.1/2]
+# ]
 buttonName = 'Lens'
 windowHandle = None  # a handle to the window on a global scope
 class popWindow(QWidget):
@@ -94,13 +95,42 @@ class popWindow(QWidget):
         QWidget.__init__(self)
         # set width of main window (X, Y , WIDTH, HEIGHT)
         windowWidth = 1000
-        windowHeight = 600
+        windowHeight = 900
         self.setGeometry(350, 50, windowWidth, windowHeight)
 
         # name the window
         self.setWindowTitle('Lens')
         self.mainGrid = QGridLayout()
         self.setLayout(self.mainGrid)
+    # ****************************************************************************************************************
+    # Controls Block
+    # ****************************************************************************************************************
+        self.groupBoxs = []
+        self.upperGroupBox = QGroupBox("Upper Lenses")
+        self.upperLenLayout = QVBoxLayout()
+        self.upperGroupBox.setLayout(self.upperLenLayout)
+        self.lowerGroupBox = QGroupBox("Lower Lenses")
+        self.lowerLenLayout = QVBoxLayout()
+        self.lowerGroupBox.setLayout(self.lowerLenLayout)
+        self.anodeVoltageLabel = QLabel("Anode Voltage (U0):")
+        self.anodeVoltageSpinbox = QDoubleSpinBox()
+        self.anodeVoltageSpinbox.setMinimum(1)
+        self.anodeVoltageSpinbox.setSingleStep(1)
+        self.mainGrid.addWidget(self.anodeVoltageLabel,1,0)
+        self.mainGrid.addWidget(self.anodeVoltageSpinbox,1,1)
+        self.mainGrid.addWidget(self.upperGroupBox,2,0,1,10)
+        self.mainGrid.addWidget(self.lowerGroupBox,2,10,1,10)
+        self.boxLayouts = []
+
+        self.voltageSpinBoxs = []
+        self.excitationSpinBoxs = []
+        self.focalLengthSpinBoxs = []
+
+        self.voltageIncrements = []
+        self.excitationIncrements= []
+        self.focalLengthIncrements= []
+
+        self.readDataFile()
 
     # ****************************************************************************************************************
     # Figure block
@@ -118,14 +148,13 @@ class popWindow(QWidget):
 
         # put the figure in a widget on the tk window
         self.canvas = FigureCanvasQTAgg(self.figure)
-        self.mainGrid.addWidget(self.canvas,0,0,1,5)
+        self.mainGrid.addWidget(self.canvas,0,0,1,20)
         self.redraw()
 
         self.x_min, self. x_max, self.y_min, self.y_max = 0, 0, 0, 0
 
         # initial focal distance of the lenses in [mm]
-        self.cf_u = [67.29, 22.94, 39.88]
-        self.cf_l = [19.67, 6.498, 6]
+
 
         # list for active lenses
         self.active_ll = [True, True, True]
@@ -139,18 +168,18 @@ class popWindow(QWidget):
 
         # draws anode
         # self.symmetrical_box(*ANODE)
-        self.len_box(*ANODE)
+        self.len_box(*self.ANODE)
         # draws sample
         # self.sample_aperature_box(*SAMPLE)
-        self.len_box(*SAMPLE)
+        self.len_box(*self.SAMPLE)
 
         # draws condensor aperature
         # self.sample_aperature_box(*CONDENSOR_APERATURE)
-        self.len_box(*CONDENSOR_APERATURE)
+        self.len_box(*self.CONDENSOR_APERATURE)
 
         # draws scintillator
         # self.asymmetrical_box(*SCINTILLATOR)
-        self.len_box(*SCINTILLATOR)
+        self.len_box(*self.SCINTILLATOR)
 
         # draw red dashed line on x-axis
         self.axis.axhline(0, 0, 1, color='red', linestyle='--')
@@ -167,7 +196,7 @@ class popWindow(QWidget):
 
         # takes in list of lens info, draws upper lenses
         # and setup magnification plots
-        for i, row in enumerate(UPPER_LENSES):
+        for i, row in enumerate(self.UPPER_LENSES):
             # draw C1 lens
             # if i == 0:
             #     self.symmetrical_box(*row)
@@ -178,7 +207,7 @@ class popWindow(QWidget):
             # set up magnification plot
             self.mag_u_plot.append(
                 self.axis.text(
-                    UPPER_LENSES[i][0] + 5,
+                    self.UPPER_LENSES[i][0] + 5,
                     0.5, '', color='k', fontsize=8,
                     rotation='vertical',
                     backgroundcolor=[0.8, 1.0, 1.0]
@@ -189,14 +218,14 @@ class popWindow(QWidget):
 
         # takes in list of lens info, draws lower lenses
         # and set up crossover points
-        for i, row in enumerate(LOWER_LENSES):
+        for i, row in enumerate(self.LOWER_LENSES):
             # draw lens
             # self.asymmetrical_box(*row)
             self.len_box(*row)
             # set up magnification plot
             self.mag_l_plot.append(
                 self.axis.text(
-                    LOWER_LENSES[i][0] + 5,
+                    self.LOWER_LENSES[i][0] + 5,
                     0.5, '', color='k', fontsize=8,
                     rotation='vertical',
                     backgroundcolor=[0.8, 1, 1]
@@ -206,8 +235,8 @@ class popWindow(QWidget):
             self.crossover_points_b.append(self.axis.plot([], 'go')[0])
 
         # set up lines representing the ray path for upper lenses
-        for i in range(len(RAYS)):
-            for j in range(len(UPPER_LENSES)):
+        for i in range(len(self.RAYS)):
+            for j in range(len(self.UPPER_LENSES)):
                 self.drawn_rays_c.append(
                     self.axis.plot(
                         [], lw=1, color=RAY_COLORS[i]
@@ -226,7 +255,7 @@ class popWindow(QWidget):
 
         # set up lines representing the ray path for lower lenses
         for i in range(len(self.sample_rays)):
-            for j in range(len(LOWER_LENSES)):
+            for j in range(len(self.LOWER_LENSES)):
                 self.drawn_rays_b.append(
                     self.axis.plot(
                         [], lw=1, color=RAY_COLORS[i]
@@ -254,92 +283,6 @@ class popWindow(QWidget):
         self.display_u_rays()
         self.display_l_rays()
 
-    # ****************************************************************************************************************
-    # Controls Block
-    # ****************************************************************************************************************
-        # self.groupBoxs = []
-
-        # self.boxLayouts = []
-
-        # self.voltageSpinBoxs = []
-        # self.excitationSpinBoxs = []
-        # self.focalLengthSpinBoxs = []
-
-        # self.voltageIncrements = []
-        # self.excitationIncrements= []
-        # self.focalLengthIncrements= []
-        self.sliders =[]
-        self.spinboxs = []
-        self.spin2sliderRatio = 1
-        self.spinBoxStep = 1
-        self.cRange = [6,300]
-
-        self.c1_slider = QSlider(Qt.Horizontal)
-        self.c1_spinbox = QDoubleSpinBox()
-        self.c1_slider.valueChanged.connect(self.update_c1_slider)
-        self.c1_spinbox.valueChanged.connect(self.update_c1_spinbox)
-
-        self.sliders.append(self.c1_slider)
-        self.spinboxs.append(self.c1_spinbox)
-        self.mainGrid.addWidget(self.c1_slider, 1,0,1,4)
-        self.mainGrid.addWidget(self.c1_spinbox,1,4)
-
-        self.c2_slider = QSlider(Qt.Horizontal)
-        self.c2_spinbox = QDoubleSpinBox()
-        self.c2_slider.valueChanged.connect(self.update_c2_slider)
-        self.c2_spinbox.valueChanged.connect(self.update_c2_spinbox)
-        self.sliders.append(self.c2_slider)
-        self.spinboxs.append(self.c2_spinbox)
-        self.mainGrid.addWidget(self.c2_slider, 2,0,1,4)
-        self.mainGrid.addWidget(self.c2_spinbox,2,4)
-
-        self.c3_slider = QSlider(Qt.Horizontal)
-        self.c3_spinbox = QDoubleSpinBox()
-        self.c3_slider.valueChanged.connect(self.update_c3_slider)
-        self.c3_spinbox.valueChanged.connect(self.update_c3_spinbox)
-        self.sliders.append(self.c3_slider)
-        self.spinboxs.append(self.c3_spinbox)
-        self.mainGrid.addWidget(self.c3_slider, 3,0,1,4)
-        self.mainGrid.addWidget(self.c3_spinbox,3,4)
-        for i in range(len(self.sliders)):
-            self.spinboxs[i].setRange(self.cRange[0], self.cRange[1])
-            self.sliders[i].setRange(self.cRange[0]*self.spin2sliderRatio, self.cRange[1]*self.spin2sliderRatio)
-            self.spinboxs[i].setValue(self.cf_u[i])
-            self.sliders[i].setValue(self.cf_u[i]*self.spin2sliderRatio)
-            self.spinboxs[i].setSingleStep(self.spinBoxStep)
-
-
-    def update_c1_spinbox(self):
-        value = self.c1_spinbox.value()
-        self.cf_u[0] = value
-        self.c1_slider.setValue(value*self.spin2sliderRatio)
-        self.update_u_lenses()
-    def update_c2_spinbox(self):
-        value = self.c2_spinbox.value()
-        self.cf_u[1] = value
-        self.c2_slider.setValue(value*self.spin2sliderRatio)
-        self.update_u_lenses()
-    def update_c3_spinbox(self):
-        value = self.c3_spinbox.value()
-        self.cf_u[2] = value
-        self.c3_slider.setValue(value*self.spin2sliderRatio)
-        self.update_u_lenses()
-    
-    def update_c1_slider(self):
-        value = self.c1_slider.value()
-        self.cf_u[0] = value
-        self.c1_spinbox.setValue(value/self.spin2sliderRatio)
-        self.update_u_lenses()
-    def update_c2_slider(self):
-        value = self.c2_slider.value()
-        self.cf_u[1] = value
-        self.c2_spinbox.setValue(value/self.spin2sliderRatio)
-        self.update_u_lenses()
-    def update_c3_slider(self):
-        value = self.c3_slider.value()
-        self.cf_u[2] = value
-        self.c3_spinbox.setValue(value/self.spin2sliderRatio)
-        self.update_u_lenses()
 
     def len_box(self, x, l, r, h, colour, name, bore=None):
         """ draws box represents lens in diagram
@@ -522,10 +465,10 @@ class popWindow(QWidget):
         upper_lenses_obj = []
         # creates a lens object for all active lenses
         # and set ups crossover points plots
-        for index in range(len(UPPER_LENSES)):
+        for index in range(len(self.UPPER_LENSES)):
             upper_lenses_obj.append(
                 Lens(
-                    UPPER_LENSES[index][0],
+                    self.UPPER_LENSES[index][0],
                     self.cf_u[index],
                     None if index == 0 else
                     upper_lenses_obj[index - 1],
@@ -540,7 +483,7 @@ class popWindow(QWidget):
         if len(upper_lenses_obj) > 0:
             upper_lenses_obj.append(
                 Lens(
-                    SAMPLE[0],
+                    self.SAMPLE[0],
                     0,
                     upper_lenses_obj[-1],
                     1
@@ -549,7 +492,7 @@ class popWindow(QWidget):
 
         # plot ray path
         self.display_ray_path(
-            RAYS, upper_lenses_obj, self.lines_u, self.mag_u_plot, True
+            self.RAYS, upper_lenses_obj, self.lines_u, self.mag_u_plot, True
         )
 
     def update_u_lenses(self):
@@ -574,13 +517,13 @@ class popWindow(QWidget):
         """creates lower lenses that will be part of the ray paths"""
         self.mag_lower = []
         lower_lenses_obj = []
-        sample = Lens(SAMPLE[0], None, None, None)
+        sample = Lens(self.SAMPLE[0], None, None, None)
         # creates a lens object for all active lenses
         # and set ups crossover points plots
-        for index in range(len(LOWER_LENSES)):
+        for index in range(len(self.LOWER_LENSES)):
             lower_lenses_obj.append(
                 Lens(
-                    LOWER_LENSES[index][0],
+                    self.LOWER_LENSES[index][0],
                     self.cf_l[index],
                     sample if index == 0 else
                     lower_lenses_obj[index - 1],
@@ -596,7 +539,7 @@ class popWindow(QWidget):
         if len(lower_lenses_obj):
             lower_lenses_obj.append(
                 Lens(
-                    SCINTILLATOR[0],
+                    self.SCINTILLATOR[0],
                     0,
                     lower_lenses_obj[index],
                     1
@@ -649,6 +592,163 @@ class popWindow(QWidget):
         print(eq)
         ans = sp.solve(eq, 'x', n=1, simplify=False, rational=False)
         return round(ans[0], 2)
+    
+    def readDataFile(self):
+        # check to see if the user data set file is present
+        # Get the current working directory (cwd)
+        cwd = os.getcwd() + '/AddOnModules/SaveFiles'
+        tree = ET.parse(cwd + '/LenSettings.xml')
+
+        # get the root xml structure
+        self.settings = tree.getroot()
+        self.lenSetting = self.settings.find("Lens")
+        self.loadLens()
+    
+    def loadLens(self):
+        anode = self.settings.find("Anode")
+        self.ANODE = [float(anode.find("location").text), float(anode.find("left").text), float(anode.find("right").text),\
+                 float(anode.find("height").text), [float(anode.find("colour").find("r").text), float(anode.find("colour").find("g").text),float(anode.find("colour").find("b").text)],\
+                    anode.tag, float(anode.find("lore").text)]
+        
+        self.anodeVoltage = float(anode.find("location").text)
+
+        condensor_aperature = self.settings.find("Cond.Apert")
+        self.CONDENSOR_APERATURE = [float(condensor_aperature.find("location").text), float(condensor_aperature.find("left").text), float(condensor_aperature.find("right").text),\
+                 float(condensor_aperature.find("height").text), [float(condensor_aperature.find("colour").find("r").text), float(condensor_aperature.find("colour").find("g").text),float(condensor_aperature.find("colour").find("b").text)],\
+                    condensor_aperature.tag, float(condensor_aperature.find("lore").text)]
+        CA_DIAMETER = float(condensor_aperature.find("diameter").text)
+        sample = self.settings.find("Sample")
+        self.SAMPLE = [float(sample.find("location").text), float(sample.find("left").text), float(sample.find("right").text),\
+                 float(sample.find("height").text), [float(sample.find("colour").find("r").text), float(sample.find("colour").find("g").text),float(sample.find("colour").find("b").text)],\
+                    sample.tag]
+        
+        scintillator = self.settings.find("Scintillator")
+        self.SCINTILLATOR = [float(scintillator.find("location").text), float(scintillator.find("left").text), float(scintillator.find("right").text),\
+                 float(scintillator.find("height").text), [float(scintillator.find("colour").find("r").text), float(scintillator.find("colour").find("g").text),float(scintillator.find("colour").find("b").text)],\
+                    scintillator.tag, float(scintillator.find("lore").text)]
+        tempLen = []
+        for i in range(len(self.lenSetting)):
+            tempLen.append([float(self.lenSetting[i].find("location").text), float(self.lenSetting[i].find("left").text), float(self.lenSetting[i].find("right").text),\
+                 float(self.lenSetting[i].find("height").text), [float(self.lenSetting[i].find("colour").find("r").text), float(self.lenSetting[i].find("colour").find("g").text),float(self.lenSetting[i].find("colour").find("b").text)],\
+                    self.lenSetting[i].tag, float(self.lenSetting[i].find("lore").text)])
+        tempLen = sorted(list(enumerate(tempLen)), key=lambda x: x[1][0])
+
+        self.lowerIndex = len(tempLen)
+        for i in range(len(tempLen)):
+            if tempLen[i][1][0] > self.SAMPLE[0]:
+                self.lowerIndex = i
+                break
+        self.UPPER_LENSES = []
+        self.LOWER_LENSES = []
+        self.cf_u = []
+        self.cf_l = []
+        for i in range(len(tempLen)):
+            isUpper = i < self.lowerIndex
+            settingIndex = tempLen[i][0]
+            if isUpper:
+                self.UPPER_LENSES.append(tempLen[i][1])
+            else:
+                self.LOWER_LENSES.append(tempLen[i][1])
+            nameLabel = QLabel(self.lenSetting[settingIndex].tag)
+            voltageLabel = QLabel("Voltage: ")
+            self.voltageSpinBoxs.append(QDoubleSpinBox())
+            v = float(self.lenSetting[i].find("voltage").text)
+            self.voltageSpinBoxs[i].setMinimum(0)
+            self.voltageSpinBoxs[i].setMaximum(v)
+            self.voltageSpinBoxs[i].setSingleStep(0.01)
+            self.voltageSpinBoxs[i].valueChanged.connect(lambda: self.updateVoltage(settingIndex, isUpper, i))
+            self.voltageIncrements.append(QComboBox())
+            self.voltageIncrements[i].addItems(
+                ['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5'])
+            self.voltageIncrements[i].setCurrentIndex(0)
+            maxExcitation = v/self.anodeVoltage
+            excitationLabel = QLabel("Excitation: ")
+            self.excitationSpinBoxs.append(QDoubleSpinBox())
+            self.excitationSpinBoxs[i].setMinimum(0)
+            self.excitationSpinBoxs[i].setMaximum(maxExcitation)
+            self.excitationSpinBoxs[i].setSingleStep(0.01)
+            self.excitationSpinBoxs[i].valueChanged.connect(lambda: self.updateExcitation(settingIndex, isUpper, i))
+            self.excitationIncrements.append(QComboBox())
+            self.excitationIncrements[i].addItems(
+                ['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5'])
+            self.excitationIncrements[i].setCurrentIndex(0)
+            formula = self.lenSetting[i].find("formula").text
+            minFL = self.excitationToFocalLength(formula, 0)
+            maxFL = self.excitationToFocalLength(formula, maxExcitation)
+            focalLengthLabel = QLabel("Focal Length: ")
+            self.focalLengthSpinBoxs.append(QDoubleSpinBox())
+            self.focalLengthSpinBoxs[i].setMinimum(0)
+            self.focalLengthSpinBoxs[i].setMaximum(maxExcitation)
+            self.focalLengthSpinBoxs[i].setSingleStep(0.01)
+            self.focalLengthSpinBoxs[i].valueChanged.connect(lambda: self.updateFocalLength(settingIndex, isUpper, i))
+            self.focalLengthIncrements.append(QComboBox())
+            self.focalLengthIncrements[i].addItems(
+                ['0.2', '0.5', '1', '2', '5', '10', '15', '20'])
+            self.focalLengthIncrements[i].setCurrentIndex(0)
+            
+            self.boxLayouts.append(QHBoxLayout())
+            self.boxLayouts[i].addWidget(nameLabel)
+            self.boxLayouts[i].addStretch()
+            self.boxLayouts[i].addWidget(voltageLabel)
+            self.boxLayouts[i].addWidget(self.voltageSpinBoxs[i])
+            self.boxLayouts[i].addWidget(self.voltageIncrements[i])
+            self.boxLayouts[i].addStretch()
+            self.boxLayouts[i].addWidget(excitationLabel)
+            self.boxLayouts[i].addWidget(self.excitationSpinBoxs[i])
+            self.boxLayouts[i].addWidget(self.excitationIncrements[i])
+            self.boxLayouts[i].addStretch()
+            self.boxLayouts[i].addWidget(focalLengthLabel) 
+            self.boxLayouts[i].addWidget(self.focalLengthSpinBoxs[i])
+            self.boxLayouts[i].addWidget(self.focalLengthSpinBoxs[i])
+            self.groupBoxs.append(QGroupBox())
+            self.groupBoxs[i].setLayout(self.boxLayouts[i])
+            default = float(self.lenSetting[i].find("default").text) 
+            if isUpper:
+                self.cf_u.append(default)
+                self.upperLenLayout.addWidget(self.groupBoxs[i])
+            else:
+                self.cf_l.append(default)
+                self.lowerLenLayout.addWidget(self.groupBoxs[i])
+        RAY_COLORS = [[1.0, 0, 0], [0.0, 1.0, 0], [0.0, 0.2, 1.0], [0.7, 0.4, 0]]
+
+        # pin condenser aperture angle limited as per location and diameter
+        self.RAYS = [
+            np.array(
+                [[1.5e-2], [(CA_DIAMETER/2 - 1.5e-2) / self.CONDENSOR_APERATURE[0]]]
+            ),
+            # 2nd ray, at r = 0, angle limited by CA
+            np.array(
+                [[0], [(CA_DIAMETER/2) / self.CONDENSOR_APERATURE[0]]]
+            ),
+            # 3rd ray, at r = tip edge, parallel to opt. axis
+            np.array(
+                [[1.5e-2], [0]]
+            ),
+            # 4th ray, at -rG, angle up to +CA edge CRAZY BEAM
+            np.array(
+                [[-1*1.5e-2], [(CA_DIAMETER/2 + 1.5e-2) / self.CONDENSOR_APERATURE[0]]]
+            )
+        ]
+
+
+    def updateVoltage(self, settingIndex, isUpper, uiIndex):
+        pass
+    def voltageIncrementChange(self, index):
+        self.voltageSpinBoxs[index].setSingleStep(
+            float(self.voltageIncrements[index].currentText()))
+        
+    def updateExcitation(self, settingIndex, isUpper, uiIndex):
+        pass    
+    def excitationIncrementChange(self, index):
+        self.excitationSpinBoxs[index].setSingleStep(
+            float(self.excitationIncrements[index].currentText()))
+    def updateFocalLength(self, settingIndex, isUpper, uiIndex):
+        pass    
+    def focalLengthIncrementChange(self, index):
+        self.focalLengthSpinBoxs[index].setSingleStep(
+            float(self.focalLengthIncrements[index].currentText()))
+
+
     def __init__(self):
         super().__init__()
         self.initUI()

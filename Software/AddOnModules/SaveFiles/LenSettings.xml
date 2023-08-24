@@ -11,6 +11,7 @@
             <b>0.3</b>
         </colour>
         <lore>1.27</lore>
+        <voltage>30</voltage>
     </Anode>
     <Cond.Apert>
         <location>192.4</location>
@@ -23,6 +24,7 @@
             <b>0</b>
         </colour>
         <lore>1.27</lore>
+        <diameter>0.01</diameter>
     </Cond.Apert>
     <Sample>
         <location>528.9</location>
