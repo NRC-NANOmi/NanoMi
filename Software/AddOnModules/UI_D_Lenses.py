@@ -116,6 +116,7 @@ class popWindow(QWidget):
         self.anodeVoltageSpinbox = QDoubleSpinBox()
         self.anodeVoltageSpinbox.setMinimum(1)
         self.anodeVoltageSpinbox.setSingleStep(1)
+        self.anodeVoltageSpinbox.valueChanged.connect(self.updateAnodeVoltage)
         self.mainGrid.addWidget(self.anodeVoltageLabel,1,0)
         self.mainGrid.addWidget(self.anodeVoltageSpinbox,1,1)
         self.mainGrid.addWidget(self.upperGroupBox,2,0,1,10)
@@ -152,9 +153,6 @@ class popWindow(QWidget):
         self.redraw()
 
         self.x_min, self. x_max, self.y_min, self.y_max = 0, 0, 0, 0
-
-        # initial focal distance of the lenses in [mm]
-
 
         # list for active lenses
         self.active_ll = [True, True, True]
@@ -282,6 +280,11 @@ class popWindow(QWidget):
         self.lines_u, self.lines_l = [], []
         self.display_u_rays()
         self.display_l_rays()
+        
+        for i in range(len(self.cf_u)):
+            self.focalLengthSpinBoxs[i].setValue(self.cf_u[i])
+        for i in range(len(self.cf_l)):
+            self.focalLengthSpinBoxs[i+self.lowerIndex].setValue(self.cf_l[i])
 
 
     def len_box(self, x, l, r, h, colour, name, bore=None):
@@ -318,102 +321,6 @@ class popWindow(QWidget):
             rotation='vertical', ha='center'
         )
         return 
-
-    def symmetrical_box(self, x, w, h, colour, name):
-        """ draws symmetrical box in diagram
-
-        Args:
-            x (float): box location
-            w (float): box width
-            h (float): box height
-            colour (list): RGB colors
-            name (str): lens name
-        """
-        # x = location of centre point of box along x-axis
-        # w = width, h = height, colour = color
-
-        # rectangle box
-        self.axis.add_patch(
-            Rectangle(
-                (x-w/2, -h), w, h*2, edgecolor=colour,
-                facecolor='none', lw=1
-            )
-        )
-        # top lens bore (horizontal line)
-        self.axis.hlines(LENS_BORE, x-w/2, x+w/2, colors=colour)
-        # bottom lens bore (horizontal line)
-        self.axis.hlines(-LENS_BORE, x-w/2, x+w/2, colors=colour)
-        # electrode location in lens
-        self.axis.vlines(x, -h, h, colors=colour, linestyles='--')
-
-        self.axis.text(
-            x, -h+0.05, name, fontsize=8,
-            rotation='vertical', ha='center'
-        )
-        return
-
-    # draws an asymmetrical box
-    def asymmetrical_box(self, x, h, position, colour, name):
-        """ draws symmetrical box in diagram
-
-        Args:
-            x (float): box location
-            h (float): box height
-            position (int): defines dashed line side
-            colour (list): RGB colors
-            name (str): box name
-        """
-        # Short, Long distance from mid holder to sample [mm]
-        long = 52.2   # mm
-        short = 11.6  # mm
-
-        self.axis.add_patch(
-            Rectangle(
-                (x+position*short, -h), -position*long-position*short,
-                2*h, edgecolor=colour, facecolor='none', lw=1
-            )
-        )
-        # electrode Location in lens
-        self.axis.vlines(x, -h, h, colors=colour, linestyles='--')
-        # bottom lens bore
-        self.axis.hlines(-LENS_BORE, x-long, x+short, colors=colour)
-        # top lens bore
-        self.axis.hlines(LENS_BORE, x-long, x+short, colors=colour)
-
-        self.axis.text(
-            x-position*10, -h+0.05, name, fontsize=8,
-            rotation='vertical', ha='center'
-        )
-        return
-
-    # draws box for sample and condensor aperature
-    def sample_aperature_box(self, x, h, position, colour, name):
-        """draws box for sample and condensor aperature
-
-        Args:
-            x (float): location of center point along (true) x-axis
-            h (float): height for box
-            position (int): defines dashed line side
-            colour (list): RGB colors
-            name (str): box name
-        """
-        # Short, Long distance from mid holder to sample [mm]
-        long = 25  # mm
-        short = 3  # mm
-
-        self.axis.add_patch(
-            Rectangle(
-                (x+position*short, -h), -position*long-position*short,
-                2*h, edgecolor=colour, facecolor='none', lw=1
-            )
-        )
-        # electrode location in lens
-        self.axis.vlines(x, h, -h, colors=colour, linestyle='--')
-        self.axis.text(
-            x-position*10, -h+0.05, name,
-            fontsize=8, ha='center', rotation='vertical'
-        )
-        return
 
     def display_ray_path(self, rays, lenses, l_plot, m_plot, upper):
         """get all ray paths through each lens
@@ -552,20 +459,7 @@ class popWindow(QWidget):
             self.mag_l_plot, False
         )
 
-    def update_l_lenses(self, opt_bool, opt_sel, lens_sel):
-        """update lower lenses settings
-
-        Args:
-            opt_bool (bool): do we need to optimize
-            opt_sel (str): image mode for optimization
-            lens_sel (int): lens index to optimize focal length
-        """
-        if opt_bool:
-            self.cf_l[lens_sel] = optimize_focal_length(
-                opt_sel, lens_sel, [cz[0] for cz in LOWER_LENSES],
-                self.cf_l, self.sample_rays[0:2], self.active_ll
-            )
-
+    def update_l_lenses(self):
         for line in self.lines_l:
             line.pop(0).remove()
         self.lines_l = []
@@ -583,7 +477,7 @@ class popWindow(QWidget):
 
     def excitationToFocalLength(self, formula, x):
         expr = sp.sympify(formula)
-        result = expr.subs('x', 2.0)
+        result = expr.subs('x', x)
         return round(result, 2)
     
     def focalLengthToExcitation(self, formula, y):
@@ -610,7 +504,8 @@ class popWindow(QWidget):
                  float(anode.find("height").text), [float(anode.find("colour").find("r").text), float(anode.find("colour").find("g").text),float(anode.find("colour").find("b").text)],\
                     anode.tag, float(anode.find("lore").text)]
         
-        self.anodeVoltage = float(anode.find("location").text)
+        self.anodeVoltage = float(anode.find("voltage").text)
+        self.anodeVoltageSpinbox.setValue(self.anodeVoltage)
 
         condensor_aperature = self.settings.find("Cond.Apert")
         self.CONDENSOR_APERATURE = [float(condensor_aperature.find("location").text), float(condensor_aperature.find("left").text), float(condensor_aperature.find("right").text),\
@@ -642,6 +537,10 @@ class popWindow(QWidget):
         self.LOWER_LENSES = []
         self.cf_u = []
         self.cf_l = []
+        self.voltageTrigger = []
+        self.excitationTrigger = []
+        self.focalLengthTrigger =  []
+        self.voltageUpdateFunctions = []
         for i in range(len(tempLen)):
             isUpper = i < self.lowerIndex
             settingIndex = tempLen[i][0]
@@ -656,36 +555,45 @@ class popWindow(QWidget):
             self.voltageSpinBoxs[i].setMinimum(0)
             self.voltageSpinBoxs[i].setMaximum(v)
             self.voltageSpinBoxs[i].setSingleStep(0.01)
-            self.voltageSpinBoxs[i].valueChanged.connect(lambda: self.updateVoltage(settingIndex, isUpper, i))
+            self.voltageUpdateFunctions.append(self.lambdaGenerator(self.updateVoltage, settingIndex, isUpper, i))
+            self.voltageSpinBoxs[i].valueChanged.connect(self.voltageUpdateFunctions[i])
             self.voltageIncrements.append(QComboBox())
             self.voltageIncrements[i].addItems(
                 ['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5'])
             self.voltageIncrements[i].setCurrentIndex(0)
+            self.voltageIncrements[i].currentIndexChanged.connect(self.lambdaGenerator(self.voltageIncrementChange, i))
+            self.voltageTrigger.append(False)
+
             maxExcitation = v/self.anodeVoltage
+            print("max excitation", maxExcitation)
             excitationLabel = QLabel("Excitation: ")
             self.excitationSpinBoxs.append(QDoubleSpinBox())
-            self.excitationSpinBoxs[i].setMinimum(0)
+            self.excitationSpinBoxs[i].setMinimum(0.01)
             self.excitationSpinBoxs[i].setMaximum(maxExcitation)
             self.excitationSpinBoxs[i].setSingleStep(0.01)
-            self.excitationSpinBoxs[i].valueChanged.connect(lambda: self.updateExcitation(settingIndex, isUpper, i))
+            self.excitationSpinBoxs[i].valueChanged.connect(self.lambdaGenerator(self.updateExcitation,settingIndex, isUpper, i))
             self.excitationIncrements.append(QComboBox())
             self.excitationIncrements[i].addItems(
                 ['0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5'])
             self.excitationIncrements[i].setCurrentIndex(0)
+            self.excitationIncrements[i].currentIndexChanged.connect(self.lambdaGenerator(self.excitationIncrementChange, i))
+            self.excitationTrigger.append(False)
+
             formula = self.lenSetting[i].find("formula").text
-            minFL = self.excitationToFocalLength(formula, 0)
-            maxFL = self.excitationToFocalLength(formula, maxExcitation)
+            minEXFL = self.excitationToFocalLength(formula, 0.01)
+            maxEXFL = self.excitationToFocalLength(formula, maxExcitation)
             focalLengthLabel = QLabel("Focal Length: ")
             self.focalLengthSpinBoxs.append(QDoubleSpinBox())
-            self.focalLengthSpinBoxs[i].setMinimum(0)
-            self.focalLengthSpinBoxs[i].setMaximum(maxExcitation)
-            self.focalLengthSpinBoxs[i].setSingleStep(0.01)
-            self.focalLengthSpinBoxs[i].valueChanged.connect(lambda: self.updateFocalLength(settingIndex, isUpper, i))
+            self.focalLengthSpinBoxs[i].setMinimum(min(minEXFL, maxEXFL))
+            self.focalLengthSpinBoxs[i].setMaximum(max(minEXFL, maxEXFL))
+            self.focalLengthSpinBoxs[i].setSingleStep(0.2)
+            self.focalLengthSpinBoxs[i].valueChanged.connect(self.lambdaGenerator(self.updateFocalLength, settingIndex, isUpper, i))
             self.focalLengthIncrements.append(QComboBox())
             self.focalLengthIncrements[i].addItems(
                 ['0.2', '0.5', '1', '2', '5', '10', '15', '20'])
             self.focalLengthIncrements[i].setCurrentIndex(0)
-            
+            self.focalLengthIncrements[i].currentIndexChanged.connect(self.lambdaGenerator(self.focalLengthIncrementChange, i))
+            self.focalLengthTrigger.append(False)
             self.boxLayouts.append(QHBoxLayout())
             self.boxLayouts[i].addWidget(nameLabel)
             self.boxLayouts[i].addStretch()
@@ -699,16 +607,17 @@ class popWindow(QWidget):
             self.boxLayouts[i].addStretch()
             self.boxLayouts[i].addWidget(focalLengthLabel) 
             self.boxLayouts[i].addWidget(self.focalLengthSpinBoxs[i])
-            self.boxLayouts[i].addWidget(self.focalLengthSpinBoxs[i])
+            self.boxLayouts[i].addWidget(self.focalLengthIncrements[i])
             self.groupBoxs.append(QGroupBox())
             self.groupBoxs[i].setLayout(self.boxLayouts[i])
-            default = float(self.lenSetting[i].find("default").text) 
+            default = float(self.lenSetting[settingIndex].find("default").text) 
             if isUpper:
                 self.cf_u.append(default)
                 self.upperLenLayout.addWidget(self.groupBoxs[i])
             else:
                 self.cf_l.append(default)
                 self.lowerLenLayout.addWidget(self.groupBoxs[i])
+            
         RAY_COLORS = [[1.0, 0, 0], [0.0, 1.0, 0], [0.0, 0.2, 1.0], [0.7, 0.4, 0]]
 
         # pin condenser aperture angle limited as per location and diameter
@@ -729,24 +638,73 @@ class popWindow(QWidget):
                 [[-1*1.5e-2], [(CA_DIAMETER/2 + 1.5e-2) / self.CONDENSOR_APERATURE[0]]]
             )
         ]
+    
+    def lambdaGenerator(self, function, *args):
+        return lambda: function(*args)
 
 
     def updateVoltage(self, settingIndex, isUpper, uiIndex):
-        pass
+        if not self.voltageTrigger[uiIndex]:
+            if not (self.excitationTrigger[uiIndex] or self.focalLengthTrigger[uiIndex]):
+                self.voltageTrigger[uiIndex] = True
+            v = round(self.voltageSpinBoxs[uiIndex].value(),2)
+            excitation = round(v/self.anodeVoltage,2)
+            self.excitationSpinBoxs[uiIndex].setValue(excitation)
+            output = round(5/float(self.lenSetting[settingIndex].find("voltage").text) * v,2)
+            Hardware.IO.setAnalog( 
+                self.lenSetting[settingIndex].find("pin").text, output)
+        else:
+            self.voltageTrigger[uiIndex] = False
+
     def voltageIncrementChange(self, index):
         self.voltageSpinBoxs[index].setSingleStep(
             float(self.voltageIncrements[index].currentText()))
         
     def updateExcitation(self, settingIndex, isUpper, uiIndex):
-        pass    
+        if not self.excitationTrigger[uiIndex]:
+            if not (self.voltageTrigger[uiIndex] or self.focalLengthTrigger[uiIndex]):
+                self.excitationTrigger[uiIndex] = True
+            excitation = round(self.excitationSpinBoxs[uiIndex].value(),2)
+            formula = self.lenSetting[settingIndex].find("formula").text
+            focalLength = round(self.excitationToFocalLength(formula, excitation),2)
+            self.focalLengthSpinBoxs[uiIndex].setValue(focalLength)
+        else:
+            self.excitationTrigger[uiIndex] = False
+
     def excitationIncrementChange(self, index):
         self.excitationSpinBoxs[index].setSingleStep(
             float(self.excitationIncrements[index].currentText()))
+        
     def updateFocalLength(self, settingIndex, isUpper, uiIndex):
-        pass    
+        if not self.focalLengthTrigger[uiIndex]:
+            focalLength = round(self.focalLengthSpinBoxs[uiIndex].value(),2)
+            formula = self.lenSetting[settingIndex].find("formula").text
+            excitation = self.focalLengthToExcitation(formula, focalLength)
+            v = round(excitation * self.anodeVoltage,2)
+            if not self.voltageTrigger[uiIndex]:
+                if not self.excitationTrigger[uiIndex]:
+                    self.focalLengthTrigger[uiIndex] = True
+                self.voltageSpinBoxs[uiIndex].setValue(v)
+            else:
+                self.voltageTrigger[uiIndex] = False
+            if isUpper:
+                self.cf_u[uiIndex] = focalLength
+                self.update_u_lenses()
+            else:
+                self.cf_l[uiIndex-self.lowerIndex] = focalLength
+                self.update_l_lenses()
+        else:
+            self.focalLengthTrigger[uiIndex] = False
+
     def focalLengthIncrementChange(self, index):
         self.focalLengthSpinBoxs[index].setSingleStep(
             float(self.focalLengthIncrements[index].currentText()))
+        
+    def updateAnodeVoltage(self):
+        self.anodeVoltage = self.anodeVoltageSpinbox.value()
+        for i in self.voltageUpdateFunctions:
+            i()
+
 
 
     def __init__(self):

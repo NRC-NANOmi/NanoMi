@@ -64,7 +64,7 @@
             <default>67.29</default>
             <formula>7.59*x^-2.727-0.811</formula>
             <voltage>30</voltage>
-            <pin></pin>
+            <pin>c1</pin>
         </C1>
         <C2>
             <location>349</location>
@@ -80,7 +80,7 @@
             <default>22.94</default>
             <formula>9.709*x^-2.503-3.723</formula>
             <voltage>30</voltage>
-            <pin></pin>
+            <pin>c2</pin>
         </C2>
         <C3>
             <location>517</location>
@@ -96,7 +96,7 @@
             <default>39.88</default>
             <formula>9.709*x^-2.503-3.723</formula>
             <voltage>30</voltage>
-            <pin></pin>
+            <pin>c3</pin>
         </C3>
         <Objective>
             <location>551.6</location>
@@ -112,7 +112,7 @@
             <default>19.67</default>
             <formula>9.709*x^-2.503-3.723</formula>
             <voltage>30</voltage>
-            <pin></pin>
+            <pin>obj</pin>
         </Objective>
         <Intermediate>
             <location>706.4</location>
@@ -128,7 +128,7 @@
             <default>6.498</default>
             <formula>9.709*x^-2.503-3.723</formula>
             <voltage>30</voltage>
-            <pin></pin>
+            <pin>int</pin>
         </Intermediate>
         <Projective>
             <location>826.9</location>
@@ -144,7 +144,7 @@
             <default>6</default>
             <formula>9.709*x^-2.503-3.723</formula>
             <voltage>30</voltage>
-            <pin></pin>
+            <pin>proj</pin>
         </Projective>
 
 
