@@ -62,7 +62,7 @@
             </colour>
             <lore>1.27</lore>
             <default>67.29</default>
-            <formula>7.59*x^-2.727-0.811</formula>
+            <formula>9.709*x^-2.503-3.723</formula>
             <voltage>30</voltage>
             <pin>c1</pin>
         </C1>
@@ -78,27 +78,11 @@
             </colour>
             <lore>1.27</lore>
             <default>22.94</default>
-            <formula>9.709*x^-2.503-3.723</formula>
+            <formula>7.59*x^-2.727-0.811</formula>
             <voltage>30</voltage>
             <pin>c2</pin>
         </C2>
-        <C3>
-            <location>517</location>
-            <left>52.2</left>
-            <right>11.6</right>
-            <height>1.5</height>
-            <colour>
-                <r>0.3</r>
-                <g>0.75</g>
-                <b>0.75</b>
-            </colour>
-            <lore>1.27</lore>
-            <default>39.88</default>
-            <formula>9.709*x^-2.503-3.723</formula>
-            <voltage>30</voltage>
-            <pin>c3</pin>
-        </C3>
-        <Objective>
+        <I1>
             <location>551.6</location>
             <left>11.6</left>
             <right>52.2</right>
@@ -112,41 +96,7 @@
             <default>19.67</default>
             <formula>9.709*x^-2.503-3.723</formula>
             <voltage>30</voltage>
-            <pin>obj</pin>
-        </Objective>
-        <Intermediate>
-            <location>706.4</location>
-            <left>52.2</left>
-            <right>11.6</right>
-            <height>1.5</height>
-            <colour>
-                <r>0.3</r>
-                <g>0.75</g>
-                <b>0.75</b>
-            </colour>
-            <lore>1.27</lore>
-            <default>6.498</default>
-            <formula>9.709*x^-2.503-3.723</formula>
-            <voltage>30</voltage>
-            <pin>int</pin>
-        </Intermediate>
-        <Projective>
-            <location>826.9</location>
-            <left>52.2</left>
-            <right>11.6</right>
-            <height>1.5</height>
-            <colour>
-                <r>0.3</r>
-                <g>0.75</g>
-                <b>0.75</b>
-            </colour>
-            <lore>1.27</lore>
-            <default>6</default>
-            <formula>9.709*x^-2.503-3.723</formula>
-            <voltage>30</voltage>
-            <pin>proj</pin>
-        </Projective>
-
-
+            <pin>I1</pin>
+        </I1>
     </Lens>
 </Settings>

@@ -102,6 +102,15 @@ class popWindow(QWidget):
         self.setWindowTitle('Lens')
         self.mainGrid = QGridLayout()
         self.setLayout(self.mainGrid)
+        
+        self.UPPER_LENSES = []
+        self.LOWER_LENSES = []
+        self.cf_u = []
+        self.cf_l = []
+        self.voltageTrigger = []
+        self.excitationTrigger = []
+        self.focalLengthTrigger =  []
+        self.voltageUpdateFunctions = []
     # ****************************************************************************************************************
     # Controls Block
     # ****************************************************************************************************************
@@ -533,14 +542,6 @@ class popWindow(QWidget):
             if tempLen[i][1][0] > self.SAMPLE[0]:
                 self.lowerIndex = i
                 break
-        self.UPPER_LENSES = []
-        self.LOWER_LENSES = []
-        self.cf_u = []
-        self.cf_l = []
-        self.voltageTrigger = []
-        self.excitationTrigger = []
-        self.focalLengthTrigger =  []
-        self.voltageUpdateFunctions = []
         for i in range(len(tempLen)):
             isUpper = i < self.lowerIndex
             settingIndex = tempLen[i][0]
