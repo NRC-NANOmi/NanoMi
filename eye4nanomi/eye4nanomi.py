@@ -91,6 +91,12 @@ class CameraDialog(QtWidgets.QWidget):
         self.live_pb.setCheckable(True)
         self.single_pb = QtWidgets.QPushButton('Acquire')
         self.single_pb.setCheckable(True)
+        self.pathLable = QtWidgets.QLabel("Folder:")
+        self.pathInput = QtWidgets.QLineEdit()
+        self.pathInput.setText('')
+        self.fileNameLable = QtWidgets.QLabel("File:")
+        self.fileNameInput = QtWidgets.QLineEdit()
+        self.fileNameInput.setText('') 
 
         layout.addWidget(QtWidgets.QLabel('ISO'),0,0)
         layout.addWidget(self.isoBox,0,1)
@@ -98,8 +104,13 @@ class CameraDialog(QtWidgets.QWidget):
         layout.addWidget(self.shutterspeedBox,0,3)
         layout.addWidget(QtWidgets.QLabel('#Image'), 0, 4)
         layout.addWidget(self.imageCount, 0, 5)
-        layout.addWidget(self.live_pb,1,0,1,2)
-        layout.addWidget(self.single_pb,1,4,1,2)
+        layout.addWidget(self.pathLable, 1, 0)
+        layout.addWidget(self.pathInput, 1, 1, 1, 2)
+        layout.addWidget(self.fileNameLable, 1, 3)
+        layout.addWidget(self.fileNameInput,1, 4, 1, 2)
+
+        layout.addWidget(self.live_pb,2,0,1,2)
+        layout.addWidget(self.single_pb,2,4,1,2)
         self.setLayout(layout)
 
 
@@ -209,7 +220,15 @@ class CameraDialog(QtWidgets.QWidget):
     @QtCore.pyqtSlot()
     def take_single(self):
         time = datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S')
-        target = datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S')+'.jpg'
+        fileName = self.fileNameInput.text()
+        if len(fileName) == 0:
+            fileName = time
+        target = fileName+'.jpg'
+        folder = self.pathInput.text()
+        if len(folder) > 0:
+            if not os.path.exists(folder):
+                os.mkdir(folder)
+            target = os.path.join(folder, target)
         try:
             file_path = self.camera.capture(gp.GP_CAPTURE_IMAGE)
             camera_file = self.camera.file_get(
@@ -217,7 +236,7 @@ class CameraDialog(QtWidgets.QWidget):
             camera_file.save(target)
             self.copy_data(self.single_name, target)
             pr.display_image(self.single_name)
-            self.save_settings(time)
+            self.save_settings(target)
         except:
             print("Failed to take a picture, there was IO process in camera, please retry")
             QtWidgets.QMessageBox.question(self,'I/O in progress', 'Failed to take a picture, there was IO process in camera, please retry', QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.Ok)
@@ -229,7 +248,14 @@ class CameraDialog(QtWidgets.QWidget):
             self.start_live()
 
     def take_multiple(self, n):
-        folderName = datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S')
+        outterFolder = self.pathInput.text()
+        folderName = self.fileNameInput.text()
+        if len(folderName) == 0:
+            folderName = datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S')
+        if len(outterFolder) > 0:
+            if not os.path.exists(outterFolder):
+                os.mkdir(outterFolder)
+        folderName = os.path.join(outterFolder, folderName)
         os.mkdir(folderName)
         for i in range(n):
             file_path = self.camera.capture(gp.GP_CAPTURE_IMAGE)
