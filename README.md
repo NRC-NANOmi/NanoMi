@@ -247,6 +247,10 @@ Distributed under the GNU License. See `LICENSE.txt` for more information.
 ## Contact Info
 For questions about the software and bug reporting, feel free to use the github issue page to post your question.
 
+Contact for software:
+
+Xuanhao Wang - wang@xuanhao.site
+
 If you made any contribution, please make a pull request and our team will review it.
 
 Any question relates to hardware or other inquiries, please contact the following emails:
